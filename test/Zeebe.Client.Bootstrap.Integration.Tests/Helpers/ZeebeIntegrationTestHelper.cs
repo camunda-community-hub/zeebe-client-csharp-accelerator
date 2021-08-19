@@ -1,11 +1,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNet.Testcontainers.Containers.Builders;
-using DotNet.Testcontainers.Containers.Modules;
-using DotNet.Testcontainers.Containers.WaitStrategies;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Configurations;
+using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Zeebe.Client.Bootstrap.Extensions;
 using Zeebe.Client.Bootstrap.Integration.Tests.Stubs;
 using static Zeebe.Client.Bootstrap.Options.ZeebeClientBootstrapOptions;
@@ -23,17 +24,19 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
 
         public IntegrationTestHelper(string zeebeVersion, HandleJobDelegate handleJobDelegate)
         {
+            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            var logger = loggerFactory.CreateLogger<IntegrationTestHelper>();
+
             cancellationTokenSource = new CancellationTokenSource();
             
-            zeebeContainer = SetupZeebe(cancellationTokenSource.Token, zeebeVersion);
+            zeebeContainer = SetupZeebe(logger, cancellationTokenSource.Token, zeebeVersion);
             var zeebePort = zeebeContainer.GetMappedPublicPort(IntegrationTestHelper.ZeebePort);
             
-            host = SetupHost(cancellationTokenSource.Token, zeebePort, handleJobDelegate);
+            host = SetupHost(loggerFactory, cancellationTokenSource.Token, zeebePort, handleJobDelegate);
 
             zeebeClient = (IZeebeClient)host.Services.GetService(typeof(IZeebeClient));
 
-            //CHECK: No need for waiting because of the configured wait strategy?
-            //WaitUntilBrokerIsReady(zeebeClient);
+            WaitUntilBrokerIsReady(zeebeClient, logger);
         }
         public IZeebeClient ZeebeClient { get { return zeebeClient; } }
 
@@ -52,25 +55,28 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
             host = null;
         }
 
-        private static TestcontainersContainer SetupZeebe(CancellationToken cancellationToken, string version)
+        private static TestcontainersContainer SetupZeebe(ILogger logger, CancellationToken cancellationToken, string version)
         {
+            TestcontainersSettings.Logger = logger;
+            
             var container = new TestcontainersBuilder<TestcontainersContainer>()
                 .WithImage($"camunda/zeebe:{version}")
-                .WithName("camunda/zeebe")
                 .WithExposedPort(IntegrationTestHelper.ZeebePort)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(IntegrationTestHelper.ZeebePort))
                 .Build();
 
             container.StartAsync(cancellationToken).Wait();
+
             return container;
         }
 
-        private static IHost SetupHost(CancellationToken cancellationToken, int zeebePort, HandleJobDelegate handleJobDelegate) {
+        private static IHost SetupHost(ILoggerFactory loggerFactory, CancellationToken cancellationToken, int zeebePort, HandleJobDelegate handleJobDelegate) {
             var host = Host
                 .CreateDefaultBuilder()
                     .ConfigureServices((hostContext, services) =>
                     {
-                        services                            
+                        services            
+                            .AddSingleton(loggerFactory)
                             .BootstrapZeebe(
                                 options => { 
                                     options.Client = new ClientOptions() {
@@ -95,9 +101,9 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
             return host;
         }
 
-        private static void WaitUntilBrokerIsReady(IZeebeClient client) => TryToConnectToBroker(client).Wait();
+        private static void WaitUntilBrokerIsReady(IZeebeClient client, ILogger logger) => TryToConnectToBroker(client, logger).Wait();
 
-        private static async Task TryToConnectToBroker(IZeebeClient client)
+        private static async Task TryToConnectToBroker(IZeebeClient client, ILogger logger)
         {
             var ready = false;
             do
@@ -107,11 +113,14 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
                     var topology = await client.TopologyRequest().Send();
                     ready = topology.Brokers[0].Partitions.Count == 1;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    logger.LogWarning(ex, "Error requesting topology.");
                     // retry
-                    Thread.Sleep(500);
+                    Thread.Sleep(1000);
                 }
+
+                logger.LogInformation("Zeebe not ready, retrying.");
             }
             while (!ready);
         }
