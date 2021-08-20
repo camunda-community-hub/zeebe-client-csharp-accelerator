@@ -9,9 +9,9 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Attributes
         [Fact]
         public void AllPropertiesAreSetWhenCreated()
         {   
-            var serviceLifetime = ServiceLifetime.Singleton;            
-            var attribute = new ServiceLifetimeAttribute(serviceLifetime);
-            Assert.Equal(serviceLifetime, attribute.ServiceLifetime);
+            var expected = ServiceLifetime.Singleton;            
+            var attribute = new ServiceLifetimeAttribute(expected);
+            Assert.Equal(expected, attribute.ServiceLifetime);
         }
     }
 }

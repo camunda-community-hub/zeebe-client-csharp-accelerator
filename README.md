@@ -16,7 +16,7 @@ Ze [examples](./examples) for more information.
 
 ## Quick start
 
-All classes which implement `Zeebe.Client.Bootstrap.Abstractions.IJobHandler<T>` or `Zeebe.Client.Bootstrap.Abstractions.IAsyncJobHandler<T>` are automaticly found and boostrapped when you register this boostrap project with the `IServiceCollection` extension method `BoostrapZeebe`.
+All classes which implement `IJobHandler<T>` or `IAsyncJobHandler<T>` are automaticly found and boostrapped when you register this boostrap project with the `IServiceCollection` extension method `BoostrapZeebe`.
 
 The `BoostrapZeebe` method has two parameters:
 
@@ -66,7 +66,7 @@ ConfigureServices((hostContext, services) => {
                 {
                     MaxJobsActive = 1,
                     TimeoutInMilliseconds = 10000,
-                    PollingTimeoutInMilliseconds = 100,
+                    PollingTimeoutInMilliseconds = 1000,
                     PollIntervalInMilliseconds = 30000
                 };
             }
@@ -83,6 +83,10 @@ The job is an implementation of `AbstractJob`. A job can be configured via optio
 ```csharp
 [JobType("SimpleJobV2")]
 [WorkerName("SimpleWorker")]
+[MaxJobsActive(2)]
+[Timeout(500)]
+[PollingTimeout(500)]
+[PollInterval(10000)]
 public class SimpleJob : AbstractJob
 {
     public SimpleJob(IJob job) : base(job)

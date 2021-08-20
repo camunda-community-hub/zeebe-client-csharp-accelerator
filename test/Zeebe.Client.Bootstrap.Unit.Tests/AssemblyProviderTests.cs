@@ -7,7 +7,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
     public class AssemblyProviderTests
     {
         [Fact]
-        public void AllPropertiesAreSetWhenCreated()
+        public void AllAssembliesAreFoundWhenCreated()
         {   
             var provider = new AssemblyProvider();
             Assert.NotNull(provider);
@@ -15,16 +15,16 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         }
 
         [Fact]
-        public void AssembliesAreFilteredWhenConstructedWithAFilter() 
+        public void AssembliesAreFilteredWhenCreatedWithAFilter() 
         {
             var provider = new AssemblyProvider(Meta.UNIT_TEST_PROJECT_NAME);
             Assert.Single(provider.Assemblies);
 
             provider = new AssemblyProvider(Meta.PROJECT_NAME);
-            Assert.Equal(2, provider.Assemblies.Count());
+            Assert.True(provider.Assemblies.All(a => a.FullName.StartsWith(Meta.PROJECT_NAME)));
 
             provider = new AssemblyProvider(Meta.PROJECT_NAME, "Client");
-            Assert.Equal(3, provider.Assemblies.Count());
+            Assert.True(provider.Assemblies.All(a => a.FullName.StartsWith(Meta.PROJECT_NAME) || a.FullName.StartsWith("Client")));
         }
     }
 }

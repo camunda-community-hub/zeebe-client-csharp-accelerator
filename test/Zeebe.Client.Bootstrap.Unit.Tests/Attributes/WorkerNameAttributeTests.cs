@@ -11,16 +11,16 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Attributes
         [InlineData("")]
         [InlineData(" ")]
         public void ThrowsArgumentExceptionWhenJobTypeIsNullOrEmptyOrWhiteSpace(string workerName) {
-            Assert.Throws<ArgumentException>("workerName", () => new WorkerNameAttribute(workerName));
+            Assert.Throws<ArgumentException>(nameof(workerName), () => new WorkerNameAttribute(workerName));
         }
 
         [Fact]
         public void AllPropertiesAreSetWhenCreated()
         {   
-            var workerName = Guid.NewGuid().ToString();
-            var attribute = new WorkerNameAttribute(workerName);
+            var exptected = Guid.NewGuid().ToString();
+            var attribute = new WorkerNameAttribute(exptected);
             Assert.NotNull(attribute.WorkerName);
-            Assert.Equal(workerName, attribute.WorkerName);
+            Assert.Equal(exptected, attribute.WorkerName);
         }
     }
 }

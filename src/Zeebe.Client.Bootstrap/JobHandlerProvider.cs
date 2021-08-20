@@ -62,7 +62,11 @@ namespace Zeebe.Client.Bootstrap
                 m, 
                 GetServiceLifetime(m),
                 GetJobType(jobType), 
-                GetWorkerName(jobType)
+                GetWorkerName(jobType), 
+                GetMaxJobsActive(jobType), 
+                GetTimeout(jobType),
+                GetPollInterval(jobType), 
+                GetPollingTimeout(jobType)
             );
         }
 
@@ -94,6 +98,30 @@ namespace Zeebe.Client.Bootstrap
                 return name;
 
             return jobType.Assembly.GetName().Name;
+        }
+
+        private static int? GetMaxJobsActive(Type jobType)
+        {
+            var attr = jobType.GetCustomAttribute<MaxJobsActiveAttribute>();
+            return attr?.MaxJobsActive;
+        }
+
+        private static TimeSpan? GetTimeout(Type jobType)
+        {
+            var attr = jobType.GetCustomAttribute<TimeoutAttribute>();
+            return attr?.Timeout;
+        }
+
+        private static TimeSpan? GetPollingTimeout(Type jobType)
+        {
+            var attr = jobType.GetCustomAttribute<PollingTimeoutAttribute>();
+            return attr?.PollingTimeout;
+        }
+
+        private static TimeSpan? GetPollInterval(Type jobType)
+        {
+            var attr = jobType.GetCustomAttribute<PollIntervalAttribute>();
+            return attr?.PollInterval;
         }
 
         private static IEnumerable<MethodInfo> GetJobHandlerMethods(Type t)
