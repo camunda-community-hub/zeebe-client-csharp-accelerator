@@ -76,16 +76,6 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         }
 
         [Fact]
-        public void PollingTimeoutPropertyIsSetCorrectlyWhenCreated() 
-        {
-            var handlers = Handlers();
-
-            var actual = handlers.Select(h => h.PollingTimeout);
-            Assert.Contains(null, actual);
-            Assert.Contains(TimeSpan.FromMilliseconds(int.MaxValue - 3), actual);
-        }
-
-        [Fact]
         public void PollIntervalPropertyIsSetCorrectlyWhenCreated()
         {
             var handlers = Handlers();
@@ -93,6 +83,16 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             var actual = handlers.Select(h => h.PollInterval);
             Assert.Contains(null, actual);
             Assert.Contains(TimeSpan.FromMilliseconds(int.MaxValue - 4), actual);
+        }
+
+        [Fact]
+        public void PollingTimeoutPropertyIsSetCorrectlyWhenCreated() 
+        {
+            var handlers = Handlers();
+
+            var actual = handlers.Select(h => h.PollingTimeout);
+            Assert.Contains(null, actual);
+            Assert.Contains(TimeSpan.FromMilliseconds(int.MaxValue - 3), actual);
         }
 
         private static JobHandlerProvider Create()

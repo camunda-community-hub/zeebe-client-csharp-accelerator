@@ -17,14 +17,14 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [Fact]
         public void AssembliesAreFilteredWhenCreatedWithAFilter() 
         {
-            var provider = new AssemblyProvider(Meta.UNIT_TEST_PROJECT_NAME);
-            Assert.Single(provider.Assemblies);
+            var actual = new AssemblyProvider(Meta.UNIT_TEST_PROJECT_NAME);
+            Assert.Single(actual.Assemblies);
 
-            provider = new AssemblyProvider(Meta.PROJECT_NAME);
-            Assert.True(provider.Assemblies.All(a => a.FullName.StartsWith(Meta.PROJECT_NAME)));
+            actual = new AssemblyProvider(Meta.PROJECT_NAME);
+            Assert.True(actual.Assemblies.All(a => a.FullName.StartsWith(Meta.PROJECT_NAME)));
 
-            provider = new AssemblyProvider(Meta.PROJECT_NAME, "Client");
-            Assert.True(provider.Assemblies.All(a => a.FullName.StartsWith(Meta.PROJECT_NAME) || a.FullName.StartsWith("Client")));
+            actual = new AssemblyProvider(Meta.PROJECT_NAME, "Client");
+            Assert.True(actual.Assemblies.All(a => a.FullName.StartsWith(Meta.PROJECT_NAME) || a.FullName.StartsWith("Client")));
         }
     }
 }

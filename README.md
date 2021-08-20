@@ -66,8 +66,8 @@ ConfigureServices((hostContext, services) => {
                 {
                     MaxJobsActive = 1,
                     TimeoutInMilliseconds = 10000,
-                    PollingTimeoutInMilliseconds = 1000,
-                    PollIntervalInMilliseconds = 30000
+                    PollIntervalInMilliseconds = 30000,
+                    PollingTimeoutInMilliseconds = 1000
                 };
             }
         },
@@ -85,8 +85,8 @@ The job is an implementation of `AbstractJob`. A job can be configured via optio
 [WorkerName("SimpleWorker")]
 [MaxJobsActive(2)]
 [Timeout(500)]
-[PollingTimeout(500)]
 [PollInterval(10000)]
+[PollingTimeout(500)]
 public class SimpleJob : AbstractJob
 {
     public SimpleJob(IJob job) : base(job)
