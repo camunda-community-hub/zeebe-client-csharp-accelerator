@@ -116,7 +116,6 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
                 catch (Exception ex)
                 {
                     logger.LogWarning(ex, "Error requesting topology.");
-                    // retry
                     Thread.Sleep(1000);
                 }
 
