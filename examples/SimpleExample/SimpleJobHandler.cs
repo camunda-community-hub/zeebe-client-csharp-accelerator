@@ -4,7 +4,7 @@ using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Api.Worker;
 using Zeebe.Client.Bootstrap.Abstractions;
 
-namespace Zeebe.Client.Bootstrap.Examples.SimpleExample
+namespace SimpleExample
 {
     class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
     {

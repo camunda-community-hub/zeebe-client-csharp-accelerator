@@ -2,7 +2,7 @@
 using Zeebe.Client.Bootstrap.Extensions;
 
 
-namespace Zeebe.Client.Bootstrap.Examples.SimpleExample
+namespace SimpleExample
 {
     class Program
     {
@@ -19,7 +19,7 @@ namespace Zeebe.Client.Bootstrap.Examples.SimpleExample
                     .ConfigureServices((hostContext, services) => {
                         services.BootstrapZeebe(
                             hostContext.Configuration.GetSection("ZeebeBootstrap"),
-                            "Zeebe.Client.Bootstrap.Examples.SimpleExample"
+                            "SimpleExample"
                         );
                     });
     }

@@ -38,8 +38,8 @@ namespace Zeebe.Client.Bootstrap.Extensions
         }
 
         private static IZeebeClient BuildClient(this IZeebeClientFinalBuildStep builder, ClientOptions options) {
-            if(options.KeepAliveInMilliSeconds.HasValue)
-                builder = builder.UseKeepAlive(options.KeepAlive);
+            if(options.KeepAlive.HasValue)
+                builder = builder.UseKeepAlive(options.KeepAlive.Value);
 
             if(options.RetrySleepDurationProvider != null)
                 builder = builder.UseRetrySleepDurationProvider(options.RetrySleepDurationProvider);

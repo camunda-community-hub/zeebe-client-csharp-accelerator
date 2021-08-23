@@ -13,7 +13,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Options
         {   
             var actual = Create();
 
-            Assert.Equal(this.keepAliveInMilliSeconds, actual.KeepAlive.TotalMilliseconds);
+            Assert.Equal(this.keepAliveInMilliSeconds, actual.KeepAlive.Value.TotalMilliseconds);
         }
 
         public ClientOptionsTests()

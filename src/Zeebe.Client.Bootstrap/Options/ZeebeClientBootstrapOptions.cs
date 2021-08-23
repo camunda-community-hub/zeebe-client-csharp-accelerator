@@ -13,7 +13,7 @@ namespace Zeebe.Client.Bootstrap.Options
             public virtual string GatewayAddress { get; set; }
             public virtual TransportEncryptionOptions TransportEncryption { get; set; }        
             public virtual long? KeepAliveInMilliSeconds { get; set; }
-            public virtual TimeSpan KeepAlive { get { return TimeSpan.FromMilliseconds(KeepAliveInMilliSeconds.Value); } }
+            public virtual TimeSpan? KeepAlive { get { return KeepAliveInMilliSeconds.HasValue ? TimeSpan.FromMilliseconds(KeepAliveInMilliSeconds.Value) : null; } }
             public virtual Func<int, TimeSpan> RetrySleepDurationProvider { get; set; }
 
             public class TransportEncryptionOptions 
