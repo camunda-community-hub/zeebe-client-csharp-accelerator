@@ -46,12 +46,12 @@ namespace Zeebe.Client.Bootstrap
                     .Timeout(reference.Timeout.HasValue ? reference.Timeout.Value : zeebeWorkerOptions.Timeout)
                     .Open();
 
-                logger.LogInformation($"Created Zeebe job worker to delegate Zeebe job '{reference.JobType}' handling to JobHandler '{reference.Handler.DeclaringType}'.");
+                logger.LogInformation($"Created job worker to delegate job '{reference.JobType}' handling to handler '{reference.Handler.DeclaringType}'.");
 
                 workers.Add(worker);
             }
 
-            logger.LogInformation($"Created {workers.Count} Zeebe job workers.");
+            logger.LogInformation($"Created {workers.Count} job workers.");
 
             return Task.CompletedTask;
             
@@ -96,7 +96,7 @@ namespace Zeebe.Client.Bootstrap
 
                 var response = reference.Handler.Invoke(handlerInstance, new object[]  { client, abstractJob, cancellationToken });
 
-                logger.LogInformation($"Zeebe job #{job.Key} ('{job.Type}') is handled by Zeebe job handler '{reference.Handler.DeclaringType.Name}'.");
+                logger.LogInformation($"Job #{job.Key} ('{job.Type}') is handled by job handler '{reference.Handler.DeclaringType.Name}'.");
 
                 var task = response as Task;
                 if(task != null)
