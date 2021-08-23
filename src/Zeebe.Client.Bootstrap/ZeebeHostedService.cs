@@ -96,7 +96,7 @@ namespace Zeebe.Client.Bootstrap
 
                 var response = reference.Handler.Invoke(handlerInstance, new object[]  { client, abstractJob, cancellationToken });
 
-                logger.LogInformation($"Zeebe job '{job.Type}' is handled by Zeebe job handler '{reference.Handler.Name}'.");
+                logger.LogInformation($"Zeebe job #{job.Key} ('{job.Type}') is handled by Zeebe job handler '{reference.Handler.DeclaringType.Name}'.");
 
                 var task = response as Task;
                 if(task != null)
