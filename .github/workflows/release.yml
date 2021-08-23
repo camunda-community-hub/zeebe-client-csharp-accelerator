@@ -29,6 +29,6 @@ jobs:
     - name: Pack
       run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
     - name: Nuget Push
-      run: dotnet nuget push "src/Zeebe.Client.Bootstrap/bin/Release/Zeebe.Client.Bootstrap.${VERSION}.nupkg" --source https://nuget.pkg.github.com/arjangeertsema/index.json --api-key ${GITHUB_TOKEN}
+      run: dotnet nuget push "Zeebe.Client.Bootstrap.${VERSION}.nupkg" --source https://nuget.pkg.github.com/arjangeertsema/index.json --api-key ${GITHUB_TOKEN}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
