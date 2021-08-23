@@ -30,7 +30,7 @@ For more information about the zeebe project please visit http://zeebe.io</Descr
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\zeebe-logo.png">
+    <None Include="..\..\zeebe-logo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
