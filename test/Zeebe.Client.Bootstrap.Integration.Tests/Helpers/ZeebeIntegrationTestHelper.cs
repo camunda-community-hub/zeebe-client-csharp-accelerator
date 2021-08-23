@@ -28,7 +28,11 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
 
         public IntegrationTestHelper(string zeebeVersion, HandleJobDelegate handleJobDelegate)
         {
-            var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
+            var loggerFactory = LoggerFactory.Create(builder => 
+                builder
+                    .AddConsole()
+                    .SetMinimumLevel(LogLevel.Trace));
+
             this.logger = loggerFactory.CreateLogger<IntegrationTestHelper>();
 
             cancellationTokenSource = new CancellationTokenSource();
