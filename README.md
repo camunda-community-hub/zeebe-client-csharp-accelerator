@@ -29,7 +29,7 @@ The `BoostrapZeebe` method has two parameters:
 ConfigureServices((hostContext, services) => {
     services.BootstrapZeebe(
         hostContext.Configuration.GetSection("ZeebeBootstrap"),
-        "Zeebe.Client.Bootstrap.Examples.SimpleExample"
+        "SimpleExample"
     );
 })
 ```
@@ -71,7 +71,7 @@ ConfigureServices((hostContext, services) => {
                 };
             }
         },
-        "Zeebe.Client.Bootstrap.Examples.SimpleExample"
+        "SimpleExample"
     );
 })
 ```
@@ -87,7 +87,7 @@ The job is an implementation of `AbstractJob`. A job can be configured via optio
 [Timeout(500)]
 [PollInterval(10000)]
 [PollingTimeout(500)]
-public class SimpleJob : AbstractJob
+class SimpleJob : AbstractJob
 {
     public SimpleJob(IJob job) : base(job)
     { }
@@ -100,7 +100,7 @@ The job handler is an implementation of `IJobHandler<T>` or `IAsyncJobHandler<T>
 
 ```csharp
 [ServiceLifetime(ServiceLifetime.Singleton)]
-public class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
+class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
 {
     public Task HandleJob(IJobClient client, SimpleJob job, CancellationToken cancellationToken)
     {  
@@ -108,7 +108,6 @@ public class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
     }
 }
 ```
-
 
 ## Conventions
 
