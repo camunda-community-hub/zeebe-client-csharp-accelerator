@@ -17,42 +17,50 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
     {
         public const string LatestZeebeVersion = "1.1.0";
         public const int ZeebePort = 26500;
+        private readonly ILogger<IntegrationTestHelper> logger;
         private readonly CancellationTokenSource cancellationTokenSource;
         private TestcontainersContainer zeebeContainer;
         private IHost host;
         private IZeebeClient zeebeClient;
 
+        public IntegrationTestHelper(HandleJobDelegate handleJobDelegate)
+            : this(LatestZeebeVersion, handleJobDelegate) { }
+
         public IntegrationTestHelper(string zeebeVersion, HandleJobDelegate handleJobDelegate)
         {
             var loggerFactory = LoggerFactory.Create(builder => builder.AddConsole());
-            var logger = loggerFactory.CreateLogger<IntegrationTestHelper>();
+            this.logger = loggerFactory.CreateLogger<IntegrationTestHelper>();
 
             cancellationTokenSource = new CancellationTokenSource();
             
             zeebeContainer = SetupZeebe(logger, cancellationTokenSource.Token, zeebeVersion);
-            var zeebePort = zeebeContainer.GetMappedPublicPort(IntegrationTestHelper.ZeebePort);
             
-            host = SetupHost(loggerFactory, cancellationTokenSource.Token, zeebePort, handleJobDelegate);
+            host = SetupHost(loggerFactory, cancellationTokenSource.Token, IntegrationTestHelper.ZeebePort, handleJobDelegate);
 
             zeebeClient = (IZeebeClient)host.Services.GetService(typeof(IZeebeClient));
-
-            WaitUntilBrokerIsReady(zeebeClient, logger);
         }
+
         public IZeebeClient ZeebeClient { get { return zeebeClient; } }
+
+        internal async Task InitializeAsync()
+        {            
+            await this.zeebeContainer.StartAsync(this.cancellationTokenSource.Token);
+            await host.StartAsync(cancellationTokenSource.Token).ConfigureAwait(false);
+            await WaitUntilBrokerIsReady(this.zeebeClient, this.logger);
+        }
 
         public async ValueTask DisposeAsync()
         {
-            zeebeClient.Dispose();
-            zeebeClient = null;
-
             cancellationTokenSource.Cancel();
             cancellationTokenSource.Dispose();
 
+            zeebeClient.Dispose();
+            
+            await this.zeebeContainer.StopAsync();
             await this.zeebeContainer.DisposeAsync();
-            zeebeContainer = null;
-
+            
             await host.StopAsync();
-            host = null;
+            host.Dispose();
         }
 
         private static TestcontainersContainer SetupZeebe(ILogger logger, CancellationToken cancellationToken, string version)
@@ -61,11 +69,9 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
             
             var container = new TestcontainersBuilder<TestcontainersContainer>()
                 .WithImage($"camunda/zeebe:{version}")
-                .WithExposedPort(IntegrationTestHelper.ZeebePort)
+                .WithPortBinding(IntegrationTestHelper.ZeebePort)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(IntegrationTestHelper.ZeebePort))
                 .Build();
-
-            container.StartAsync(cancellationToken).Wait();
 
             return container;
         }
@@ -95,15 +101,11 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
                             .Add(new ServiceDescriptor(typeof(HandleJobDelegate), handleJobDelegate));
                     })
                 .Build();
-
-            host.RunAsync(cancellationToken);
-
+            
             return host;
         }
 
-        private static void WaitUntilBrokerIsReady(IZeebeClient client, ILogger logger) => TryToConnectToBroker(client, logger).Wait();
-
-        private static async Task TryToConnectToBroker(IZeebeClient client, ILogger logger)
+        private static async Task WaitUntilBrokerIsReady(IZeebeClient client, ILogger logger)
         {
             var ready = false;
             do

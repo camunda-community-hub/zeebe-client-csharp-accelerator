@@ -7,7 +7,7 @@ using Zeebe.Client.Bootstrap.Integration.Tests.Helpers;
 
 namespace Zeebe.Client.Bootstrap.Integration.Tests
 {
-    public class Test : IAsyncDisposable
+    public class Test : IAsyncLifetime
     {
         private int jobHandledCounter = 0;
         private static readonly string DemoProcessPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "simple-process.bpmn");
@@ -16,12 +16,7 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests
 
         public Test()
         {
-            this.helper = new IntegrationTestHelper(IntegrationTestHelper.LatestZeebeVersion, (client, job, cancellationToken) => jobHandledCounter++);            
-        }
-
-        public async ValueTask DisposeAsync()
-        {
-            await this.helper.DisposeAsync();
+            this.helper = new IntegrationTestHelper((client, job, cancellationToken) => jobHandledCounter++);            
         }
 
         [Fact]
@@ -47,6 +42,16 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests
             Thread.Sleep(500);
             
             Assert.True(this.jobHandledCounter > startCounter);        
+        }
+
+        public async Task InitializeAsync()
+        {
+            await this.helper.InitializeAsync();
+        }
+
+        async Task IAsyncLifetime.DisposeAsync()
+        {
+            await this.helper.DisposeAsync();
         }
     }
 }
