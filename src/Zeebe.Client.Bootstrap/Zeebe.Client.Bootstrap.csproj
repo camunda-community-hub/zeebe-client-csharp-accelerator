@@ -2,6 +2,24 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <Authors>Arjan Geertsema</Authors>
+    <Company />
+    <Description>
+This project is an extension of the zb-client (https://www.nuget.org/packages/zb-client/). 
+
+Zeebe Job handlers are automaticly recognized and boostrapped via a .Net HostedService.
+
+For more information about the zeebe project please visit http://zeebe.io</Description>
+    <PackageProjectUrl>https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap</PackageProjectUrl>
+    <PackageTags>zeebe, zb, zb-csharp, zb-client, grpc</PackageTags>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageId>zb-client-bootstrap</PackageId>
+    <Product>Zeebe C# client Boostrap extension</Product>
+    <RepositoryUrl>https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageIcon>zeebe-logo.png</PackageIcon>
+    <RootNamespace>Zeebe.Client.Bootstrap</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,5 +28,13 @@
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
     <PackageReference Include="zb-client" Version="1.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\zeebe-logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
   
 </Project>
