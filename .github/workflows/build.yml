@@ -1,4 +1,4 @@
-name: .NET CI
+name: BUILD
 on: 
   push:
     branches:
@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest    
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
     - name: Pull zeebe
       run: docker pull camunda/zeebe:1.1.0
