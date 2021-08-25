@@ -17,7 +17,7 @@ This project is an extension of the [C# Zeebe client project](https://github.com
 
 ## How to use
 
-The Zeebe C# client boostrap extensions is available via nuget (https://www.nuget.org/packages/zb-client-bootsrap/).
+The Zeebe C# client boostrap extensions is available via nuget (https://www.nuget.org/packages/zb-client-bootstrap/).
 
 Ze [examples](./examples) for more information.
 
