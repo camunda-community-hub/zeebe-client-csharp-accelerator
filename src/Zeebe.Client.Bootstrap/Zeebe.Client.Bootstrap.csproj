@@ -13,6 +13,7 @@ For more information about the zeebe project please visit http://zeebe.io</Descr
     <RepositoryUrl>https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
+    <PackageId>zb-client-bootstrap</PackageId>
     <PackageProjectUrl>https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap</PackageProjectUrl>
     <PackageTags>zeebe;zb;zb-csharp;zb-client;grpc</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
