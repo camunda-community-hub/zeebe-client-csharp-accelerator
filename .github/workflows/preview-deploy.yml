@@ -20,11 +20,7 @@ jobs:
       run: echo "VERSION=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_ENV
     - name: Pack
       run: dotnet pack --configuration Release /p:Version=${VERSION} --output .
-    - name: Nuget Push Github
-      run: dotnet nuget push "zb-client-bootstrap.${VERSION}.nupkg" --source https://nuget.pkg.github.com/arjangeertsema/index.json --api-key ${GITHUB_TOKEN}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Nuget Push nuget.org
-      run: dotnet nuget push "zb-client-bootstrap.${VERSION}.nupkg" -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push "Zeebe.Client.Bootstrap.${VERSION}.nupkg" -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
       env:
         NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
