@@ -32,3 +32,7 @@ jobs:
       run: dotnet nuget push "zb-client-bootstrap.${VERSION}.nupkg" --source https://nuget.pkg.github.com/arjangeertsema/index.json --api-key ${GITHUB_TOKEN}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Push Nuget
+      run: dotnet nuget push "zb-client-bootstrap.${VERSION}.nupkg" -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
+      env:
+        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
