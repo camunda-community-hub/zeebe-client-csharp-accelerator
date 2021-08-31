@@ -25,9 +25,10 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Options
 
         private ClientOptions Create()
         {
-            var options = new ClientOptions();
-
-            options.KeepAliveInMilliSeconds = this.keepAliveInMilliSeconds;
+            var options = new ClientOptions
+            {
+                KeepAliveInMilliSeconds = this.keepAliveInMilliSeconds
+            };
 
             return options;
         }

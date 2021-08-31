@@ -374,7 +374,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             return mock;
         }
 
-        private Mock<IJobHandlerProvider> CreateIJobHandlerProviderMock(Mock<IJobHandler<JobA>> jobHandlerMock = null)
+        private Mock<IJobHandlerProvider> CreateIJobHandlerProviderMock()
         {
             var mock = new Mock<IJobHandlerProvider>();            
 

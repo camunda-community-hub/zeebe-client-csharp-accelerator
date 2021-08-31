@@ -68,7 +68,6 @@ namespace Zeebe.Client.Bootstrap
 
         private static string[] GetAllAssemblyPaths(string appDllsDirectory)
         {
-            var assembliesToBeLoaded = new List<string>();
             var assemblyPaths = Directory.GetFiles(appDllsDirectory, "*.dll");
             return assemblyPaths;
         }

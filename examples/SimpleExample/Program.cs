@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Zeebe.Client.Bootstrap.Extensions;
 
-
 namespace SimpleExample
 {
     class Program

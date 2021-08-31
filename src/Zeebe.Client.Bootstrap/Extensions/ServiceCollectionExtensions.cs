@@ -12,7 +12,6 @@ namespace Zeebe.Client.Bootstrap.Extensions
 {
     public static class ServiceCollectionExtensions 
     {
-
         public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, params string[] assembliesStartsWith)
         {
             return services

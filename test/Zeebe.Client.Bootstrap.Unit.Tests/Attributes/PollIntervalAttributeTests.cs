@@ -9,7 +9,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Attributes
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
-        public void ThrowsArgumentExceptionWhenPollIntervalIsSmallerThenOne(long pollIntervalInMilliseconds) {
+        public void ThrowsArgumentExceptionWhenPollIntervalIsSmallerThenOne(long pollIntervalInMilliseconds)
+        {
             Assert.Throws<ArgumentException>(nameof(pollIntervalInMilliseconds), () => new PollIntervalAttribute(pollIntervalInMilliseconds));
         }
 

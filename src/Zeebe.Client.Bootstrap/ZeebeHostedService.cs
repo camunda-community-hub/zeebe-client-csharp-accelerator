@@ -12,14 +12,15 @@ using Microsoft.Extensions.Options;
 using static Zeebe.Client.Bootstrap.Options.ZeebeClientBootstrapOptions;
 
 namespace Zeebe.Client.Bootstrap
-{    public class ZeebeHostedService : IHostedService, IDisposable
+{
+    public class ZeebeHostedService : IHostedService, IDisposable
     {
         private readonly IServiceProvider serviceProvider;
         private readonly IZeebeClient client;
         private readonly IJobHandlerProvider jobHandlerProvider;
         private readonly WorkerOptions zeebeWorkerOptions;
         private readonly ILogger<ZeebeHostedService> logger;
-        private List<IJobWorker> workers = new List<IJobWorker>();
+        private readonly List<IJobWorker> workers = new List<IJobWorker>();
 
         public ZeebeHostedService(IServiceProvider serviceProvider, IZeebeClient client, IJobHandlerProvider jobHandlerProvider, IOptions<ZeebeClientBootstrapOptions> options, ILogger<ZeebeHostedService> logger)
         {
@@ -39,11 +40,11 @@ namespace Zeebe.Client.Bootstrap
                     .JobType(reference.JobType)                    
                     .Handler((client, job) =>  HandleJob(client, job, cancellationToken, reference))                
                     .FetchVariables(reference.FetchVariabeles)
-                    .MaxJobsActive(reference.MaxJobsActive.HasValue ? reference.MaxJobsActive.Value : zeebeWorkerOptions.MaxJobsActive)
+                    .MaxJobsActive(reference.MaxJobsActive ?? zeebeWorkerOptions.MaxJobsActive)
                     .Name(zeebeWorkerOptions.Name ?? reference.WorkerName)
-                    .PollingTimeout(reference.PollingTimeout.HasValue ? reference.PollingTimeout.Value : zeebeWorkerOptions.PollingTimeout)
-                    .PollInterval(reference.PollInterval.HasValue ? reference.PollInterval.Value : zeebeWorkerOptions.PollInterval)
-                    .Timeout(reference.Timeout.HasValue ? reference.Timeout.Value : zeebeWorkerOptions.Timeout)
+                    .PollingTimeout(reference.PollingTimeout ?? zeebeWorkerOptions.PollingTimeout)
+                    .PollInterval(reference.PollInterval ?? zeebeWorkerOptions.PollInterval)
+                    .Timeout(reference.Timeout ?? zeebeWorkerOptions.Timeout)
                     .Open();
 
                 logger.LogInformation($"Created job worker to delegate job '{reference.JobType}' handling to handler '{reference.Handler.DeclaringType}'.");
@@ -84,7 +85,8 @@ namespace Zeebe.Client.Bootstrap
                 throw new ArgumentException($"'{nameof(zeebeWorkerOptions.Name)}' cannot be empty or whitespace.", $"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.Name)}");
         }
 
-        private Task HandleJob(IJobClient client, IJob job, CancellationToken cancellationToken, IJobHandlerReference reference) {
+        private Task HandleJob(IJobClient client, IJob job, CancellationToken cancellationToken, IJobHandlerReference reference)
+        {
             try 
             {
                 var handlerInstance = serviceProvider.GetService(reference.Handler.DeclaringType);
@@ -98,11 +100,9 @@ namespace Zeebe.Client.Bootstrap
 
                 logger.LogInformation($"Job #{job.Key} ('{job.Type}') is handled by job handler '{reference.Handler.DeclaringType.Name}'.");
 
-                var task = response as Task;
-                if(task != null)
+                if (response is Task task)
                     return task;
 
-                
                 return Task.CompletedTask;
             }
             catch(Exception ex) 

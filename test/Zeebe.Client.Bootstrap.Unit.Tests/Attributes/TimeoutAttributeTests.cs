@@ -9,7 +9,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Attributes
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
-        public void ThrowsArgumentExceptionWhenTimeoutIsSmallerThenOne(long timeoutInMilliseconds) {
+        public void ThrowsArgumentExceptionWhenTimeoutIsSmallerThenOne(long timeoutInMilliseconds)
+        {
             Assert.Throws<ArgumentException>(nameof(timeoutInMilliseconds), () => new TimeoutAttribute(timeoutInMilliseconds));
         }
 

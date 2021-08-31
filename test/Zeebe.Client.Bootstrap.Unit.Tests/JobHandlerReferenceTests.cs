@@ -28,7 +28,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
-        public void ThrowsArgumentExceptionWhenJobTypeIsNullOrEmptyOrWhiteSpace(string jobType) {
+        public void ThrowsArgumentExceptionWhenJobTypeIsNullOrEmptyOrWhiteSpace(string jobType)
+        {
             Assert.Throws<ArgumentException>("jobType", () => new JobHandlerReference(this.handler, this.handlerServiceLifetime, jobType, this.workerName));
         }
 
@@ -36,7 +37,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
-        public void ThrowsArgumentExceptionWheWorkerNameIsNullOrEmptyOrWhiteSpace(string workerName) {
+        public void ThrowsArgumentExceptionWheWorkerNameIsNullOrEmptyOrWhiteSpace(string workerName)
+        {
             Assert.Throws<ArgumentException>("workerName", () => new JobHandlerReference(this.handler, this.handlerServiceLifetime, this.jobType, workerName));
         }
 
@@ -88,7 +90,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         }
 
         [Fact]
-        public void EmptyStringArrayIsCreatedWhenFetchVariabelesIsNull() {
+        public void EmptyStringArrayIsCreatedWhenFetchVariabelesIsNull()
+        {
             this.fetchVariabeles = null;
             var actual = Create();
             Assert.Equal(new string[0], actual.FetchVariabeles);

@@ -7,21 +7,24 @@ namespace Zeebe.Client.Bootstrap.Extensions
 {
      public static class ZeebeClientBuilderExtensions 
      {
-         public static IZeebeClient Build(this IZeebeClientBuilder builder, ZeebeClientBootstrapOptions options) {
+         public static IZeebeClient Build(this IZeebeClientBuilder builder, ZeebeClientBootstrapOptions options)
+         {
              return builder
                 .BuildTransportBuilder(options.Client)
                 .BuildFinalStep(options.Client)
                 .BuildClient(options.Client);
          }
 
-        private static IZeebeClientTransportBuilder BuildTransportBuilder(this IZeebeClientBuilder builder, ClientOptions options) {
+        private static IZeebeClientTransportBuilder BuildTransportBuilder(this IZeebeClientBuilder builder, ClientOptions options)
+        {
             if(String.IsNullOrEmpty(options.GatewayAddress))
                 throw new ArgumentNullException(nameof(options.GatewayAddress));
 
             return builder.UseGatewayAddress(options.GatewayAddress);
         }
 
-        private static IZeebeClientFinalBuildStep BuildFinalStep(this IZeebeClientTransportBuilder builder, ClientOptions options) {
+        private static IZeebeClientFinalBuildStep BuildFinalStep(this IZeebeClientTransportBuilder builder, ClientOptions options)
+        {
             if(options.TransportEncryption == null)
                 return builder.UsePlainText();
 
@@ -37,7 +40,8 @@ namespace Zeebe.Client.Bootstrap.Extensions
             throw new NotImplementedException($"{nameof(options.TransportEncryption)} is instantiated but none of it's properties have valid values.");
         }
 
-        private static IZeebeClient BuildClient(this IZeebeClientFinalBuildStep builder, ClientOptions options) {
+        private static IZeebeClient BuildClient(this IZeebeClientFinalBuildStep builder, ClientOptions options)
+        {
             if(options.KeepAlive.HasValue)
                 builder = builder.UseKeepAlive(options.KeepAlive.Value);
 

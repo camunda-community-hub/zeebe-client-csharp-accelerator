@@ -19,9 +19,9 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
         public const int ZeebePort = 26500;
         private readonly ILogger<IntegrationTestHelper> logger;
         private readonly CancellationTokenSource cancellationTokenSource;
-        private TestcontainersContainer zeebeContainer;
-        private IHost host;
-        private IZeebeClient zeebeClient;
+        private readonly TestcontainersContainer zeebeContainer;
+        private readonly IHost host;
+        private readonly IZeebeClient zeebeClient;
 
         public IntegrationTestHelper(HandleJobDelegate handleJobDelegate)
             : this(LatestZeebeVersion, handleJobDelegate) { }
@@ -37,9 +37,9 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
 
             cancellationTokenSource = new CancellationTokenSource();
             
-            zeebeContainer = SetupZeebe(logger, cancellationTokenSource.Token, zeebeVersion);
+            zeebeContainer = SetupZeebe(logger, zeebeVersion);
             
-            host = SetupHost(loggerFactory, cancellationTokenSource.Token, IntegrationTestHelper.ZeebePort, handleJobDelegate);
+            host = SetupHost(loggerFactory, IntegrationTestHelper.ZeebePort, handleJobDelegate);
 
             zeebeClient = (IZeebeClient)host.Services.GetService(typeof(IZeebeClient));
         }
@@ -67,7 +67,7 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
             host.Dispose();
         }
 
-        private static TestcontainersContainer SetupZeebe(ILogger logger, CancellationToken cancellationToken, string version)
+        private static TestcontainersContainer SetupZeebe(ILogger logger, string version)
         {
             TestcontainersSettings.Logger = logger;
             
@@ -80,7 +80,8 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
             return container;
         }
 
-        private static IHost SetupHost(ILoggerFactory loggerFactory, CancellationToken cancellationToken, int zeebePort, HandleJobDelegate handleJobDelegate) {
+        private static IHost SetupHost(ILoggerFactory loggerFactory, int zeebePort, HandleJobDelegate handleJobDelegate)
+        {
             var host = Host
                 .CreateDefaultBuilder()
                     .ConfigureServices((hostContext, services) =>

@@ -12,12 +12,12 @@ namespace Zeebe.Client.Bootstrap
 {
     public class JobHandlerProvider : IJobHandlerProvider
     {
-        private static Type JOB_HANDLER_TYPE = typeof(IJobHandler<>);        
-        private static string JOB_HANDLER_METHOD_NAME = nameof(IJobHandler<AbstractJob>.HandleJob);
-        public static Type JOB_HANDLER_METHOD_RETURN_TYPE = typeof(void);
-        private static Type ASYNC_JOB_HANDLER_TYPE = typeof(IAsyncJobHandler<>);
-        private static string ASYNC_JOB_HANDLER_METHOD_NAME = nameof(IAsyncJobHandler<AbstractJob>.HandleJob);
-        public static Type ASYNC_JOB_HANDLER_METHOD_RETURN_TYPE = typeof(Task);
+        private static readonly Type JOB_HANDLER_TYPE = typeof(IJobHandler<>);        
+        private static readonly string JOB_HANDLER_METHOD_NAME = nameof(IJobHandler<AbstractJob>.HandleJob);
+        private static readonly Type JOB_HANDLER_METHOD_RETURN_TYPE = typeof(void);
+        private static readonly Type ASYNC_JOB_HANDLER_TYPE = typeof(IAsyncJobHandler<>);
+        private static readonly string ASYNC_JOB_HANDLER_METHOD_NAME = nameof(IAsyncJobHandler<AbstractJob>.HandleJob);
+        private static readonly Type ASYNC_JOB_HANDLER_METHOD_RETURN_TYPE = typeof(Task);
         private readonly IAssemblyProvider assemblyProvider;
         private List<IJobHandlerReference> references;
 
@@ -38,7 +38,7 @@ namespace Zeebe.Client.Bootstrap
             }
         }
 
-        private List<IJobHandlerReference> GetReferences(IAssemblyProvider assemblyProvider)
+        private static List<IJobHandlerReference> GetReferences(IAssemblyProvider assemblyProvider)
         {            
             return assemblyProvider
                 .Assemblies
@@ -150,7 +150,7 @@ namespace Zeebe.Client.Bootstrap
                 jobTypes.Any(jt =>  jt.Equals(parameters[1].ParameterType));
         }
 
-        public bool ImplementsGenericType(Type type, Type genericType)
+        private static bool ImplementsGenericType(Type type, Type genericType)
         {
             return
                 type.IsClass && 

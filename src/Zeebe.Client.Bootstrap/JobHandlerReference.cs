@@ -41,7 +41,7 @@ namespace Zeebe.Client.Bootstrap
             this.Timeout = timeout;
             this.PollInterval = pollInterval;
             this.PollingTimeout = pollingTimeout;
-            this.FetchVariabeles = fetchVariabeles == null ? new string[0] : fetchVariabeles;
+            this.FetchVariabeles = fetchVariabeles ?? (new string[0]);
         }
 
         public MethodInfo Handler { get; }

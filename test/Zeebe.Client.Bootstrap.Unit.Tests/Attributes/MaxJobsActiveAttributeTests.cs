@@ -9,7 +9,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Attributes
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
-        public void ThrowsArgumentExceptionWhenMaxJobsActiveIsSmallerThenOne(int maxJobsActive) {
+        public void ThrowsArgumentExceptionWhenMaxJobsActiveIsSmallerThenOne(int maxJobsActive)
+        {
             Assert.Throws<ArgumentException>(nameof(maxJobsActive), () => new MaxJobsActiveAttribute(maxJobsActive));
         }
 

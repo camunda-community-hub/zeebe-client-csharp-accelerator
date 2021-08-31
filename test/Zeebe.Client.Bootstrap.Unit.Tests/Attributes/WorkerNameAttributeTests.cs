@@ -10,7 +10,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Attributes
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
-        public void ThrowsArgumentExceptionWhenJobTypeIsNullOrEmptyOrWhiteSpace(string workerName) {
+        public void ThrowsArgumentExceptionWhenJobTypeIsNullOrEmptyOrWhiteSpace(string workerName)
+        {
             Assert.Throws<ArgumentException>(nameof(workerName), () => new WorkerNameAttribute(workerName));
         }
 

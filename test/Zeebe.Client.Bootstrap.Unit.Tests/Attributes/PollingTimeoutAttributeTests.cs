@@ -9,7 +9,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Attributes
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
-        public void ThrowsArgumentExceptionWhenPollingTimeoutIsSmallerThenOne(int pollingTimeoutInMilliseconds) {
+        public void ThrowsArgumentExceptionWhenPollingTimeoutIsSmallerThenOne(int pollingTimeoutInMilliseconds)
+        {
             Assert.Throws<ArgumentException>(nameof(pollingTimeoutInMilliseconds), () => new PollingTimeoutAttribute(pollingTimeoutInMilliseconds));
         }
 

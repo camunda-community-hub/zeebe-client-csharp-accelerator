@@ -49,13 +49,14 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Options
 
         private WorkerOptions Create()
         {
-            var options = new WorkerOptions();
-
-            options.MaxJobsActive = this.maxJobsActive;
-            options.TimeoutInMilliseconds = this.timeout;
-            options.PollingTimeoutInMilliseconds = this.pollingTimeout;
-            options.PollIntervalInMilliseconds = this.pollInterval;
-            options.Name = this.name;
+            var options = new WorkerOptions
+            {
+                MaxJobsActive = this.maxJobsActive,
+                TimeoutInMilliseconds = this.timeout,
+                PollingTimeoutInMilliseconds = this.pollingTimeout,
+                PollIntervalInMilliseconds = this.pollInterval,
+                Name = this.name
+            };
 
             return options;
         }
