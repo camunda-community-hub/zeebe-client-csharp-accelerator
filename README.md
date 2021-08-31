@@ -47,7 +47,7 @@ ConfigureServices((hostContext, services) => {
 {
     "ZeebeBootstrap": {
         "Client": {                
-            "GatewayAddress": "0.0.0.0:26500"
+            "GatewayAddress": "120.0.0.1:26500"
         },
         "Worker": {
             "MaxJobsActive": 1,
@@ -67,7 +67,7 @@ ConfigureServices((hostContext, services) => {
         options => { 
             options => { 
                 options.Client = new ClientOptions() {
-                    GatewayAddress = "0.0.0.0:26500"
+                    GatewayAddress = "127.0.0.1:26500"
                 };
                 options.Worker = new WorkerOptions() 
                 {

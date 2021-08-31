@@ -73,6 +73,7 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
             
             var container = new TestcontainersBuilder<TestcontainersContainer>()
                 .WithImage($"camunda/zeebe:{version}")
+                .WithName("zeebe-testcontainer")
                 .WithPortBinding(IntegrationTestHelper.ZeebePort)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(IntegrationTestHelper.ZeebePort))
                 .Build();
@@ -91,7 +92,7 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
                             .BootstrapZeebe(
                                 options => { 
                                     options.Client = new ClientOptions() {
-                                        GatewayAddress = $"0.0.0.0:{zeebePort}"
+                                        GatewayAddress = $"127.0.0.1:{zeebePort}"
                                     };
                                     options.Worker = new WorkerOptions() 
                                     {
