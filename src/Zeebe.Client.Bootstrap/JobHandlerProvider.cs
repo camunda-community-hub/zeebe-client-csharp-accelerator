@@ -19,14 +19,14 @@ namespace Zeebe.Client.Bootstrap
         private static readonly string ASYNC_JOB_HANDLER_METHOD_NAME = nameof(IAsyncJobHandler<AbstractJob>.HandleJob);
         private static readonly Type ASYNC_JOB_HANDLER_METHOD_RETURN_TYPE = typeof(Task);
         private readonly IAssemblyProvider assemblyProvider;
-        private List<IJobHandlerReference> references;
+        private List<IJobHandlerInfo> references;
 
         public JobHandlerProvider(IAssemblyProvider assemblyProvider)
         {
             this.assemblyProvider = assemblyProvider ?? throw new ArgumentNullException(nameof(assemblyProvider));
         }
 
-        public IEnumerable<IJobHandlerReference> JobHandlers
+        public IEnumerable<IJobHandlerInfo> JobHandlers
         {
             get
             {
@@ -38,7 +38,7 @@ namespace Zeebe.Client.Bootstrap
             }
         }
 
-        private static List<IJobHandlerReference> GetReferences(IAssemblyProvider assemblyProvider)
+        private static List<IJobHandlerInfo> GetReferences(IAssemblyProvider assemblyProvider)
         {            
             return assemblyProvider
                 .Assemblies
@@ -48,17 +48,17 @@ namespace Zeebe.Client.Bootstrap
                 .ToList();
         }
 
-        private static IEnumerable<IJobHandlerReference> CreateReferences(Type t)
+        private static IEnumerable<IJobHandlerInfo> CreateReferences(Type t)
         {
             return GetJobHandlerMethods(t)
                 .Select(m => CreateReference(m));
         }
 
-        private static IJobHandlerReference CreateReference(MethodInfo m)
+        private static IJobHandlerInfo CreateReference(MethodInfo m)
         {
             var jobType = m.GetParameters()[1].ParameterType;
 
-            return new JobHandlerReference(
+            return new JobHandlerInfo(
                 m, 
                 GetServiceLifetime(m),
                 GetJobType(jobType), 

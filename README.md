@@ -99,19 +99,51 @@ class SimpleJob : AbstractJob
     public SimpleJob(IJob job) : base(job)
     { }
 }
+
+class SimpleJob : AbstractJob
+{
+    public AnotherSimpleJob(IJob job) : base(job)
+    { }
+
+    class Response 
+    {
+        public string PropertyA { get; set; }
+        public bool PropertyB { get; set; }
+        public DateTime PropertyC { get; set; }
+    }
+}
 ```
 
 ### Job handler
 
-The job handler is an implementation of `IJobHandler<T>` or `IAsyncJobHandler<T>`. A job can be configured via optional attributes. Job handlers are automaticly added to the DI container, therefore you can use dependency injection inside the job handlers.
+The job handler is an implementation of `IJobHandler<Job, Respone>`, `IAsyncJobHandler<Job, Response>`. A job can be configured via optional attributes. Job handlers are automaticly added to the DI container, therefore you can use dependency injection inside the job handlers. 
+
+A handled job has three outcomes:
+
+1. The job has been handled without exceptions: this will result in a `JobCompletedCommand` beeing send to the broker. The `Response` is automaticly serialized as a json string and added to the `JobCompletedCommand`.
+1. An exception has been thrown while handling the job, the exception implements `JobException`: this wil result in a `ThrowErrorCommand` beeing send to the broker;
+1. Any other exception will result in a `FailCommand` beeing send to the broker;
 
 ```csharp
 [ServiceLifetime(ServiceLifetime.Singleton)]
-class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
+class SimpleJobHandler : IAsyncJobHandler<SimpleJob>, IAsyncJobHandler<AnotherSimpleJob, AnotherSimpleJob.Response>, 
 {
-    public Task HandleJob(IJobClient client, SimpleJob job, CancellationToken cancellationToken)
+    public Task HandleJob(SimpleJob job, CancellationToken cancellationToken)
     {  
-        return client.NewCompleteJobCommand(job.Key).Send();
+        throw new JobError("error code", "error message");
+    }
+
+    public Task<AnotherSimpleJob.Response> HandleJob(AnotherSimpleJob job, CancellationToken cancellationToken)
+    {  
+        return Task.FromResult
+        (
+            new AnotherSimpleJob.Response() 
+            {  
+                PropertyA = "a value",
+                PropertyB = true,
+                PropertyC = DateTime.Now()
+            }
+        );
     }
 }
 ```

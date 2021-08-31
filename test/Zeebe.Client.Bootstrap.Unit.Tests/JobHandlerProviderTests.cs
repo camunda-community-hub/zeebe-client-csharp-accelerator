@@ -100,7 +100,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             return new JobHandlerProvider(new AssemblyProvider(Meta.UNIT_TEST_PROJECT_NAME));
         }
 
-        private static IEnumerable<IJobHandlerReference> Handlers()
+        private static IEnumerable<IJobHandlerInfo> Handlers()
         {
             var provider = Create();
             return provider.JobHandlers;

@@ -4,6 +4,6 @@ namespace Zeebe.Client.Bootstrap.Abstractions
 {
     public interface IJobHandlerProvider 
     {
-        IEnumerable<IJobHandlerReference> JobHandlers { get; }
+        IEnumerable<IJobHandlerInfo> JobHandlers { get; }
     }
 }

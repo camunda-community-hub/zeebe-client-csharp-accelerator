@@ -21,7 +21,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
     public class ZeebeHostedServiceTests 
     {
         private readonly CancellationToken cancellationToken;
-        private readonly List<IJobHandlerReference> jobHandlers;
+        private readonly List<IJobHandlerInfo> jobHandlers;
         private readonly Mock<HandleJobDelegate> handleJobDelegateMock;
         private readonly Mock<IZeebeClient> zeebeClientMock;
         private readonly Mock<IServiceProvider> serviceProviderMock;
@@ -157,7 +157,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         public async Task DefaultsAreSetWhenHandlerPropertiesAreNull()
         {
             jobHandlers.Clear();
-            jobHandlers.Add(new JobHandlerReference(
+            jobHandlers.Add(new JobHandlerInfo(
                 typeof(JobHandlerA)
                     .GetMethods()
                     .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
@@ -267,7 +267,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         public ZeebeHostedServiceTests()
         {            
             this.cancellationToken = new CancellationToken();
-            this.jobHandlers = new List<IJobHandlerReference>() {
+            this.jobHandlers = new List<IJobHandlerInfo>() {
                CreateJobHandlerReference(
                     typeof(JobHandlerA)
                         .GetMethods()
@@ -416,11 +416,11 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             return mock;
         }
 
-        private static IJobHandlerReference CreateJobHandlerReference(MethodInfo handler) 
+        private static IJobHandlerInfo CreateJobHandlerReference(MethodInfo handler) 
         {
             var random = new Random();
             
-            return  new JobHandlerReference(
+            return  new JobHandlerInfo(
                 handler,
                 ServiceLifetime.Scoped,
                 Guid.NewGuid().ToString(),

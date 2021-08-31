@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Zeebe.Client.Bootstrap.Unit.Tests
 {
-    public class JobHandlerReferenceTests
+    public class JobHandlerInfoTests
     {
         private readonly MethodInfo handler;
         private readonly ServiceLifetime handlerServiceLifetime;
@@ -21,7 +21,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [Fact]
         public void ThrowsArgumenNullExceptionWhenHandlerIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("handler", () => new JobHandlerReference(null, this.handlerServiceLifetime, this.jobType, this.workerName));
+            Assert.Throws<ArgumentNullException>("handler", () => new JobHandlerInfo(null, this.handlerServiceLifetime, this.jobType, this.workerName));
         }
 
         [Theory]
@@ -30,7 +30,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [InlineData(" ")]
         public void ThrowsArgumentExceptionWhenJobTypeIsNullOrEmptyOrWhiteSpace(string jobType)
         {
-            Assert.Throws<ArgumentException>("jobType", () => new JobHandlerReference(this.handler, this.handlerServiceLifetime, jobType, this.workerName));
+            Assert.Throws<ArgumentException>("jobType", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, jobType, this.workerName));
         }
 
         [Theory]
@@ -39,7 +39,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [InlineData(" ")]
         public void ThrowsArgumentExceptionWheWorkerNameIsNullOrEmptyOrWhiteSpace(string workerName)
         {
-            Assert.Throws<ArgumentException>("workerName", () => new JobHandlerReference(this.handler, this.handlerServiceLifetime, this.jobType, workerName));
+            Assert.Throws<ArgumentException>("workerName", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, workerName));
         }
 
         [Theory]
@@ -47,7 +47,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [InlineData(-1)]
         public void ThrowsArgumentOutOfRangeExceptionWhenMaxJobsActiveIsSmallerOrEqualThen0(int maxJobsActive) 
         {
-            Assert.Throws<ArgumentOutOfRangeException>("maxJobsActive", () => new JobHandlerReference(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, maxJobsActive, this.timeout, this.pollInterval, this.pollingTimeout));
+            Assert.Throws<ArgumentOutOfRangeException>("maxJobsActive", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, maxJobsActive, this.timeout, this.pollInterval, this.pollingTimeout));
         }
 
         [Theory]
@@ -55,7 +55,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [InlineData(-1)]
         public void ThrowsArgumentOutOfRangeExceptionWhenTimeoutIsSmallerOrEqualThen0(int timeout) 
         {
-            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => new JobHandlerReference(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, TimeSpan.FromMilliseconds(timeout), this.pollInterval, this.pollingTimeout));
+            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, TimeSpan.FromMilliseconds(timeout), this.pollInterval, this.pollingTimeout));
         }
 
         [Theory]
@@ -63,7 +63,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [InlineData(-1)]
         public void ThrowsArgumentOutOfRangeExceptionWhenPollIntervalIsSmallerOrEqualThen0(int pollInterval) 
         {
-            Assert.Throws<ArgumentOutOfRangeException>("pollInterval", () => new JobHandlerReference(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.timeout, TimeSpan.FromMilliseconds(pollInterval), this.pollingTimeout));
+            Assert.Throws<ArgumentOutOfRangeException>("pollInterval", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.timeout, TimeSpan.FromMilliseconds(pollInterval), this.pollingTimeout));
         }
 
         [Theory]
@@ -71,7 +71,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [InlineData(-1)]
         public void ThrowsArgumentOutOfRangeExceptionWhenPollingTimeoutIsSmallerOrEqualThen0(int pollingTimeout) 
         {
-            Assert.Throws<ArgumentOutOfRangeException>("pollingTimeout", () => new JobHandlerReference(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.timeout, this.pollInterval, TimeSpan.FromMilliseconds(pollingTimeout)));
+            Assert.Throws<ArgumentOutOfRangeException>("pollingTimeout", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.timeout, this.pollInterval, TimeSpan.FromMilliseconds(pollingTimeout)));
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             Assert.Equal(new string[0], actual.FetchVariabeles);
         }
 
-        public JobHandlerReferenceTests()
+        public JobHandlerInfoTests()
         {
             Expression<Func<int, string>> expression = i => i.ToString();
             var handler = ((MethodCallExpression)expression.Body).Method;
@@ -117,9 +117,9 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             };
         }
 
-        private JobHandlerReference Create() 
+        private JobHandlerInfo Create() 
         {
-            return new JobHandlerReference
+            return new JobHandlerInfo
             (
                 this.handler,
                 this.handlerServiceLifetime,
