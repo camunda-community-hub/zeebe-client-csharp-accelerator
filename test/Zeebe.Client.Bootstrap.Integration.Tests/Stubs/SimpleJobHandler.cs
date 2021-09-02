@@ -1,7 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Zeebe.Client.Api.Responses;
-using Zeebe.Client.Api.Worker;
 using Zeebe.Client.Bootstrap.Abstractions;
 
 namespace Zeebe.Client.Bootstrap.Integration.Tests.Stubs
@@ -15,10 +14,10 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Stubs
             this.handleJobDelegate = handleJobDelegate;
         }
 
-        public Task HandleJob(IJobClient client, SimpleJob job, CancellationToken cancellationToken)
+        public Task HandleJob(SimpleJob job, CancellationToken cancellationToken)
         {  
-            handleJobDelegate(client, job, cancellationToken);
-            return client.NewCompleteJobCommand(job.Key).Send();
+            handleJobDelegate(job, cancellationToken);
+            return Task.CompletedTask;
         }
     }
 

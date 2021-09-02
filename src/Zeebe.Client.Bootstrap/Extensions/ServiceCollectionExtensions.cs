@@ -15,38 +15,46 @@ namespace Zeebe.Client.Bootstrap.Extensions
         public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, params string[] assembliesStartsWith)
         {
             return services
-                .AddZeebeClient(assembliesStartsWith)
-                .Configure<ZeebeClientBootstrapOptions>(namedConfigurationSection)
-                .AddHostedService<ZeebeHostedService>();
+                .BootstrapZeebe(assembliesStartsWith)
+                .Configure<ZeebeClientBootstrapOptions>(namedConfigurationSection);
         }
 
         public static IServiceCollection BootstrapZeebe(this IServiceCollection services, Action<ZeebeClientBootstrapOptions> configureOptions, params string[] assembliesStartsWith) 
         {
             return services
-                .AddZeebeClient(assembliesStartsWith)
-                .Configure(configureOptions)
-                .AddHostedService<ZeebeHostedService>();
+                .BootstrapZeebe(assembliesStartsWith)
+                .Configure(configureOptions);
         }
 
-        public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, Action<ZeebeClientBootstrapOptions> configureOptions, params string[] assembliesStartsWith)
+        public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, Action<ZeebeClientBootstrapOptions> postConfigureOptions, params string[] assembliesStartsWith)
         {
-            return services
-                .AddZeebeClient(assembliesStartsWith)
+            return services                
+                .BootstrapZeebe(assembliesStartsWith)
                 .Configure<ZeebeClientBootstrapOptions>(namedConfigurationSection)
-                .PostConfigure(configureOptions)
-                .AddHostedService<ZeebeHostedService>();
+                .PostConfigure(postConfigureOptions);
         }
-        private static IServiceCollection AddZeebeClient(this IServiceCollection services, params string[] assembliesStartsWith)
+
+        private static IServiceCollection BootstrapZeebe(this IServiceCollection services, params string[] assembliesStartsWith)
         {
+
             if (services == null) 
                 throw new ArgumentNullException(nameof(services));
 
             var assemblyprovider = new AssemblyProvider(assembliesStartsWith);
 
+            return services
+                .AddSingleton(typeof(IAssemblyProvider), assemblyprovider)
+                .AddSingleton<IBootstrapJobHandler, BootstrapJobHandler>()
+                .AddZeebeJobHandlers(assemblyprovider)
+                .AddZeebeClient(assembliesStartsWith)
+                .AddHostedService<ZeebeHostedService>();
+        }
+
+        private static IServiceCollection AddZeebeClient(this IServiceCollection services, params string[] assembliesStartsWith)
+        {
+
             return services                
                 .AddZeebeBuilders()
-                .AddSingleton(typeof(IAssemblyProvider), assemblyprovider)                
-                .AddZeebeJobHandlers(assemblyprovider)
                 .AddScoped(sp => {
                     var options = sp.GetRequiredService<IOptions<ZeebeClientBootstrapOptions>>();
                     var builder = sp.GetRequiredService<IZeebeClientBuilder>();

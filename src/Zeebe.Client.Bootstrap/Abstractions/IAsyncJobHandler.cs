@@ -1,24 +1,23 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Zeebe.Client.Api.Responses;
-using Zeebe.Client.Api.Worker;
 
 namespace Zeebe.Client.Bootstrap.Abstractions
 {
-    public interface IAsyncJobHandler
+    public interface IBootstrapJobHandler
     {
         Task HandleJob(IJob job, CancellationToken cancellationToken);
     }
 
-    public interface IAsyncJobHandler<Job>  where Job : AbstractJob
+    public interface IAsyncJobHandler<TJob>  where TJob : AbstractJob
     {
-        Task HandleJob(IJobClient client, Job job, CancellationToken cancellationToken);
+        Task HandleJob(TJob job, CancellationToken cancellationToken);
     }
 
-    public interface IAsyncJobHandler<Job, Response>  
-        where Job : AbstractJob
-        where Response : struct
+    public interface IAsyncJobHandler<TJob, TResponse>  
+        where TJob : AbstractJob
+        where TResponse : class
     {
-        Task<Response> HandleJob(IJobClient client, Job job, CancellationToken cancellationToken);
+        Task<TResponse> HandleJob(TJob job, CancellationToken cancellationToken);
     }
 }

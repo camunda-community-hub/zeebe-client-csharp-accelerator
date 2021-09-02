@@ -4,7 +4,7 @@ using Moq;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Bootstrap.Unit.Tests.Stubs;
 
-namespace Zeebe.Client.Bootstrap.Unit.Tests
+namespace Zeebe.Client.Bootstrap.Unit.Tests.Abstractions
 {
     public class AbstractJobTests
     {

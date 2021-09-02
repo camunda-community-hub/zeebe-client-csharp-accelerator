@@ -11,7 +11,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Stubs
     [PollInterval(int.MaxValue - 4)]
     public class JobB : AbstractJob
     {
-        public JobB(IJob job) : base(job)
+        public JobB(IJob job) 
+            : base(job)
         { }
     }
 }

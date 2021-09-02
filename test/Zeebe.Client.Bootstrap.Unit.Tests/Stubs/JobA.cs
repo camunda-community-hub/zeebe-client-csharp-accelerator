@@ -5,7 +5,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Stubs
 {
     public class JobA : AbstractJob
     {
-        public JobA(IJob job) : base(job)
+        public JobA(IJob job) 
+            : base(job)
         { }
     }
 }
