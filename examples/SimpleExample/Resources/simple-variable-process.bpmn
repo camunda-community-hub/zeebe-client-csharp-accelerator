@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_16innre" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.0.0">
+  <bpmn:collaboration id="SimpleVariableProcess1">
+    <bpmn:participant id="Participant_1" name="Simple variable process" processRef="SimpleVariableProcess" />
+  </bpmn:collaboration>
+  <bpmn:process id="SimpleVariableProcess" name="Simple variable process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent" name="Start">
+      <bpmn:outgoing>Flow_1b03ijq</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:serviceTask id="Activity_HandleTask" name="Handle task">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="SimpleVariableJob" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1b03ijq</bpmn:incoming>
+      <bpmn:outgoing>Flow_1yt4smo</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1b03ijq" sourceRef="StartEvent" targetRef="Activity_HandleTask" />
+    <bpmn:sequenceFlow id="Flow_1yt4smo" sourceRef="Activity_HandleTask" targetRef="Gateway_0jghfqb" />
+    <bpmn:exclusiveGateway id="Gateway_0jghfqb" name="Is Property true?" default="Flow_1n4bdrm">
+      <bpmn:incoming>Flow_1yt4smo</bpmn:incoming>
+      <bpmn:outgoing>Flow_0fed43r</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1n4bdrm</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:endEvent id="Event_1xu362i" name="True end">
+      <bpmn:incoming>Flow_0fed43r</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0fed43r" name="Yes" sourceRef="Gateway_0jghfqb" targetRef="Event_1xu362i">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=Property = true</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_05glqda" name="False end">
+      <bpmn:incoming>Flow_1n4bdrm</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1n4bdrm" sourceRef="Gateway_0jghfqb" targetRef="Event_05glqda" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SimpleVariableProcess1">
+      <bpmndi:BPMNShape id="Participant_0fl1xof_di" bpmnElement="Participant_1" isHorizontal="true">
+        <dc:Bounds x="160" y="52" width="798" height="316" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1yt4smo_di" bpmnElement="Flow_1yt4smo">
+        <di:waypoint x="450" y="177" />
+        <di:waypoint x="515" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1b03ijq_di" bpmnElement="Flow_1b03ijq">
+        <di:waypoint x="295" y="177" />
+        <di:waypoint x="350" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fed43r_di" bpmnElement="Flow_0fed43r">
+        <di:waypoint x="565" y="177" />
+        <di:waypoint x="632" y="177" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="589" y="159" width="19" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1n4bdrm_di" bpmnElement="Flow_1n4bdrm">
+        <di:waypoint x="540" y="202" />
+        <di:waypoint x="540" y="290" />
+        <di:waypoint x="632" y="290" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent">
+        <dc:Bounds x="259" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="265" y="202" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ji4v0p_di" bpmnElement="Activity_HandleTask">
+        <dc:Bounds x="350" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0jghfqb_di" bpmnElement="Gateway_0jghfqb" isMarkerVisible="true">
+        <dc:Bounds x="515" y="152" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="499" y="122" width="82" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1xu362i_di" bpmnElement="Event_1xu362i">
+        <dc:Bounds x="632" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="628" y="202" width="44" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_05glqda_di" bpmnElement="Event_05glqda">
+        <dc:Bounds x="632" y="272" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="626" y="315" width="49" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

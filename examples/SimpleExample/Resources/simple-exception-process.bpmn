@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_16innre" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.0.0">
+  <bpmn:collaboration id="SimpleExceptionProcess1">
+    <bpmn:participant id="Participant_1" name="Simple exception process" processRef="SimpleExceptionProcess" />
+  </bpmn:collaboration>
+  <bpmn:process id="SimpleExceptionProcess" name="Simple exception process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent" name="Start">
+      <bpmn:outgoing>Flow_1b03ijq</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent" name="End">
+      <bpmn:incoming>Flow_1yt4smo</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:serviceTask id="Activity_HandleTask" name="Handle task">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="SimpleExceptionJob" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1b03ijq</bpmn:incoming>
+      <bpmn:outgoing>Flow_1yt4smo</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1b03ijq" sourceRef="StartEvent" targetRef="Activity_HandleTask" />
+    <bpmn:sequenceFlow id="Flow_1yt4smo" sourceRef="Activity_HandleTask" targetRef="EndEvent" />
+    <bpmn:boundaryEvent id="Event_0q42szc" attachedToRef="Activity_HandleTask">
+      <bpmn:outgoing>Flow_0h2jhyf</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_1v75q1a" errorRef="Error_17n61lh" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_0h2jhyf" sourceRef="Event_0q42szc" targetRef="Event_1im80bp" />
+    <bpmn:endEvent id="Event_1im80bp" name="End exception">
+      <bpmn:incoming>Flow_0h2jhyf</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmn:error id="Error_17n61lh" name="Error_333a1l2" errorCode="1" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="SimpleExceptionProcess1">
+      <bpmndi:BPMNShape id="Participant_0fl1xof_di" bpmnElement="Participant_1" isHorizontal="true">
+        <dc:Bounds x="160" y="52" width="490" height="326" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1yt4smo_di" bpmnElement="Flow_1yt4smo">
+        <di:waypoint x="450" y="177" />
+        <di:waypoint x="512" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1b03ijq_di" bpmnElement="Flow_1b03ijq">
+        <di:waypoint x="295" y="177" />
+        <di:waypoint x="350" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0h2jhyf_di" bpmnElement="Flow_0h2jhyf">
+        <di:waypoint x="400" y="235" />
+        <di:waypoint x="400" y="300" />
+        <di:waypoint x="512" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent">
+        <dc:Bounds x="259" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="265" y="202" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0ya9i0s_di" bpmnElement="EndEvent">
+        <dc:Bounds x="512" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="520" y="202" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ji4v0p_di" bpmnElement="Activity_HandleTask">
+        <dc:Bounds x="350" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1im80bp_di" bpmnElement="Event_1im80bp">
+        <dc:Bounds x="512" y="282" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="495" y="325" width="70" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_08sohcv_di" bpmnElement="Event_0q42szc">
+        <dc:Bounds x="382" y="199" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

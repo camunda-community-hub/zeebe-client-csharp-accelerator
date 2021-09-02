@@ -1,4 +1,4 @@
-name: RELEASE
+name: DEPLOY
 on:
   push:
     tags:
@@ -6,7 +6,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
     - name: Pull zeebe
       run: docker pull camunda/zeebe:1.1.0
@@ -28,7 +28,7 @@ jobs:
       run: dotnet test --configuration Release /p:Version=${VERSION} --no-build
     - name: Pack
       run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
-    - name: Nuget Push
-      run: dotnet nuget push "src/Zeebe.Client.Bootstrap/bin/Release/Zeebe.Client.Bootstrap.${VERSION}.nupkg" --source https://nuget.pkg.github.com/arjangeertsema/index.json --api-key ${GITHUB_TOKEN}
+    - name: Nuget Push nuget.org
+      run: dotnet nuget push "zb-client-bootstrap.${VERSION}.nupkg" -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
