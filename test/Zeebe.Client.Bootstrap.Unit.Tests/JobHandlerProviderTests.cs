@@ -19,8 +19,9 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [Fact]
         public void AllJobHandlersAreFoundWhenCreated() {
             var actual = Handlers();
-            
-            Assert.Equal(3, actual.Count());
+            var expected = 6;
+
+            Assert.Equal(expected, actual.Count());
         }
 
         [Fact]

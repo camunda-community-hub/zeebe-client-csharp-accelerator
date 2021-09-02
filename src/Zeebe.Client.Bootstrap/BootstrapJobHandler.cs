@@ -10,63 +10,58 @@ namespace Zeebe.Client.Bootstrap
 {
     public class BootstrapJobHandler : IBootstrapJobHandler
     {
-        private readonly IJobHandlerProvider _jobHandlerProvider;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IZeebeClient _client;
-        private readonly IZeebeVariablesSerializer _serializer;
-        private readonly ILogger<BootstrapJobHandler> _logger;
+        private readonly IJobHandlerProvider jobHandlerProvider;
+        private readonly IServiceProvider serviceProvider;
+        private readonly IZeebeClient client;
+        private readonly IZeebeVariablesSerializer serializer;
+        private readonly ILogger<BootstrapJobHandler> logger;
 
         public BootstrapJobHandler(IServiceProvider serviceProvider, IZeebeClient client, IJobHandlerProvider jobHandlerProvider, IZeebeVariablesSerializer serializer, ILogger<BootstrapJobHandler> logger)
         {
-            this._serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            this._client = client ?? throw new ArgumentNullException(nameof(client));
-            this._jobHandlerProvider = jobHandlerProvider ?? throw new ArgumentNullException(nameof(jobHandlerProvider));
-            this._serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));   
-            this._logger = logger ?? throw new ArgumentNullException(nameof(logger));;            
+            this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            this.client = client ?? throw new ArgumentNullException(nameof(client));
+            this.jobHandlerProvider = jobHandlerProvider ?? throw new ArgumentNullException(nameof(jobHandlerProvider));
+            this.serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));   
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));;            
         }
 
         public async Task HandleJob(IJob job, CancellationToken cancellationToken)
         {
-            var jobHandlerInfo = this._jobHandlerProvider.JobHandlers
+            var jobHandlerInfo = this.jobHandlerProvider.JobHandlers
                 .Where(i => job.Type.Equals(i.JobType))
                 .FirstOrDefault();
 
-            try 
+            try
             {
-                await HandleJob(job, jobHandlerInfo, cancellationToken);
-            }            
-            catch(AbstractJobException ex) 
-            {
-                _logger.LogInformation(ex, $"JobException while handling job '${jobHandlerInfo.JobType ?? "null"}' with key '${job.Key}'. Process instance key = $'{job.ProcessInstanceKey}', process definition key = '{job.ProcessDefinitionKey}', process definition version = '{job.ProcessDefinitionVersion}'.");
-                
-                await this._client
-                    .NewThrowErrorCommand(job.Key)
-                    .ErrorCode(ex.Code)
-                    .ErrorMessage(ex.Message)
-                    .Send(cancellationToken);
+                var response = await HandleJob(job, jobHandlerInfo, cancellationToken);
+                await CompleteJob(job, response, cancellationToken);
             }
-            catch(Exception ex) 
+            catch (AbstractJobException ex)
             {
-                _logger.LogError(ex, $"Unhandled exception while handling job '${jobHandlerInfo.JobType ?? "null"}' with key '${job.Key}'. Process instance key = $'{job.ProcessInstanceKey}', process definition key = '{job.ProcessDefinitionKey}', process definition version = '{job.ProcessDefinitionVersion}'.");
+                await ThrowError(job, jobHandlerInfo, ex, cancellationToken);
+            }
+            catch (Exception ex) 
+            {
+                logger.LogError(ex, $"Unhandled exception while handling job '${jobHandlerInfo?.JobType ?? "null"}' with key '${job.Key}'. Process instance key = $'{job.ProcessInstanceKey}', process definition key = '{job.ProcessDefinitionKey}', process definition version = '{job.ProcessDefinitionVersion}'.");
                 throw;
             }
         }
 
-        private async Task HandleJob(IJob job, IJobHandlerInfo jobHandlerInfo, CancellationToken cancellationToken)
+        private async Task<object> HandleJob(IJob job, IJobHandlerInfo jobHandlerInfo, CancellationToken cancellationToken)
         {
             if(jobHandlerInfo == null)
                 throw new ArgumentNullException(nameof(jobHandlerInfo));
 
-            var handlerInstance = _serviceProvider.GetService(jobHandlerInfo.Handler.DeclaringType);
+            var handlerInstance = serviceProvider.GetService(jobHandlerInfo.Handler.DeclaringType);
             if(handlerInstance == null)
                 throw new InvalidOperationException($"There is no service of type {jobHandlerInfo.Handler.DeclaringType}.");
 
-            var jobType = jobHandlerInfo.Handler.GetParameters()[1].ParameterType;
+            var jobType = jobHandlerInfo.Handler.GetParameters()[0].ParameterType;
             var abstractJob = CreateAbstractJobInstance(job, jobType);
 
-            var response = jobHandlerInfo.Handler.Invoke(handlerInstance, new object[]  { _client, abstractJob, cancellationToken });
+            var response = jobHandlerInfo.Handler.Invoke(handlerInstance, new object[]  { abstractJob, cancellationToken });
 
-            _logger.LogInformation($"Job #{job.Key} ('{job.Type}') is handled by job handler '{jobHandlerInfo.Handler.DeclaringType.Name}'.");
+            logger.LogInformation($"Job #{job.Key} ('{job.Type}') is handled by job handler '{jobHandlerInfo.Handler.DeclaringType.Name}'.");
 
             if (response is Task task) 
             {
@@ -74,14 +69,31 @@ namespace Zeebe.Client.Bootstrap
                 response = task.GetType().GetProperty("Result")?.GetValue(task);
             }
 
-            var command = this._client.NewCompleteJobCommand(job.Key);
-            
-            if(response != null) {
-                var variables = this._serializer.Serialize(response);
+            return response;
+        }
+
+        private async Task CompleteJob(IJob job, object response, CancellationToken cancellationToken)
+        {
+            var command = this.client.NewCompleteJobCommand(job.Key);
+
+            if (response != null)
+            {
+                var variables = this.serializer.Serialize(response);
                 command.Variables(variables);
             }
-                
+
             await command.Send(cancellationToken);
+        }
+
+        private async Task ThrowError(IJob job, IJobHandlerInfo jobHandlerInfo, AbstractJobException ex, CancellationToken cancellationToken)
+        {
+            logger.LogInformation(ex, $"JobException while handling job '${jobHandlerInfo?.JobType ?? "null"}' with key '${job.Key}'. Process instance key = $'{job.ProcessInstanceKey}', process definition key = '{job.ProcessDefinitionKey}', process definition version = '{job.ProcessDefinitionVersion}'.");
+
+            await this.client
+                .NewThrowErrorCommand(job.Key)
+                .ErrorCode(ex.Code)
+                .ErrorMessage(ex.Message)
+                .Send(cancellationToken);
         }
 
         private static object CreateAbstractJobInstance(IJob job, Type jobType) 

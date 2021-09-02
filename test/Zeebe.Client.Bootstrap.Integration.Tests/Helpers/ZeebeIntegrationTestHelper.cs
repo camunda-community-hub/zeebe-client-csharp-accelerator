@@ -7,6 +7,7 @@ using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Zeebe.Client.Bootstrap.Abstractions;
 using Zeebe.Client.Bootstrap.Extensions;
 using Zeebe.Client.Bootstrap.Integration.Tests.Stubs;
 using static Zeebe.Client.Bootstrap.Options.ZeebeClientBootstrapOptions;
@@ -61,6 +62,7 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
             zeebeClient.Dispose();
             
             await this.zeebeContainer.StopAsync();
+            await this.zeebeContainer.CleanUpAsync();
             await this.zeebeContainer.DisposeAsync();
             
             await host.StopAsync();
@@ -103,7 +105,7 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
                                     };
                                 },
                                 "Zeebe.Client.Bootstrap.Integration.Tests"
-                            )
+                            )                            
                             .Add(new ServiceDescriptor(typeof(HandleJobDelegate), handleJobDelegate));
                     })
                 .Build();

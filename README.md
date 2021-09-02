@@ -178,11 +178,12 @@ This project uses the following conventions:
 1. By default the simple name of the `AbstractJob` implementation is used to match the `Type` which is specified in the BPMN model. This can be overriden by adding the `JobTypeAttribute` to the `AbstractJob` implementation.
 1. By default the assembly name which contains the job handler is used as the `Worker name`. This can be overriden by adding the `WorkerNameAttribute` to the `AbstractJob` implementation.
 1. By default the job handlers are added to de DI container with a `Transient` service lifetime. This can be overriden by adding the `ServiceLifetimeAttribute` to the job handler.
+1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. You can override this registration by registering your service after the `BootstrapZeebe` method or you can register `System.Text.Json.JsonSerializerOptions` to configure the `System.Text.Json.JsonSerializer`. 
 
 ## How to build
 
-Run `dotnet build Zeebe.Client.Bootstrap.sln`.
+Run `dotnet build Zeebe.Client.Bootstrap.sln`
 
 ## How to test
 
-Run `dotnet test Zeebe.Client.Bootstrap.sln`.
+Run `dotnet test Zeebe.Client.Bootstrap.sln`

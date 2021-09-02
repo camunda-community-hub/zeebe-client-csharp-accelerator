@@ -11,6 +11,9 @@ using Zeebe.Client.Bootstrap.Unit.Tests.Stubs;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using static Zeebe.Client.Bootstrap.Options.ZeebeClientBootstrapOptions;
+using System.Threading.Tasks;
+using Zeebe.Client.Api.Responses;
+using Zeebe.Client.Api.Commands;
 
 namespace Zeebe.Client.Bootstrap.Unit.Tests
 {
@@ -25,6 +28,9 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         private readonly Mock<IJobWorkerBuilderStep3> jobWorkerBuilderStep3Mock;
         private readonly Mock<IJobWorkerBuilderStep2> jobWorkerBuilderStep2Mock;
         private readonly Mock<IJobWorkerBuilderStep1> jobWorkerBuilderStep1Mock;
+        private readonly Mock<ICompleteJobCommandStep1> completeJobCommandStep1Mock;
+        private readonly Mock<IThrowErrorCommandStep2> throwErrorCommandStep2Mock;
+        private readonly Mock<IThrowErrorCommandStep1> throwErrorCommandStep1Mock;
         private readonly Mock<IJobHandlerProvider> jobHandlerProviderMock;
         private readonly Mock<IZeebeVariablesSerializer> serializerMock;
         private readonly Mock<ILogger<BootstrapJobHandler>> loggerMock;
@@ -58,117 +64,147 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         {
             Assert.Throws<ArgumentNullException>("logger", () => new BootstrapJobHandler(this.serviceProviderMock.Object, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, this.serializerMock.Object, null));
         }
-        
-        /*[Fact]
-        public async Task HandlerDelegateExecutesTheCorrectJobHandlerMethodWhenExecuted() {
-            var handlers = new List<BootstrapJobHandler>();
-            var jobs = new List<IJob>();
 
-            this.jobWorkerBuilderStep2Mock.Setup(m => m.Handler(It.IsAny<BootstrapJobHandler>()))
-                .Returns(jobWorkerBuilderStep3Mock.Object)
-                .Callback<BootstrapJobHandler>(h => handlers.Add(h));
+        [Fact]
+        public async Task ThrowsArgumentNullExceptionWhenTheJobHandlerIsNotFound() 
+        {
+            var jobMock = new Mock<IJob>();            
+            jobMock.SetupGet(m => m.Type).Returns(Guid.NewGuid().ToString());
 
-            this.handleJobDelegateMock.Setup(d => d.Invoke(It.IsAny<IJobClient>(), It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
-                .Callback<IJobClient, IJob, CancellationToken>((jobClient, job, cancellationToken) => {
-                    Assert.NotNull(jobClient);
-                    Assert.NotNull(job);
+            var handler = Create();
 
-                    Assert.Equal(this.zeebeClientMock.Object, jobClient);
-                    Assert.Equal(this.cancellationToken, cancellationToken);
-                    jobs.Add(job);
-                });
-
-            var service = Create();
-            await service.StartAsync(cancellationToken);
-
-            Assert.Equal(this.jobHandlers.Count, handlers.Count);
-            
-            var jobMock = new Mock<IJob>();
-            var job = jobMock.Object;
-
-            Task.WaitAll(handlers.Select(h => h(this.zeebeClientMock.Object, job)).ToArray());
-
-            this.handleJobDelegateMock.Verify(d => d.Invoke(It.IsAny<IJobClient>(), It.IsAny<IJob>(), It.IsAny<CancellationToken>()), Times.Exactly(this.jobHandlers.Count));
-            Assert.Equal(jobs.Count, this.jobHandlers.Count);
-
-            (new Type[] { typeof(JobA), typeof(JobB), typeof(JobC) })
-                .All(t => jobs.Where(j => j.GetType().Equals(t)).Any());
+            await Assert.ThrowsAsync<ArgumentNullException>("jobHandlerInfo",() => handler.HandleJob(jobMock.Object, cancellationToken));
         }
 
         [Fact]
-        public async Task ExceptionIsRaisedWhenDelegateThrowsException() {
-            var expected = new SystemException();
+        public async Task ThrowsInvalidOperationExceptionWhenTheJobHandlerServiceIsNotFound() 
+        {
+            var expected = jobHandlers.First();
 
-            var handlers = new List<BootstrapJobHandler>();
-            
-            this.jobWorkerBuilderStep2Mock.Setup(m => m.Handler(It.IsAny<BootstrapJobHandler>()))
-                .Returns(jobWorkerBuilderStep3Mock.Object)
-                .Callback<BootstrapJobHandler>(h => handlers.Add(h));
+            var jobMock = new Mock<IJob>();            
+            jobMock.SetupGet(m => m.Type).Returns(expected.JobType);
 
-            this.handleJobDelegateMock.Setup(d => d.Invoke(It.IsAny<IJobClient>(), It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
-                .Throws(expected);
+            this.serviceProviderMock.Setup(m => m.GetService(It.IsAny<Type>())).Returns(null);
 
-            var service = Create();
-            await service.StartAsync(cancellationToken);
+            var handler = Create();
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => handler.HandleJob(jobMock.Object, cancellationToken));
+        }
+
+        [Fact]
+        public async Task JobIsCompletedWhenJobIsHandled() 
+        {
+            var random = new Random();
+            var expectedHandler = jobHandlers.First();
+            var expectedKey = random.Next();
+
+            var jobMock = new Mock<IJob>();            
+            jobMock.SetupGet(m => m.Type).Returns(expectedHandler.JobType);
+            jobMock.SetupGet(m => m.Key).Returns(expectedKey);
+
+            var handler = Create();
+
+            await handler.HandleJob(jobMock.Object, cancellationToken);
+
+            this.zeebeClientMock.Verify(c => c.NewCompleteJobCommand(expectedKey), Times.Once);
+            this.completeJobCommandStep1Mock.Verify(c => c.Variables(It.IsAny<string>()), Times.Never);
+            this.completeJobCommandStep1Mock.Verify(c => c.Send(cancellationToken), Times.Once);
+        }
+
+        [Fact]
+        public async Task JobIsCompletedWithVariablesWhenJobIsHandledWithAResponse()
+        {
+            var random = new Random();
+            PrepareJobHandlersFor<JobD>();
+            var expectedHandler = jobHandlers.First();
+            var expectedKey = random.Next();
+            var expectedSerializedResponse = Guid.NewGuid().ToString();
 
             var jobMock = new Mock<IJob>();
-            var job = jobMock.Object;
+            jobMock.SetupGet(m => m.Type).Returns(expectedHandler.JobType);
+            jobMock.SetupGet(m => m.Key).Returns(expectedKey);
 
-            var tasks = handlers.Select(h => h(this.zeebeClientMock.Object, job)).ToArray();
+            this.serializerMock.Setup(m => m.Serialize(It.IsAny<ResponseD>())).Returns(expectedSerializedResponse);
 
-            try {
-                Task.WaitAll(tasks);
+            var handler = Create();
+
+            await handler.HandleJob(jobMock.Object, cancellationToken);
+
+            this.zeebeClientMock.Verify(c => c.NewCompleteJobCommand(expectedKey), Times.Once);
+            this.zeebeClientMock.Verify(c => c.NewThrowErrorCommand(expectedKey), Times.Never);
+            this.zeebeClientMock.Verify(c => c.NewFailCommand(expectedKey), Times.Never);
+            this.completeJobCommandStep1Mock.Verify(c => c.Variables(expectedSerializedResponse), Times.Once);
+            this.completeJobCommandStep1Mock.Verify(c => c.Send(cancellationToken), Times.Once);
+        }
+
+        [Fact]
+        public async Task JobThrowsErrorWhenJobIsHandledWithAsbtractJobException() 
+        {
+            var random = new Random();
+
+            PrepareJobHandlersFor<JobE>();
+            var expectedHandler = jobHandlers.First();
+            var expectedKey = random.Next();
+            var expectedSerializedResponse = Guid.NewGuid().ToString();
+
+            var jobMock = new Mock<IJob>();            
+            jobMock.SetupGet(m => m.Type).Returns(expectedHandler.JobType);
+            jobMock.SetupGet(m => m.Key).Returns(expectedKey);
+
+            var handler = Create();
+
+            await handler.HandleJob(jobMock.Object, cancellationToken);
+
+            this.zeebeClientMock.Verify(c => c.NewCompleteJobCommand(expectedKey), Times.Never);
+            this.zeebeClientMock.Verify(c => c.NewThrowErrorCommand(expectedKey), Times.Once);
+            this.zeebeClientMock.Verify(c => c.NewFailCommand(expectedKey), Times.Never);
+            this.throwErrorCommandStep1Mock.Verify(c => c.ErrorCode("12345"), Times.Once);
+            this.throwErrorCommandStep2Mock.Verify(c => c.ErrorMessage("54321"), Times.Once);
+        }
+
+        [Fact]
+        public async Task ThrowsExceptionWhenJobIsHandledWithAnException() 
+        {
+            var random = new Random();
+
+            PrepareJobHandlersFor<JobF>();
+            var expectedHandler = jobHandlers.First();
+            var expectedKey = random.Next();
+            var expectedSerializedResponse = Guid.NewGuid().ToString();
+
+            var jobMock = new Mock<IJob>();            
+            jobMock.SetupGet(m => m.Type).Returns(expectedHandler.JobType);
+            jobMock.SetupGet(m => m.Key).Returns(expectedKey);
+
+            var handler = Create();
+
+            try
+            {
+                await handler.HandleJob(jobMock.Object, cancellationToken);
             }
-            catch { }
+            catch(Exception ex) 
+            {
+                Assert.Equal("123456789109876543210", ex.InnerException.Message);
+            }
 
-            Assert.Equal(this.jobHandlers.Count,  tasks.Where(t => t.IsFaulted && t.Exception.InnerException.InnerException.Equals(expected)).Count());
+            this.zeebeClientMock.Verify(c => c.NewCompleteJobCommand(expectedKey), Times.Never);
+            this.zeebeClientMock.Verify(c => c.NewThrowErrorCommand(expectedKey), Times.Never);
+            this.zeebeClientMock.Verify(c => c.NewFailCommand(expectedKey), Times.Never);
         }
-
-        [Fact]
-        public async Task AllWorkersAreDisposedWhenStopAsyncIsExecuted() 
-        {
-            var service = Create();
-            await service.StartAsync(cancellationToken);
-            await service.StopAsync(cancellationToken);
-
-            this.jobWorkerMock.Verify(j => j.Dispose(), Times.Exactly(this.jobHandlers.Count));
-        }
-
-        [Fact]
-        public async Task AllWorkersAreDisposedWhenServiceIsDisposed() 
-        {
-            var service = Create();
-            await service.StartAsync(cancellationToken);
-            service.Dispose();
-
-            this.jobWorkerMock.Verify(j => j.Dispose(), Times.Exactly(this.jobHandlers.Count));
-        }*/
 
         #region Prepare
 
         public BootstrapJobHandlerTests()
         {            
             this.cancellationToken = new CancellationToken();
-            this.jobHandlers = new List<IJobHandlerInfo>() {
-               CreateJobHandlerReference(
-                    typeof(JobHandlerA)
-                        .GetMethods()
-                        .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
-                        .First()
-               ), 
-               CreateJobHandlerReference(
-                    typeof(JobHandlerA)
-                        .GetMethods()
-                        .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
-                        .ToArray()[1]
-               ),
-               CreateJobHandlerReference(
-                    typeof(JobHandlerB)
-                        .GetMethods()
-                        .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
-                        .First()
-               )
-            };
+
+
+            this.jobHandlers = new List<IJobHandlerInfo>(
+                new Type[] { typeof(JobHandlerA), typeof(JobHandlerB) }
+                    .SelectMany(t => t.GetMethods())
+                    .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
+                    .Select(m => CreateJobHandlerReference(m))
+            );
 
             this.handleJobDelegateMock = new Mock<HandleJobDelegate>();
             this.serviceProviderMock = CreateIServiceProviderMock(this.handleJobDelegateMock);
@@ -176,8 +212,11 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             this.jobWorkerMock = CreateIJobWorkerMock();
             this.jobWorkerBuilderStep3Mock = CreateIJobWorkerBuilderStep3Mock(this.jobWorkerMock);
             this.jobWorkerBuilderStep2Mock = CreateIJobWorkerBuilderStep2Mock(this.jobWorkerBuilderStep3Mock);
-            this.jobWorkerBuilderStep1Mock = CreateIJobWorkerBuilderStep1Mock(this.jobWorkerBuilderStep2Mock);
-            this.zeebeClientMock = CreateIZeebeClientMock(this.jobWorkerBuilderStep1Mock);
+            this.jobWorkerBuilderStep1Mock = CreateIJobWorkerBuilderStep1Mock(this.jobWorkerBuilderStep2Mock);            
+            this.completeJobCommandStep1Mock = CreateICompleteJobCommandStep1Mock();
+            this.throwErrorCommandStep2Mock = CreateIThrowErrorCommandStep2Mock();
+            this.throwErrorCommandStep1Mock = CreateIThrowErrorCommandStep1Mock(this.throwErrorCommandStep2Mock);
+            this.zeebeClientMock = CreateIZeebeClientMock(this.jobWorkerBuilderStep1Mock, this.completeJobCommandStep1Mock, this.throwErrorCommandStep1Mock);
 
             this.jobHandlerProviderMock = CreateIJobHandlerProviderMock();
             
@@ -207,12 +246,41 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             return mock;
         }
 
-        private static Mock<IZeebeClient> CreateIZeebeClientMock(Mock<IJobWorkerBuilderStep1> step1Mock)
+        private static Mock<ICompleteJobCommandStep1> CreateICompleteJobCommandStep1Mock() 
+        {
+            var mock = new Mock<ICompleteJobCommandStep1>();
+
+            mock.Setup(m => m.Variables(It.IsAny<string>())).Returns(mock.Object);
+
+            return mock;
+        }
+
+        private static Mock<IThrowErrorCommandStep1> CreateIThrowErrorCommandStep1Mock(Mock<IThrowErrorCommandStep2> throwErrorCommandStep2Mock) 
+        {
+            var mock = new Mock<IThrowErrorCommandStep1>();
+
+            mock.Setup(m => m.ErrorCode(It.IsAny<string>())).Returns(throwErrorCommandStep2Mock.Object);
+
+            return mock;
+        }
+
+        private static Mock<IThrowErrorCommandStep2> CreateIThrowErrorCommandStep2Mock() 
+        {
+            var mock = new Mock<IThrowErrorCommandStep2>();
+
+            mock.Setup(m => m.ErrorMessage(It.IsAny<string>())).Returns(mock.Object);
+
+            return mock;
+        }
+
+        private static Mock<IZeebeClient> CreateIZeebeClientMock(Mock<IJobWorkerBuilderStep1> step1Mock, Mock<ICompleteJobCommandStep1> completeJobCommandStep1Mock, Mock<IThrowErrorCommandStep1> throwErrorCommandStep1Mock)
         {
             var mock = new Mock<IZeebeClient>();
 
             mock.Setup(c => c.NewWorker()).Returns(step1Mock.Object);
-
+            mock.Setup(c => c.NewCompleteJobCommand(It.IsAny<long>())).Returns(completeJobCommandStep1Mock.Object);
+            mock.Setup(c => c.NewThrowErrorCommand(It.IsAny<long>())).Returns(throwErrorCommandStep1Mock.Object);
+         
             return mock;
         }
 
@@ -290,6 +358,21 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
                     Guid.NewGuid().ToString()
                 }
             );
+        }
+
+        private void PrepareJobHandlersFor<T>() 
+            where T : AbstractJob
+        {
+            this.jobHandlers.Clear();
+            this.jobHandlers.Add(new JobHandlerInfo(
+                typeof(JobHandlerB)
+                    .GetMethods()
+                    .Where(m => m.Name.Equals(nameof(JobHandlerB.HandleJob)) && m.GetParameters()[0].ParameterType == typeof(T))
+                    .Single(),
+                ServiceLifetime.Transient,
+                typeof(T).GetTypeInfo().Name,
+                "Test"
+            ));
         }
 
         #endregion

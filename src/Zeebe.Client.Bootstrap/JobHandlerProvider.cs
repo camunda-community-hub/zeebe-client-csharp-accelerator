@@ -32,19 +32,18 @@ namespace Zeebe.Client.Bootstrap
                 if(jobHandlers != null)
                     return this.jobHandlers;
 
-                this.jobHandlers = GetJobHandlers(assemblyProvider);
+                this.jobHandlers = GetJobHandlers(assemblyProvider).ToList();
                 return this.jobHandlers;
             }
         }
 
-        private static List<IJobHandlerInfo> GetJobHandlers(IAssemblyProvider assemblyProvider)
+        private static IEnumerable<IJobHandlerInfo> GetJobHandlers(IAssemblyProvider assemblyProvider)
         {
             return assemblyProvider
                 .Assemblies
                 .SelectMany(a => a.GetTypes())
                 .Where(t => ImplementsJobHandlerInterface(t))
-                .SelectMany(t => CreateJobHandlerInfo(t))
-                .ToList();
+                .SelectMany(t => CreateJobHandlerInfo(t));
         }
 
         private static IEnumerable<IJobHandlerInfo> CreateJobHandlerInfo(Type jobHandlerType)

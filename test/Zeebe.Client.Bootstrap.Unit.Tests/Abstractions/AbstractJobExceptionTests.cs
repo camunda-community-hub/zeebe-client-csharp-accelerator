@@ -12,7 +12,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Abstractions
         [InlineData(" ")]
         public void ThrowsArgumentExceptionWhenCodeIsNullOrEmptyOrWhiteSpace(string code)
         {
-            Assert.Throws<ArgumentException>("code", () => new SimpleJobException(null, Guid.NewGuid().ToString()));
+            Assert.Throws<ArgumentException>("code", () => new SimpleJobException(code, Guid.NewGuid().ToString()));
         }
 
         [Theory]
@@ -21,7 +21,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Abstractions
         [InlineData(" ")]
         public void ThrowsArgumentExceptionWhenMessageIsNullOrEmptyOrWhiteSpace(string message)
         {
-            Assert.Throws<ArgumentException>("message", () => new SimpleJobException(Guid.NewGuid().ToString(), null));
+            Assert.Throws<ArgumentException>("message", () => new SimpleJobException(Guid.NewGuid().ToString(), message));
         }
 
 

@@ -14,6 +14,16 @@ namespace Zeebe.Client.Bootstrap.Extensions
     {
         public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, params string[] assembliesStartsWith)
         {
+            if (services is null)
+            {
+                throw new ArgumentNullException(nameof(services));
+            }
+
+            if (namedConfigurationSection is null)
+            {
+                throw new ArgumentNullException(nameof(namedConfigurationSection));
+            }
+
             return services
                 .BootstrapZeebe(assembliesStartsWith)
                 .Configure<ZeebeClientBootstrapOptions>(namedConfigurationSection);
@@ -21,6 +31,11 @@ namespace Zeebe.Client.Bootstrap.Extensions
 
         public static IServiceCollection BootstrapZeebe(this IServiceCollection services, Action<ZeebeClientBootstrapOptions> configureOptions, params string[] assembliesStartsWith) 
         {
+            if (configureOptions is null)
+            {
+                throw new ArgumentNullException(nameof(configureOptions));
+            }
+
             return services
                 .BootstrapZeebe(assembliesStartsWith)
                 .Configure(configureOptions);
@@ -28,6 +43,16 @@ namespace Zeebe.Client.Bootstrap.Extensions
 
         public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, Action<ZeebeClientBootstrapOptions> postConfigureOptions, params string[] assembliesStartsWith)
         {
+            if (namedConfigurationSection is null)
+            {
+                throw new ArgumentNullException(nameof(namedConfigurationSection));
+            }
+
+            if (postConfigureOptions is null)
+            {
+                throw new ArgumentNullException(nameof(postConfigureOptions));
+            }
+
             return services                
                 .BootstrapZeebe(assembliesStartsWith)
                 .Configure<ZeebeClientBootstrapOptions>(namedConfigurationSection)
@@ -36,7 +61,6 @@ namespace Zeebe.Client.Bootstrap.Extensions
 
         private static IServiceCollection BootstrapZeebe(this IServiceCollection services, params string[] assembliesStartsWith)
         {
-
             if (services == null) 
                 throw new ArgumentNullException(nameof(services));
 
@@ -44,28 +68,11 @@ namespace Zeebe.Client.Bootstrap.Extensions
 
             return services
                 .AddSingleton(typeof(IAssemblyProvider), assemblyprovider)
-                .AddSingleton<IBootstrapJobHandler, BootstrapJobHandler>()
+                .AddSingleton(typeof(IBootstrapJobHandler), typeof(BootstrapJobHandler))
+                .AddSingleton(typeof(IZeebeVariablesSerializer), typeof(ZeebeVariablesSerializer))
                 .AddZeebeJobHandlers(assemblyprovider)
-                .AddZeebeClient(assembliesStartsWith)
+                .AddZeebeClient()
                 .AddHostedService<ZeebeHostedService>();
-        }
-
-        private static IServiceCollection AddZeebeClient(this IServiceCollection services, params string[] assembliesStartsWith)
-        {
-
-            return services                
-                .AddZeebeBuilders()
-                .AddScoped(sp => {
-                    var options = sp.GetRequiredService<IOptions<ZeebeClientBootstrapOptions>>();
-                    var builder = sp.GetRequiredService<IZeebeClientBuilder>();
-                    var loggerFactory = sp.GetService<ILoggerFactory>();
-                    
-                    if(loggerFactory != null)
-                        builder = builder.UseLoggerFactory(loggerFactory);
-                        
-                    return builder
-                        .Build(options.Value);                        
-                });
         }
 
         private static IServiceCollection AddZeebeJobHandlers(this IServiceCollection services, IAssemblyProvider assemblyprovider) {
@@ -81,6 +88,23 @@ namespace Zeebe.Client.Bootstrap.Extensions
             }
 
             return services;
+        }
+
+        private static IServiceCollection AddZeebeClient(this IServiceCollection services)
+        {
+            return services                
+                .AddZeebeBuilders()
+                .AddScoped(sp => {
+                    var options = sp.GetRequiredService<IOptions<ZeebeClientBootstrapOptions>>();
+                    var builder = sp.GetRequiredService<IZeebeClientBuilder>();
+                    var loggerFactory = sp.GetService<ILoggerFactory>();
+                    
+                    if(loggerFactory != null)
+                        builder = builder.UseLoggerFactory(loggerFactory);
+                        
+                    return builder
+                        .Build(options.Value);                        
+                });
         }
 
         private static bool IsAlreadyRegistered(IServiceCollection services, Type declaringType)

@@ -25,7 +25,7 @@
       <bpmn:incoming>Flow_0fed43r</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0fed43r" name="Yes" sourceRef="Gateway_0jghfqb" targetRef="Event_1xu362i">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">Properfty == true</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=Property = true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_05glqda" name="False end">
       <bpmn:incoming>Flow_1n4bdrm</bpmn:incoming>
