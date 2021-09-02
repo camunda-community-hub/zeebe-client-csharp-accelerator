@@ -1,10 +1,16 @@
 using System.Threading;
-using Zeebe.Client.Api.Worker;
 
 namespace Zeebe.Client.Bootstrap.Abstractions
 {
-    public interface IJobHandler<T>  where T : AbstractJob
+    public interface IJobHandler<TJob>  where TJob : AbstractJob
     {
-         void HandleJob(IJobClient client, T job, CancellationToken cancellationToken);
+         void HandleJob(TJob job, CancellationToken cancellationToken);
+    }
+
+    public interface IJobHandler<TJob, TResponse>  
+        where TJob : AbstractJob
+        where TResponse : class
+    {
+         TResponse HandleJob(TJob job, CancellationToken cancellationToken);
     }
 }

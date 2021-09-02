@@ -16,7 +16,7 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests
 
         public Test()
         {
-            this.helper = new IntegrationTestHelper((client, job, cancellationToken) => jobHandledCounter++);            
+            this.helper = new IntegrationTestHelper((job, cancellationToken) => jobHandledCounter++);            
         }
 
         [Fact]

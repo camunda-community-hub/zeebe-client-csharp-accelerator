@@ -19,8 +19,9 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [Fact]
         public void AllJobHandlersAreFoundWhenCreated() {
             var actual = Handlers();
-            
-            Assert.Equal(3, actual.Count());
+            var expected = 6;
+
+            Assert.Equal(expected, actual.Count());
         }
 
         [Fact]
@@ -100,7 +101,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             return new JobHandlerProvider(new AssemblyProvider(Meta.UNIT_TEST_PROJECT_NAME));
         }
 
-        private static IEnumerable<IJobHandlerReference> Handlers()
+        private static IEnumerable<IJobHandlerInfo> Handlers()
         {
             var provider = Create();
             return provider.JobHandlers;

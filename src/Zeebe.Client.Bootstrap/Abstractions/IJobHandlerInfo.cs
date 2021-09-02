@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Zeebe.Client.Bootstrap.Abstractions
 {
-    public interface IJobHandlerReference
+    public interface IJobHandlerInfo
     { 
         MethodInfo Handler { get; }
         ServiceLifetime HandlerServiceLifetime { get; }

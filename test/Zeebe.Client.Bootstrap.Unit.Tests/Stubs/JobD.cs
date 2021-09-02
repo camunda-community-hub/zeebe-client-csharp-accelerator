@@ -3,10 +3,13 @@ using Zeebe.Client.Bootstrap.Abstractions;
 
 namespace Zeebe.Client.Bootstrap.Unit.Tests.Stubs
 {
-    public class JobA : AbstractJob
+    public class JobD : AbstractJob
     {
-        public JobA(IJob job) 
+        public JobD(IJob job) 
             : base(job)
         { }
     }
+
+    public class ResponseD
+    { }
 }

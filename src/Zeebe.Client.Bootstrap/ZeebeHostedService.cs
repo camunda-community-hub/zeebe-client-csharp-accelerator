@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Zeebe.Client.Bootstrap.Abstractions;
-using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Api.Worker;
 using Microsoft.Extensions.Logging;
 using Zeebe.Client.Bootstrap.Options;
@@ -15,16 +14,16 @@ namespace Zeebe.Client.Bootstrap
 {
     public class ZeebeHostedService : IHostedService, IDisposable
     {
-        private readonly IServiceProvider serviceProvider;
+        private readonly IBootstrapJobHandler bootstrapJobHandler;
         private readonly IZeebeClient client;
         private readonly IJobHandlerProvider jobHandlerProvider;
         private readonly WorkerOptions zeebeWorkerOptions;
         private readonly ILogger<ZeebeHostedService> logger;
         private readonly List<IJobWorker> workers = new List<IJobWorker>();
 
-        public ZeebeHostedService(IServiceProvider serviceProvider, IZeebeClient client, IJobHandlerProvider jobHandlerProvider, IOptions<ZeebeClientBootstrapOptions> options, ILogger<ZeebeHostedService> logger)
+        public ZeebeHostedService(IBootstrapJobHandler bootstrapJobHandler, IZeebeClient client, IJobHandlerProvider jobHandlerProvider, IOptions<ZeebeClientBootstrapOptions> options, ILogger<ZeebeHostedService> logger)
         {
-            this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            this.bootstrapJobHandler = bootstrapJobHandler ?? throw new ArgumentNullException(nameof(bootstrapJobHandler));
             this.client = client ?? throw new ArgumentNullException(nameof(client));   
             this.jobHandlerProvider = jobHandlerProvider ?? throw new ArgumentNullException(nameof(jobHandlerProvider));
             this.zeebeWorkerOptions = options?.Value?.Worker ?? throw new ArgumentNullException(nameof(options), $"{nameof(IOptions<ZeebeClientBootstrapOptions>)}.Value.{nameof(ZeebeClientBootstrapOptions.Worker)} is null.");
@@ -34,28 +33,27 @@ namespace Zeebe.Client.Bootstrap
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            foreach(var reference in jobHandlerProvider.JobHandlers) 
+            foreach(var info in jobHandlerProvider.JobHandlers) 
             {
                 var worker = client.NewWorker()
-                    .JobType(reference.JobType)                    
-                    .Handler((client, job) =>  HandleJob(client, job, cancellationToken, reference))                
-                    .FetchVariables(reference.FetchVariabeles)
-                    .MaxJobsActive(reference.MaxJobsActive ?? zeebeWorkerOptions.MaxJobsActive)
-                    .Name(zeebeWorkerOptions.Name ?? reference.WorkerName)
-                    .PollingTimeout(reference.PollingTimeout ?? zeebeWorkerOptions.PollingTimeout)
-                    .PollInterval(reference.PollInterval ?? zeebeWorkerOptions.PollInterval)
-                    .Timeout(reference.Timeout ?? zeebeWorkerOptions.Timeout)
+                    .JobType(info.JobType)                    
+                    .Handler((client, job) =>  this.bootstrapJobHandler.HandleJob(job, cancellationToken))                
+                    .FetchVariables(info.FetchVariabeles)
+                    .MaxJobsActive(info.MaxJobsActive ?? zeebeWorkerOptions.MaxJobsActive)
+                    .Name(zeebeWorkerOptions.Name ?? info.WorkerName)
+                    .PollingTimeout(info.PollingTimeout ?? zeebeWorkerOptions.PollingTimeout)
+                    .PollInterval(info.PollInterval ?? zeebeWorkerOptions.PollInterval)
+                    .Timeout(info.Timeout ?? zeebeWorkerOptions.Timeout)
                     .Open();
 
-                logger.LogInformation($"Created job worker to delegate job '{reference.JobType}' handling to handler '{reference.Handler.DeclaringType}'.");
+                logger.LogInformation($"Created job worker to delegate job '{info.JobType}' to the boostrap job handler.");
 
                 workers.Add(worker);
             }
 
             logger.LogInformation($"Created {workers.Count} job workers.");
 
-            return Task.CompletedTask;
-            
+            return Task.CompletedTask;            
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
@@ -83,45 +81,6 @@ namespace Zeebe.Client.Bootstrap
                 throw new ArgumentOutOfRangeException($"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.PollingTimeout)}");
             if(String.IsNullOrWhiteSpace(zeebeWorkerOptions.Name) && zeebeWorkerOptions.Name != null)
                 throw new ArgumentException($"'{nameof(zeebeWorkerOptions.Name)}' cannot be empty or whitespace.", $"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.Name)}");
-        }
-
-        private Task HandleJob(IJobClient client, IJob job, CancellationToken cancellationToken, IJobHandlerReference reference)
-        {
-            try 
-            {
-                var handlerInstance = serviceProvider.GetService(reference.Handler.DeclaringType);
-                if(handlerInstance == null)
-                    throw new InvalidOperationException($"There is no service of type {reference.Handler.DeclaringType}.");
-
-                var jobType = reference.Handler.GetParameters()[1].ParameterType;
-                var abstractJob = CreateAbstractJobInstance(job, jobType);
-
-                var response = reference.Handler.Invoke(handlerInstance, new object[]  { client, abstractJob, cancellationToken });
-
-                logger.LogInformation($"Job #{job.Key} ('{job.Type}') is handled by job handler '{reference.Handler.DeclaringType.Name}'.");
-
-                if (response is Task task)
-                    return task;
-
-                return Task.CompletedTask;
-            }
-            catch(Exception ex) 
-            {
-                logger.LogError(ex, $"Exception while handling job '${reference.JobType}' with key '${job.Key}'. Process instance key = $'{job.ProcessInstanceKey}', process definition key = '{job.ProcessDefinitionKey}', process definition version = '{job.ProcessDefinitionVersion}'.");
-                return Task.FromException(ex);
-            }
-        }
-
-        private static object CreateAbstractJobInstance(IJob job, Type jobType) 
-        {
-            if(!jobType.IsSubclassOf(typeof(AbstractJob)))
-                throw new Exception($"Type {jobType.FullName} is not a subclass of {typeof(AbstractJob).FullName}.");
-
-            var constructor = jobType.GetConstructor(new Type[] { typeof(IJob) });
-            if(constructor == null)
-                throw new Exception($"Type {jobType.FullName} does not have a constructor with one parameter of type {typeof(IJob).FullName}.");
-
-            return constructor.Invoke(new object[] { job });
         }
     }
 }

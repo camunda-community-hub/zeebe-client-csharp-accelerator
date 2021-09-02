@@ -16,14 +16,14 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Stubs
             this.handleJobDelegate = handleJobDelegate;
         }
 
-        public void HandleJob(IJobClient client, JobA job, CancellationToken cancellationToken)
+        public void HandleJob(JobA job, CancellationToken cancellationToken)
         {
-            this.handleJobDelegate(client, job, cancellationToken);
+            this.handleJobDelegate(job, cancellationToken);
         }
 
-        public void HandleJob(IJobClient client, JobB job, CancellationToken cancellationToken)
+        public void HandleJob(JobB job, CancellationToken cancellationToken)
         {
-            this.handleJobDelegate(client, job, cancellationToken);
+            this.handleJobDelegate(job, cancellationToken);
         }
 }
 }

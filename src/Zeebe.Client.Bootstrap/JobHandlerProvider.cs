@@ -2,8 +2,6 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading.Tasks;
-using Zeebe.Client.Api.Worker;
 using Zeebe.Client.Bootstrap.Abstractions;
 using Zeebe.Client.Bootstrap.Attributes;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,55 +10,65 @@ namespace Zeebe.Client.Bootstrap
 {
     public class JobHandlerProvider : IJobHandlerProvider
     {
-        private static readonly Type JOB_HANDLER_TYPE = typeof(IJobHandler<>);        
-        private static readonly string JOB_HANDLER_METHOD_NAME = nameof(IJobHandler<AbstractJob>.HandleJob);
-        private static readonly Type JOB_HANDLER_METHOD_RETURN_TYPE = typeof(void);
-        private static readonly Type ASYNC_JOB_HANDLER_TYPE = typeof(IAsyncJobHandler<>);
-        private static readonly string ASYNC_JOB_HANDLER_METHOD_NAME = nameof(IAsyncJobHandler<AbstractJob>.HandleJob);
-        private static readonly Type ASYNC_JOB_HANDLER_METHOD_RETURN_TYPE = typeof(Task);
+        private static readonly List<Type> HANDLER_TYPES = new List<Type>()
+        {
+            typeof(IJobHandler<>),
+            typeof(IJobHandler<,>),
+            typeof(IAsyncJobHandler<>),
+            typeof(IAsyncJobHandler<,>)
+        };
         private readonly IAssemblyProvider assemblyProvider;
-        private List<IJobHandlerReference> references;
+        private List<IJobHandlerInfo> jobHandlers;
 
         public JobHandlerProvider(IAssemblyProvider assemblyProvider)
         {
             this.assemblyProvider = assemblyProvider ?? throw new ArgumentNullException(nameof(assemblyProvider));
         }
 
-        public IEnumerable<IJobHandlerReference> JobHandlers
+        public IEnumerable<IJobHandlerInfo> JobHandlers
         {
             get
             {
-                if(references != null)
-                    return this.references;
+                if(jobHandlers != null)
+                    return this.jobHandlers;
 
-                this.references = GetReferences(assemblyProvider);
-                return this.references;
+                this.jobHandlers = GetJobHandlers(assemblyProvider).ToList();
+                return this.jobHandlers;
             }
         }
 
-        private static List<IJobHandlerReference> GetReferences(IAssemblyProvider assemblyProvider)
-        {            
+        private static IEnumerable<IJobHandlerInfo> GetJobHandlers(IAssemblyProvider assemblyProvider)
+        {
             return assemblyProvider
                 .Assemblies
                 .SelectMany(a => a.GetTypes())
-                .Where(t => ImplementsGenericType(t, JOB_HANDLER_TYPE) || ImplementsGenericType(t, ASYNC_JOB_HANDLER_TYPE))
-                .SelectMany(t => CreateReferences(t))
-                .ToList();
+                .Where(t => ImplementsJobHandlerInterface(t))
+                .SelectMany(t => CreateJobHandlerInfo(t));
         }
 
-        private static IEnumerable<IJobHandlerReference> CreateReferences(Type t)
+        private static IEnumerable<IJobHandlerInfo> CreateJobHandlerInfo(Type jobHandlerType)
         {
-            return GetJobHandlerMethods(t)
-                .Select(m => CreateReference(m));
+            return GetJobHandlers(jobHandlerType)
+                .Select(m => CreateJobHandlerInfo(m));
         }
 
-        private static IJobHandlerReference CreateReference(MethodInfo m)
+        private static IEnumerable<MethodInfo> GetJobHandlers(Type jobHandlerType)
         {
-            var jobType = m.GetParameters()[1].ParameterType;
+            var jobHandlerMethods = jobHandlerType.GetInterfaces()
+                .Where(i => IsJobHandlerInterface(i))
+                .SelectMany(i => i.GetMethods());
 
-            return new JobHandlerReference(
-                m, 
-                GetServiceLifetime(m),
+            return jobHandlerType.GetMethods()
+                .Where(m => IsJobHandlerMethod(m, jobHandlerMethods));
+        }
+
+        private static IJobHandlerInfo CreateJobHandlerInfo(MethodInfo jobHandlerMethod)
+        {
+            var jobType = jobHandlerMethod.GetParameters()[0].ParameterType;
+
+            return new JobHandlerInfo(
+                jobHandlerMethod, 
+                GetServiceLifetime(jobHandlerMethod),
                 GetJobType(jobType), 
                 GetWorkerName(jobType), 
                 GetMaxJobsActive(jobType), 
@@ -124,30 +132,23 @@ namespace Zeebe.Client.Bootstrap
             return attr?.PollInterval;
         }
 
-        private static IEnumerable<MethodInfo> GetJobHandlerMethods(Type t)
+
+        private static bool ImplementsJobHandlerInterface(Type type)
         {
-            var jobTypes = t.GetInterfaces()
-                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == JOB_HANDLER_TYPE)
-                .Select(i => i.GenericTypeArguments.First());
-
-            var asyncJobTypes = t.GetInterfaces()
-                .Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == ASYNC_JOB_HANDLER_TYPE)
-                .Select(i => i.GenericTypeArguments.First());
-
-            return t.GetMethods()
-                .Where(m => 
-                    IsJobHandlerMethod(m, JOB_HANDLER_METHOD_NAME, JOB_HANDLER_METHOD_RETURN_TYPE, jobTypes) || 
-                    IsJobHandlerMethod(m, ASYNC_JOB_HANDLER_METHOD_NAME, ASYNC_JOB_HANDLER_METHOD_RETURN_TYPE, asyncJobTypes));
+            return HANDLER_TYPES.Any(h => ImplementsGenericType(type, h));
         }
-        private static bool IsJobHandlerMethod(MethodInfo m, string methodName, Type returnType, IEnumerable<Type> jobTypes)
-        {
-            var parameters = m.GetParameters().ToArray();
 
-            return m.Name.Equals(methodName) &&
-                m.ReturnType.Equals(returnType) &&
-                parameters.Length == 3 &&
-                parameters[0].ParameterType.Equals(typeof(IJobClient)) &&
-                jobTypes.Any(jt =>  jt.Equals(parameters[1].ParameterType));
+        private static bool IsJobHandlerMethod(MethodInfo method, IEnumerable<MethodInfo> jobHandlerMethods)
+        {
+            var methodParameters = method.GetParameters()
+                .Select(p => p.ParameterType)
+                .ToList();
+
+            return jobHandlerMethods.Any(h => 
+                h.Name.Equals(method.Name) &&
+                h.GetParameters().Select(p => p.ParameterType).SequenceEqual(methodParameters) &&
+                h.ReturnParameter.ParameterType.Equals(method.ReturnParameter.ParameterType)
+            );
         }
 
         private static bool ImplementsGenericType(Type type, Type genericType)
@@ -156,6 +157,12 @@ namespace Zeebe.Client.Bootstrap
                 type.IsClass && 
                 type.GetInterfaces()
                     .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == genericType);
+        }
+        
+        private static bool IsJobHandlerInterface(Type i)
+        {
+            return i.IsGenericType && 
+                HANDLER_TYPES.Any(h => i.GetGenericTypeDefinition().Equals(h));
         }
     }
 }

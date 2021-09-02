@@ -96,22 +96,77 @@ The job is an implementation of `AbstractJob`. A job can be configured via optio
 [PollingTimeout(500)]
 class SimpleJob : AbstractJob
 {
-    public SimpleJob(IJob job) : base(job)
+    public SimpleJob(IJob job) 
+        : base(job)
     { }
+
+    class JobKeyIsOddException : AbstractJobException 
+    {
+        public JobKeyIsOddException() 
+            : base("1", "Job key is odd.")
+        { }
+    }
+}
+
+class AnotherSimpleJob : AbstractJob
+{
+    public AnotherSimpleJob(IJob job) 
+        : base(job)
+    { }
+
+    class Response 
+    {
+        public bool Property { get; set; }
+    }
 }
 ```
 
 ### Job handler
 
-The job handler is an implementation of `IJobHandler<T>` or `IAsyncJobHandler<T>`. A job can be configured via optional attributes. Job handlers are automaticly added to the DI container, therefore you can use dependency injection inside the job handlers.
+The job handler is an implementation of `IJobHandler<Job, Respone>` or `IAsyncJobHandler<Job, Response>`. A jobhandler can be configured via optional attributes. Job handlers are automaticly added to the DI container, therefore you can use dependency injection inside the job handlers. 
+
+A handled job has three outcomes:
+
+1. The job has been handled without exceptions: this will automaticly result in a `JobCompletedCommand` beeing send to the broker. The `Response` is automaticly serialized and added to the `JobCompletedCommand`.
+1. An exception has been thrown while handling the job, the exception implements `AbstractJobException`: this wil automaticly result in a `ThrowErrorCommand` beeing send to the broker;
+1. Any other exception will automaticly result in a `FailCommand` beeing send to the broker;
 
 ```csharp
 [ServiceLifetime(ServiceLifetime.Singleton)]
-class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
+class SimpleJobHandler : IAsyncJobHandler<SimpleJob>, IAsyncJobHandler<AnotherSimpleJob, AnotherSimpleJob.Response>, 
 {
-    public Task HandleJob(IJobClient client, SimpleJob job, CancellationToken cancellationToken)
+    public Task HandleJob(SimpleJob job, CancellationToken cancellationToken)
     {  
-        return client.NewCompleteJobCommand(job.Key).Send();
+        if(job.Key % 2 == 0)
+        {            
+            //Outcome 1 with no response:
+            return Task.CompletedTask;
+        }
+        else 
+        {
+            //Outcome 2:
+            return Task.FromException(new SimpleJob.JobKeyIsOddException());
+        }
+    }
+
+    public Task<AnotherSimpleJob.Response> HandleJob(AnotherSimpleJob job, CancellationToken cancellationToken)
+    {  
+        if(job.Key % 2 == 0)
+        {
+            //Outcome 1 with response:
+            return Task.FromResult
+            (
+                new AnotherSimpleJob.Response() 
+                {  
+                    Property = true
+                }
+            );            
+        }
+        else
+        {
+            //Outcome 3:
+            throw new Exception("something unexpected has happened");
+        }
     }
 }
 ```
@@ -123,11 +178,12 @@ This project uses the following conventions:
 1. By default the simple name of the `AbstractJob` implementation is used to match the `Type` which is specified in the BPMN model. This can be overriden by adding the `JobTypeAttribute` to the `AbstractJob` implementation.
 1. By default the assembly name which contains the job handler is used as the `Worker name`. This can be overriden by adding the `WorkerNameAttribute` to the `AbstractJob` implementation.
 1. By default the job handlers are added to de DI container with a `Transient` service lifetime. This can be overriden by adding the `ServiceLifetimeAttribute` to the job handler.
+1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. You can override this registration by registering your service after the `BootstrapZeebe` method or you can register `System.Text.Json.JsonSerializerOptions` to configure the `System.Text.Json.JsonSerializer`. 
 
 ## How to build
 
-Run `dotnet build Zeebe.Client.Bootstrap.sln`.
+Run `dotnet build Zeebe.Client.Bootstrap.sln`
 
 ## How to test
 
-Run `dotnet test Zeebe.Client.Bootstrap.sln`.
+Run `dotnet test Zeebe.Client.Bootstrap.sln`

@@ -5,9 +5,9 @@ using Zeebe.Client.Bootstrap.Abstractions;
 
 namespace Zeebe.Client.Bootstrap
 {
-    public class JobHandlerReference : IJobHandlerReference
+    public class JobHandlerInfo : IJobHandlerInfo
     {
-        public JobHandlerReference(
+        public JobHandlerInfo(
             MethodInfo handler,
             ServiceLifetime handlerServiceLifetime,
             string jobType, 
