@@ -19,7 +19,7 @@ This project is an extension of the [C# Zeebe client project](https://github.com
 
 The Zeebe C# client boostrap extensions is available via nuget (https://www.nuget.org/packages/zb-client-bootstrap/).
 
-See [examples](./examples) for more information.
+See [examples](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/tree/main/examples/SimpleExample) for more information.
 
 ## Quick start
 
@@ -165,7 +165,7 @@ class SimpleJobHandler : IAsyncJobHandler<SimpleJob>, IAsyncJobHandler<AnotherSi
         else
         {
             //Outcome 3:
-            throw new Exception("something unexpected has happened");
+            Task.FromException(new Exception("something unexpected has happened"));
         }
     }
 }
