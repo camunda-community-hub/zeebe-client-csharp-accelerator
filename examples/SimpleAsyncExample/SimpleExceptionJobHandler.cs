@@ -1,16 +1,17 @@
 using System.Threading;
+using System.Threading.Tasks;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Bootstrap.Abstractions;
 
-namespace SimpleAsyncExample
+namespace SimpleExample
 {
-    class SimpleExceptionJobHandler : IJobHandler<SimpleExceptionJob>
+    class SimpleExceptionJobHandler : IAsyncJobHandler<SimpleExceptionJob>
     {
-        public void HandleJob(SimpleExceptionJob job, CancellationToken cancellationToken)
+        public async Task HandleJob(SimpleExceptionJob job, CancellationToken cancellationToken)
         {
             if(job.Key % 2 == 0)
             {
-                Usecase.Execute();
+                await Usecase.ExecuteAsync();
             }
             else
             {

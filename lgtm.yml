@@ -1,0 +1,4 @@
+extraction:
+  csharp:
+    index:
+      solution: Zeebe.Client.Bootstrap.sln

@@ -1,15 +1,16 @@
 using System.Threading;
+using System.Threading.Tasks;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Bootstrap.Abstractions;
 
-namespace SimpleAsyncExample
+namespace SimpleExample
 {
-    class SimpleVariableJobHandler : IJobHandler<SimpleVariableJob, SimpleVariableJobResponse>
+    class SimpleVariableJobHandler : IAsyncJobHandler<SimpleVariableJob, SimpleVariableJobResponse>
     {
-        public SimpleVariableJobResponse HandleJob(SimpleVariableJob job, CancellationToken cancellationToken)
+        public async Task<SimpleVariableJobResponse> HandleJob(SimpleVariableJob job, CancellationToken cancellationToken)
         {
-            Usecase.Execute();
-            return new SimpleVariableJobResponse() 
+            await Usecase.ExecuteAsync();
+            return  new SimpleVariableJobResponse() 
             {
                 Property = job.Key % 2 == 0
             };
