@@ -1,4 +1,4 @@
-namespace SimpleAsyncExample
+namespace SimpleExample
 {
     static class Usecase
     {

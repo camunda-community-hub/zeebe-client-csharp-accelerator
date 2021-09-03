@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace SimpleExample
+namespace SimpleAsyncExample
 {
     static class Usecase
     {

@@ -18,7 +18,7 @@ namespace SimpleExample
                     .ConfigureServices((hostContext, services) => {
                         services.BootstrapZeebe(
                             hostContext.Configuration.GetSection("ZeebeBootstrap"),
-                            "SimpleAsyncExample"
+                            "SimpleExample"
                         );
                     });
     }

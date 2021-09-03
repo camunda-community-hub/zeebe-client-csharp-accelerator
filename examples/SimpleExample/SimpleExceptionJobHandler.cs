@@ -2,7 +2,7 @@ using System.Threading;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Bootstrap.Abstractions;
 
-namespace SimpleAsyncExample
+namespace SimpleExample
 {
     class SimpleExceptionJobHandler : IJobHandler<SimpleExceptionJob>
     {

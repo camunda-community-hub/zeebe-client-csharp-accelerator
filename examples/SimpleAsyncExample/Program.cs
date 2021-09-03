@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Zeebe.Client.Bootstrap.Extensions;
 
-namespace SimpleExample
+namespace SimpleAsyncExample
 {
     class Program
     {
@@ -18,7 +18,7 @@ namespace SimpleExample
                     .ConfigureServices((hostContext, services) => {
                         services.BootstrapZeebe(
                             hostContext.Configuration.GetSection("ZeebeBootstrap"),
-                            "SimpleExample"
+                            "SimpleAsyncExample"
                         );
                     });
     }

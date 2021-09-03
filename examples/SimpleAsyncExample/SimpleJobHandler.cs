@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Bootstrap.Abstractions;
 
-namespace SimpleExample
+namespace SimpleAsyncExample
 {
     class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
     {
