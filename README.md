@@ -1,4 +1,5 @@
-[![Build Status](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/actions/workflows/build.yml/badge.svg)](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/actions/workflows/build.yml)
+[![BUILD](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/actions/workflows/build.yml/badge.svg)](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/actions/workflows/build.yml)
+[![ANALYZE](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/actions/workflows/analyze.yml/badge.svg)](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/actions/workflows/analyze.yml)
 [![](https://img.shields.io/nuget/v/zb-client-bootstrap.svg)](https://www.nuget.org/packages/zb-client-bootstrap/) 
 [![](https://img.shields.io/nuget/dt/zb-client-bootstrap)](https://www.nuget.org/stats/packages/zb-client-bootstrap?groupby=Version) 
 [![](https://img.shields.io/github/license/arjangeertsema/zeebe-client-csharp-bootstrap.svg)](https://www.apache.org/licenses/LICENSE-2.0) 
