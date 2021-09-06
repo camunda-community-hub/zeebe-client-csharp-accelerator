@@ -8,12 +8,12 @@ using Zeebe.Client.Bootstrap.Unit.Tests.Stubs;
 
 namespace Zeebe.Client.Bootstrap.Unit.Tests
 {
-    public class JobHandlerProviderTests
+    public class JobHandlerInfoProviderTests
     {
         [Fact]
         public void ThrowsArgumentNullExceptionWhenAssemblyProviderIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("assemblyProvider", () => new JobHandlerProvider(null));
+            Assert.Throws<ArgumentNullException>("assemblyProvider", () => new JobHandlerInfoProvider(null));
         }
 
         [Fact]
@@ -46,6 +46,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             Assert.DoesNotContain(nameof(JobB), actual);
         }
 
+
         [Fact]
         public void HandlerServiceLifeTimePropertyIsSetCorrectlyWhenCreated() 
         {
@@ -54,6 +55,17 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             var actual = handlers.Select(h => h.HandlerServiceLifetime);
             Assert.Contains(ServiceLifetime.Scoped, actual);
             Assert.Contains(ServiceLifetime.Transient, actual);
+        }
+
+        [Fact]
+        public void FetchVariablesPropertyIsSetCorrectlyWhenCreated() 
+        {
+            var expected = new string[] { "1", "2", "3", "4", "5" };
+            var handlers = Handlers();
+
+            var actual = handlers.Select(h => h.FetchVariabeles);
+            Assert.Contains(new string[0], actual);
+            Assert.Contains(expected, actual);
         }
 
         [Fact]
@@ -96,15 +108,15 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             Assert.Contains(TimeSpan.FromMilliseconds(int.MaxValue - 3), actual);
         }
 
-        private static JobHandlerProvider Create()
+        private static JobHandlerInfoProvider Create()
         {
-            return new JobHandlerProvider(new AssemblyProvider(Meta.UNIT_TEST_PROJECT_NAME));
+            return new JobHandlerInfoProvider(new AssemblyProvider(Meta.UNIT_TEST_PROJECT_NAME));
         }
 
         private static IEnumerable<IJobHandlerInfo> Handlers()
         {
             var provider = Create();
-            return provider.JobHandlers;
+            return provider.JobHandlerInfoCollection;
         }
     }
 }

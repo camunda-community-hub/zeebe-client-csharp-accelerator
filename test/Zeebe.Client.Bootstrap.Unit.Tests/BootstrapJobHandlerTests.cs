@@ -31,7 +31,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         private readonly Mock<ICompleteJobCommandStep1> completeJobCommandStep1Mock;
         private readonly Mock<IThrowErrorCommandStep2> throwErrorCommandStep2Mock;
         private readonly Mock<IThrowErrorCommandStep1> throwErrorCommandStep1Mock;
-        private readonly Mock<IJobHandlerProvider> jobHandlerProviderMock;
+        private readonly Mock<IJobHandlerInfoProvider> jobHandlerProviderMock;
         private readonly Mock<IZeebeVariablesSerializer> serializerMock;
         private readonly Mock<ILogger<BootstrapJobHandler>> loggerMock;
 
@@ -322,11 +322,11 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             return mock;
         }
 
-        private Mock<IJobHandlerProvider> CreateIJobHandlerProviderMock()
+        private Mock<IJobHandlerInfoProvider> CreateIJobHandlerProviderMock()
         {
-            var mock = new Mock<IJobHandlerProvider>();            
+            var mock = new Mock<IJobHandlerInfoProvider>();            
 
-            mock.SetupGet(p => p.JobHandlers).Returns(this.jobHandlers);
+            mock.SetupGet(p => p.JobHandlerInfoCollection).Returns(this.jobHandlers);
 
             return mock;
         }

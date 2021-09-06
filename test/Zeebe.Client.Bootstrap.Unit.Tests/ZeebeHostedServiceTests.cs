@@ -29,7 +29,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         private readonly Mock<IJobWorkerBuilderStep3> jobWorkerBuilderStep3Mock;
         private readonly Mock<IJobWorkerBuilderStep2> jobWorkerBuilderStep2Mock;
         private readonly Mock<IJobWorkerBuilderStep1> jobWorkerBuilderStep1Mock;
-        private readonly Mock<IJobHandlerProvider> jobHandlerProviderMock;
+        private readonly Mock<IJobHandlerInfoProvider> jobHandlerProviderMock;
         private readonly Mock<IOptions<ZeebeClientBootstrapOptions>> optionsMock;
         private readonly Mock<ZeebeClientBootstrapOptions> zeebeClientBootstrapOptionsMock;
         private readonly Mock<WorkerOptions> zeebeWorkerOptionsMock;
@@ -141,15 +141,15 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             var service = Create();
             await service.StartAsync(cancellationToken);
             
-            this.jobHandlers.ForEach(handler => {
-                this.jobWorkerBuilderStep1Mock.Verify(c => c.JobType(handler.JobType), Times.Once);
+            this.jobHandlers.ForEach(info => {
+                this.jobWorkerBuilderStep1Mock.Verify(c => c.JobType(info.JobType), Times.Once);
                 this.jobWorkerBuilderStep2Mock.Verify(c => c.Handler(It.IsAny<AsyncJobHandler>()), Times.Exactly(this.jobHandlers.Count));
-                this.jobWorkerBuilderStep3Mock.Verify(s => s.Name(handler.WorkerName), Times.Once);                
-                this.jobWorkerBuilderStep3Mock.Verify(s => s.MaxJobsActive(handler.MaxJobsActive.Value), Times.Once);
-                this.jobWorkerBuilderStep3Mock.Verify(s => s.Timeout(handler.Timeout.Value), Times.Once);
-                this.jobWorkerBuilderStep3Mock.Verify(s => s.PollInterval(handler.PollInterval.Value), Times.Once);
-                this.jobWorkerBuilderStep3Mock.Verify(s => s.PollingTimeout(handler.PollingTimeout.Value), Times.Once);                
-                this.jobWorkerBuilderStep3Mock.Verify(s => s.FetchVariables(handler.FetchVariabeles), Times.Once);
+                this.jobWorkerBuilderStep3Mock.Verify(s => s.Name(info.WorkerName), Times.Once);                
+                this.jobWorkerBuilderStep3Mock.Verify(s => s.MaxJobsActive(info.MaxJobsActive.Value), Times.Once);
+                this.jobWorkerBuilderStep3Mock.Verify(s => s.Timeout(info.Timeout.Value), Times.Once);
+                this.jobWorkerBuilderStep3Mock.Verify(s => s.PollInterval(info.PollInterval.Value), Times.Once);
+                this.jobWorkerBuilderStep3Mock.Verify(s => s.PollingTimeout(info.PollingTimeout.Value), Times.Once);                
+                this.jobWorkerBuilderStep3Mock.Verify(s => s.FetchVariables(info.FetchVariabeles), Times.Once);
             });
         }
 
@@ -384,11 +384,11 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             return mock;
         }
 
-        private Mock<IJobHandlerProvider> CreateIJobHandlerProviderMock()
+        private Mock<IJobHandlerInfoProvider> CreateIJobHandlerProviderMock()
         {
-            var mock = new Mock<IJobHandlerProvider>();            
+            var mock = new Mock<IJobHandlerInfoProvider>();            
 
-            mock.SetupGet(p => p.JobHandlers).Returns(this.jobHandlers);
+            mock.SetupGet(p => p.JobHandlerInfoCollection).Returns(this.jobHandlers);
 
             return mock;
         }

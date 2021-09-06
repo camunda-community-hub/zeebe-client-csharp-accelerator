@@ -1,9 +1,9 @@
 using System;
+using Zeebe.Client.Bootstrap.Abstractions;
 
 namespace Zeebe.Client.Bootstrap.Attributes 
 {    
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class JobTypeAttribute : Attribute
+    public class JobTypeAttribute : AbstractJobAttribute
     {
         public JobTypeAttribute(string jobType)
         {

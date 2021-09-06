@@ -10,13 +10,13 @@ namespace Zeebe.Client.Bootstrap
 {
     public class BootstrapJobHandler : IBootstrapJobHandler
     {
-        private readonly IJobHandlerProvider jobHandlerProvider;
+        private readonly IJobHandlerInfoProvider jobHandlerProvider;
         private readonly IServiceProvider serviceProvider;
         private readonly IZeebeClient client;
         private readonly IZeebeVariablesSerializer serializer;
         private readonly ILogger<BootstrapJobHandler> logger;
 
-        public BootstrapJobHandler(IServiceProvider serviceProvider, IZeebeClient client, IJobHandlerProvider jobHandlerProvider, IZeebeVariablesSerializer serializer, ILogger<BootstrapJobHandler> logger)
+        public BootstrapJobHandler(IServiceProvider serviceProvider, IZeebeClient client, IJobHandlerInfoProvider jobHandlerProvider, IZeebeVariablesSerializer serializer, ILogger<BootstrapJobHandler> logger)
         {
             this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             this.client = client ?? throw new ArgumentNullException(nameof(client));
@@ -27,7 +27,7 @@ namespace Zeebe.Client.Bootstrap
 
         public async Task HandleJob(IJob job, CancellationToken cancellationToken)
         {
-            var jobHandlerInfo = this.jobHandlerProvider.JobHandlers
+            var jobHandlerInfo = this.jobHandlerProvider.JobHandlerInfoCollection
                 .Where(i => job.Type.Equals(i.JobType))
                 .FirstOrDefault();
 
