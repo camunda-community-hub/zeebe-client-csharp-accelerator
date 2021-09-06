@@ -76,10 +76,10 @@ namespace Zeebe.Client.Bootstrap.Extensions
         }
 
         private static IServiceCollection AddZeebeJobHandlers(this IServiceCollection services, IAssemblyProvider assemblyprovider) {
-            var jobHandlerProvider = new JobHandlerProvider(assemblyprovider);
-            services.AddSingleton(typeof(IJobHandlerProvider), jobHandlerProvider);
+            var jobHandlerProvider = new JobHandlerInfoProvider(assemblyprovider);
+            services.AddSingleton(typeof(IJobHandlerInfoProvider), jobHandlerProvider);
 
-            foreach(var reference in jobHandlerProvider.JobHandlers)
+            foreach(var reference in jobHandlerProvider.JobHandlerInfoCollection)
             {
                 if (IsAlreadyRegistered(services, reference.Handler.DeclaringType))
                     continue;

@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Zeebe.Client.Bootstrap
 {
-    public class JobHandlerProvider : IJobHandlerProvider
+    public class JobHandlerInfoProvider : IJobHandlerInfoProvider
     {
         private static readonly List<Type> HANDLER_TYPES = new List<Type>()
         {
@@ -20,12 +20,12 @@ namespace Zeebe.Client.Bootstrap
         private readonly IAssemblyProvider assemblyProvider;
         private List<IJobHandlerInfo> jobHandlers;
 
-        public JobHandlerProvider(IAssemblyProvider assemblyProvider)
+        public JobHandlerInfoProvider(IAssemblyProvider assemblyProvider)
         {
             this.assemblyProvider = assemblyProvider ?? throw new ArgumentNullException(nameof(assemblyProvider));
         }
 
-        public IEnumerable<IJobHandlerInfo> JobHandlers
+        public IEnumerable<IJobHandlerInfo> JobHandlerInfoCollection
         {
             get
             {
@@ -48,11 +48,11 @@ namespace Zeebe.Client.Bootstrap
 
         private static IEnumerable<IJobHandlerInfo> CreateJobHandlerInfo(Type jobHandlerType)
         {
-            return GetJobHandlers(jobHandlerType)
+            return GetJobHandlerMethods(jobHandlerType)
                 .Select(m => CreateJobHandlerInfo(m));
         }
 
-        private static IEnumerable<MethodInfo> GetJobHandlers(Type jobHandlerType)
+        private static IEnumerable<MethodInfo> GetJobHandlerMethods(Type jobHandlerType)
         {
             var jobHandlerMethods = jobHandlerType.GetInterfaces()
                 .Where(i => IsJobHandlerInterface(i))
@@ -66,7 +66,8 @@ namespace Zeebe.Client.Bootstrap
         {
             var jobType = jobHandlerMethod.GetParameters()[0].ParameterType;
 
-            return new JobHandlerInfo(
+            return new JobHandlerInfo
+            (
                 jobHandlerMethod, 
                 GetServiceLifetime(jobHandlerMethod),
                 GetJobType(jobType), 
@@ -74,7 +75,8 @@ namespace Zeebe.Client.Bootstrap
                 GetMaxJobsActive(jobType), 
                 GetTimeout(jobType),
                 GetPollInterval(jobType), 
-                GetPollingTimeout(jobType)
+                GetPollingTimeout(jobType),
+                GetFetchVariables(jobType)
             );
         }
 
@@ -132,6 +134,11 @@ namespace Zeebe.Client.Bootstrap
             return attr?.PollInterval;
         }
 
+        private static string[] GetFetchVariables(Type jobType)
+        {
+            var attr = jobType.GetCustomAttribute<FetchVariablesAttribute>();
+            return attr?.FetchVariables;
+        }
 
         private static bool ImplementsJobHandlerInterface(Type type)
         {

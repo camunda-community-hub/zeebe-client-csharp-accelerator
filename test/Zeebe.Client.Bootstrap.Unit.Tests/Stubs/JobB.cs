@@ -9,6 +9,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Stubs
     [Timeout(int.MaxValue - 2)]
     [PollingTimeout(int.MaxValue - 3)]
     [PollInterval(int.MaxValue - 4)]
+    [FetchVariables("1", "2", "3", "4", "5")]
     public class JobB : AbstractJob
     {
         public JobB(IJob job) 

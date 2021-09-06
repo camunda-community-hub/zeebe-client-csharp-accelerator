@@ -16,16 +16,16 @@ namespace Zeebe.Client.Bootstrap
     {
         private readonly IBootstrapJobHandler bootstrapJobHandler;
         private readonly IZeebeClient client;
-        private readonly IJobHandlerProvider jobHandlerProvider;
+        private readonly IJobHandlerInfoProvider jobHandlerInfoProvider;
         private readonly WorkerOptions zeebeWorkerOptions;
         private readonly ILogger<ZeebeHostedService> logger;
         private readonly List<IJobWorker> workers = new List<IJobWorker>();
 
-        public ZeebeHostedService(IBootstrapJobHandler bootstrapJobHandler, IZeebeClient client, IJobHandlerProvider jobHandlerProvider, IOptions<ZeebeClientBootstrapOptions> options, ILogger<ZeebeHostedService> logger)
+        public ZeebeHostedService(IBootstrapJobHandler bootstrapJobHandler, IZeebeClient client, IJobHandlerInfoProvider jobHandlerInfoProvider, IOptions<ZeebeClientBootstrapOptions> options, ILogger<ZeebeHostedService> logger)
         {
             this.bootstrapJobHandler = bootstrapJobHandler ?? throw new ArgumentNullException(nameof(bootstrapJobHandler));
             this.client = client ?? throw new ArgumentNullException(nameof(client));   
-            this.jobHandlerProvider = jobHandlerProvider ?? throw new ArgumentNullException(nameof(jobHandlerProvider));
+            this.jobHandlerInfoProvider = jobHandlerInfoProvider ?? throw new ArgumentNullException(nameof(jobHandlerInfoProvider));
             this.zeebeWorkerOptions = options?.Value?.Worker ?? throw new ArgumentNullException(nameof(options), $"{nameof(IOptions<ZeebeClientBootstrapOptions>)}.Value.{nameof(ZeebeClientBootstrapOptions.Worker)} is null.");
             ValidateZeebeWorkerOptions(zeebeWorkerOptions);
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));;            
@@ -33,20 +33,20 @@ namespace Zeebe.Client.Bootstrap
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            foreach(var info in jobHandlerProvider.JobHandlers) 
+            foreach(var jobHandlerInfo in jobHandlerInfoProvider.JobHandlerInfoCollection) 
             {
                 var worker = client.NewWorker()
-                    .JobType(info.JobType)                    
+                    .JobType(jobHandlerInfo.JobType)                    
                     .Handler((client, job) =>  this.bootstrapJobHandler.HandleJob(job, cancellationToken))                
-                    .FetchVariables(info.FetchVariabeles)
-                    .MaxJobsActive(info.MaxJobsActive ?? zeebeWorkerOptions.MaxJobsActive)
-                    .Name(zeebeWorkerOptions.Name ?? info.WorkerName)
-                    .PollingTimeout(info.PollingTimeout ?? zeebeWorkerOptions.PollingTimeout)
-                    .PollInterval(info.PollInterval ?? zeebeWorkerOptions.PollInterval)
-                    .Timeout(info.Timeout ?? zeebeWorkerOptions.Timeout)
+                    .FetchVariables(jobHandlerInfo.FetchVariabeles)
+                    .MaxJobsActive(jobHandlerInfo.MaxJobsActive ?? zeebeWorkerOptions.MaxJobsActive)
+                    .Name(zeebeWorkerOptions.Name ?? jobHandlerInfo.WorkerName)
+                    .PollingTimeout(jobHandlerInfo.PollingTimeout ?? zeebeWorkerOptions.PollingTimeout)
+                    .PollInterval(jobHandlerInfo.PollInterval ?? zeebeWorkerOptions.PollInterval)
+                    .Timeout(jobHandlerInfo.Timeout ?? zeebeWorkerOptions.Timeout)
                     .Open();
 
-                logger.LogInformation($"Created job worker to delegate job '{info.JobType}' to the boostrap job handler.");
+                logger.LogInformation($"Created job worker to delegate job '{jobHandlerInfo.JobType}' to the boostrap job handler.");
 
                 workers.Add(worker);
             }
