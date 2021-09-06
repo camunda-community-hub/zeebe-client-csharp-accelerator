@@ -20,7 +20,7 @@ This project is an extension of the [C# Zeebe client project](https://github.com
 
 The Zeebe C# client boostrap extensions is available via nuget (https://www.nuget.org/packages/zb-client-bootstrap/).
 
-See [examples] for more information.
+See [examples] and [blog post](https://link.medium.com/4a3yax14gjb) for more information.
 
 ## Quick start
 
