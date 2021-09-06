@@ -25,7 +25,7 @@
       <bpmn:incoming>Flow_0fed43r</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0fed43r" name="Yes" sourceRef="Gateway_0jghfqb" targetRef="Event_1xu362i">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=Property = true</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=Property=true</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:endEvent id="Event_05glqda" name="False end">
       <bpmn:incoming>Flow_1n4bdrm</bpmn:incoming>
@@ -37,13 +37,10 @@
       <bpmndi:BPMNShape id="Participant_0fl1xof_di" bpmnElement="Participant_1" isHorizontal="true">
         <dc:Bounds x="160" y="52" width="798" height="316" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_1yt4smo_di" bpmnElement="Flow_1yt4smo">
-        <di:waypoint x="450" y="177" />
-        <di:waypoint x="515" y="177" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1b03ijq_di" bpmnElement="Flow_1b03ijq">
-        <di:waypoint x="295" y="177" />
-        <di:waypoint x="350" y="177" />
+      <bpmndi:BPMNEdge id="Flow_1n4bdrm_di" bpmnElement="Flow_1n4bdrm">
+        <di:waypoint x="540" y="202" />
+        <di:waypoint x="540" y="290" />
+        <di:waypoint x="632" y="290" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0fed43r_di" bpmnElement="Flow_0fed43r">
         <di:waypoint x="565" y="177" />
@@ -52,10 +49,13 @@
           <dc:Bounds x="589" y="159" width="19" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1n4bdrm_di" bpmnElement="Flow_1n4bdrm">
-        <di:waypoint x="540" y="202" />
-        <di:waypoint x="540" y="290" />
-        <di:waypoint x="632" y="290" />
+      <bpmndi:BPMNEdge id="Flow_1yt4smo_di" bpmnElement="Flow_1yt4smo">
+        <di:waypoint x="450" y="177" />
+        <di:waypoint x="515" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1b03ijq_di" bpmnElement="Flow_1b03ijq">
+        <di:waypoint x="295" y="177" />
+        <di:waypoint x="350" y="177" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent">
         <dc:Bounds x="259" y="159" width="36" height="36" />
