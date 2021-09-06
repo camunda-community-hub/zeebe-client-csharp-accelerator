@@ -3,7 +3,7 @@ using Xunit;
 using Zeebe.Client.Bootstrap.Attributes;
 
 namespace Zeebe.Client.Bootstrap.Unit.Tests.Attributes 
-{    
+{
     public class JobTypeAttributeTests
     {
         [Theory]

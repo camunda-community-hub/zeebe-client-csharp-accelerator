@@ -297,7 +297,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
 
             this.bootstrapJobHandlerMock = CreateBootstrapJobHandlerMock(this.handleJobDelegateMock);
 
-            this.jobHandlerInfoProviderMock = CreateIJobHandlerProviderMock();
+            this.jobHandlerInfoProviderMock = CreateIJobHandlerInfoProviderMock();
             
             this.zeebeWorkerOptionsMock = CreateZeebeWorkerOptionsMock();
             this.zeebeClientBootstrapOptionsMock = CreateZeebeClientBootstrapOptionsMock(this.zeebeWorkerOptionsMock);
@@ -384,7 +384,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             return mock;
         }
 
-        private Mock<IJobHandlerInfoProvider> CreateIJobHandlerProviderMock()
+        private Mock<IJobHandlerInfoProvider> CreateIJobHandlerInfoProviderMock()
         {
             var mock = new Mock<IJobHandlerInfoProvider>();            
 
