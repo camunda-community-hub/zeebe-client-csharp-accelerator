@@ -24,11 +24,11 @@ See [examples] and [blog post](https://link.medium.com/4a3yax14gjb) for more inf
 
 ## Quick start
 
-All classes which implement `IJobHandler<TJob>`, `IJobHandler<TJob, TResponse>`, `IAsyncJobHandler<TJob>` or `IAsyncJobHandler<TJob, TResponse>` are automaticly found and boostrapped when you register this boostrap project with the `IServiceCollection.BoostrapZeebe()` method.
+All classes which implement `IJobHandler<TJob>`, `IJobHandler<TJob, TResponse>`, `IAsyncJobHandler<TJob>` or `IAsyncJobHandler<TJob, TResponse>` are automaticly found, added to the service collection and autowired to Zeebe when you register this boostrap project with the `IServiceCollection.BoostrapZeebe()` extension method.
 
 The `BoostrapZeebe` method has two parameters:
 
-1. `ZeebeBootstrapOptions` via [Configuration, Action delegate or both](https://docs.microsoft.com/en-us/dotnet/core/extensions/options-library-authors).
+1. `ZeebeBootstrapOptions` via [configuration, action delegate or both](https://docs.microsoft.com/en-us/dotnet/core/extensions/options-library-authors).
 1. An array with assembly filters, only assemblies which start with one of the filters will be scanned for job handlers.
 
 ```csharp
@@ -42,7 +42,7 @@ ConfigureServices((hostContext, services) => {
 
 ### Job
 
-The job is an implementation of `AbstractJob`. A job can be configured via optional [attributes](). By default the simple name of the job is mapped to BPMN task job type. Job types must be unique.
+The job is an implementation of `AbstractJob`. By default the simple name of the job is mapped to BPMN task job type. Job types must be unique. The default job configuration can be overwritten with `AbstractJobAttribute` implementations, see [attributes] for more information.
 
 ```csharp
 public class SimpleJob : AbstractJob
@@ -57,7 +57,7 @@ public class SimpleJob : AbstractJob
 
 ### Job handler
 
-The job handler is an implementation of `IJobHandler<TJob>`, `IJobHandler<TJob, TResponse>`, `IAsyncJobHandler<TJob>` or `IAsyncJobHandler<TJob, TResponse>`. A jobhandler can be configured via optional [attributes]. Job handlers are automaticly added to the DI container, therefore you can use dependency injection inside the job handlers. 
+The job handler is an implementation of `IJobHandler<TJob>`, `IJobHandler<TJob, TResponse>`, `IAsyncJobHandler<TJob>` or `IAsyncJobHandler<TJob, TResponse>`. Job handlers are automaticly added to the DI container, therefore you can use dependency injection inside the job handlers.  The default job handler configuration can be overwritten with `AbstractJobHandlerAttribute` implementations, see [attributes] for more information.
 
 
 ```csharp
@@ -65,6 +65,7 @@ public class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
 {
     public async Task HandleJob(SimpleJob job, CancellationToken cancellationToken)
     {  
+        //TODO: make the handling idempotent.
         await Usecase.ExecuteAsync();
     }
 }
