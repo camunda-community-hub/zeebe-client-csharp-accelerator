@@ -21,7 +21,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
     public class ZeebeHostedServiceTests 
     {
         private readonly CancellationToken cancellationToken;
-        private readonly List<IJobHandlerInfo> jobHandlers;
+        private readonly List<IJobHandlerInfo> jobHandlerInfoCollection;
         private readonly Mock<HandleJobDelegate> handleJobDelegateMock;
         private readonly Mock<IZeebeClient> zeebeClientMock;
         private readonly Mock<IBootstrapJobHandler> bootstrapJobHandlerMock;
@@ -29,48 +29,48 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         private readonly Mock<IJobWorkerBuilderStep3> jobWorkerBuilderStep3Mock;
         private readonly Mock<IJobWorkerBuilderStep2> jobWorkerBuilderStep2Mock;
         private readonly Mock<IJobWorkerBuilderStep1> jobWorkerBuilderStep1Mock;
-        private readonly Mock<IJobHandlerInfoProvider> jobHandlerProviderMock;
+        private readonly Mock<IJobHandlerInfoProvider> jobHandlerInfoProviderMock;
         private readonly Mock<IOptions<ZeebeClientBootstrapOptions>> optionsMock;
         private readonly Mock<ZeebeClientBootstrapOptions> zeebeClientBootstrapOptionsMock;
         private readonly Mock<WorkerOptions> zeebeWorkerOptionsMock;
         private readonly Mock<ILogger<ZeebeHostedService>> loggerMock;
 
         [Fact]
-        public void ThrowsArgumentNullExceptionWhenServiceProviderIsNull() 
+        public void ThrowsArgumentNullExceptionWhenBootstrapJobHandlerIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("bootstrapJobHandler", () => new ZeebeHostedService(null, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("bootstrapJobHandler", () => new ZeebeHostedService(null, this.zeebeClientMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenClientIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("client", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, null, this.jobHandlerProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("client", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, null, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Fact]
-        public void ThrowsArgumentNullExceptionWhenJobHandlerProviderIsNull() 
+        public void ThrowsArgumentNullExceptionWhenJobHandlerInfoProviderIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("jobHandlerProvider", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, null, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("jobHandlerInfoProvider", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, null, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenOptionsIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("options", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, null, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("options", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerInfoProviderMock.Object, null, this.loggerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenOptionsValueIsNull() 
         {
             this.optionsMock.SetupGet(m => m.Value).Returns((ZeebeClientBootstrapOptions)null);
-            Assert.Throws<ArgumentNullException>("options", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("options", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenOptionsValueWorkerIsNull() 
         {
             this.zeebeClientBootstrapOptionsMock.SetupGet(m => m.Worker).Returns((WorkerOptions)null);
-            Assert.Throws<ArgumentNullException>("options", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("options", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Theory]
@@ -79,7 +79,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         public void ThrowsArgumentOutOfRangeExceptionWhenMaxJobsActiveIsSmallerOrEqualThen0(int maxJobsActive) 
         {
             this.zeebeWorkerOptionsMock.SetupGet(m => m.MaxJobsActive).Returns(maxJobsActive);
-            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.MaxJobsActive", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.MaxJobsActive", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Theory]
@@ -88,7 +88,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         public void ThrowsArgumentOutOfRangeExceptionWhenTimeoutIsSmallerOrEqualThen0(int timeout) 
         {
             this.zeebeWorkerOptionsMock.SetupGet(m => m.Timeout).Returns(TimeSpan.FromMilliseconds(timeout));
-            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.Timeout", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.Timeout", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Theory]
@@ -97,7 +97,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         public void ThrowsArgumentOutOfRangeExceptionWhenPollIntervalIsSmallerOrEqualThen0(int pollInterval) 
         {
             this.zeebeWorkerOptionsMock.SetupGet(m => m.PollInterval).Returns(TimeSpan.FromMilliseconds(pollInterval));
-            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.PollInterval", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.PollInterval", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Theory]
@@ -106,7 +106,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         public void ThrowsArgumentOutOfRangeExceptionWhenPollingTimeoutIsSmallerOrEqualThen0(int pollingTimeout) 
         {
             this.zeebeWorkerOptionsMock.SetupGet(m => m.PollingTimeout).Returns(TimeSpan.FromMilliseconds(pollingTimeout));
-            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.PollingTimeout", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.PollingTimeout", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Theory]
@@ -115,13 +115,13 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         public void ThrowsArgumentExceptionWhenNameIsEmpty(string name) 
         {
             this.zeebeWorkerOptionsMock.SetupGet(m => m.Name).Returns(name);
-            Assert.Throws<ArgumentException>("WorkerOptions.Name", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentException>("WorkerOptions.Name", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenLoggerIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("logger", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerProviderMock.Object, this.optionsMock.Object, null));
+            Assert.Throws<ArgumentNullException>("logger", () => new ZeebeHostedService(this.bootstrapJobHandlerMock.Object, this.zeebeClientMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, null));
         }
 
         [Fact]
@@ -130,7 +130,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             var service = Create();
             await service.StartAsync(cancellationToken);
             
-            this.zeebeClientMock.Verify(c => c.NewWorker(), Times.Exactly(this.jobHandlers.Count));
+            this.zeebeClientMock.Verify(c => c.NewWorker(), Times.Exactly(this.jobHandlerInfoCollection.Count));
         }
 
         [Fact]
@@ -141,9 +141,9 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             var service = Create();
             await service.StartAsync(cancellationToken);
             
-            this.jobHandlers.ForEach(info => {
+            this.jobHandlerInfoCollection.ForEach(info => {
                 this.jobWorkerBuilderStep1Mock.Verify(c => c.JobType(info.JobType), Times.Once);
-                this.jobWorkerBuilderStep2Mock.Verify(c => c.Handler(It.IsAny<AsyncJobHandler>()), Times.Exactly(this.jobHandlers.Count));
+                this.jobWorkerBuilderStep2Mock.Verify(c => c.Handler(It.IsAny<AsyncJobHandler>()), Times.Exactly(this.jobHandlerInfoCollection.Count));
                 this.jobWorkerBuilderStep3Mock.Verify(s => s.Name(info.WorkerName), Times.Once);                
                 this.jobWorkerBuilderStep3Mock.Verify(s => s.MaxJobsActive(info.MaxJobsActive.Value), Times.Once);
                 this.jobWorkerBuilderStep3Mock.Verify(s => s.Timeout(info.Timeout.Value), Times.Once);
@@ -156,8 +156,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [Fact]
         public async Task DefaultsAreSetWhenHandlerPropertiesAreNull()
         {
-            jobHandlers.Clear();
-            jobHandlers.Add(new JobHandlerInfo(
+            jobHandlerInfoCollection.Clear();
+            jobHandlerInfoCollection.Add(new JobHandlerInfo(
                 typeof(JobHandlerA)
                     .GetMethods()
                     .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
@@ -197,15 +197,15 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             var service = Create();
             await service.StartAsync(cancellationToken);
 
-            Assert.Equal(this.jobHandlers.Count, handlers.Count);
+            Assert.Equal(this.jobHandlerInfoCollection.Count, handlers.Count);
             
             var jobMock = new Mock<IJob>();
             var job = jobMock.Object;
 
             Task.WaitAll(handlers.Select(h => h(this.zeebeClientMock.Object, job)).ToArray());
 
-            this.handleJobDelegateMock.Verify(d => d.Invoke(It.IsAny<IJob>(), It.IsAny<CancellationToken>()), Times.Exactly(this.jobHandlers.Count));
-            Assert.Equal(jobs.Count, this.jobHandlers.Count);
+            this.handleJobDelegateMock.Verify(d => d.Invoke(It.IsAny<IJob>(), It.IsAny<CancellationToken>()), Times.Exactly(this.jobHandlerInfoCollection.Count));
+            Assert.Equal(jobs.Count, this.jobHandlerInfoCollection.Count);
 
             (new Type[] { typeof(JobA), typeof(JobB), typeof(JobC) })
                 .All(t => jobs.Where(j => j.GetType().Equals(t)).Any());
@@ -237,7 +237,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             }
             catch { }
 
-            Assert.Equal(this.jobHandlers.Count,  tasks.Where(t => t.IsFaulted && t.Exception.InnerException.Equals(expected)).Count());
+            Assert.Equal(this.jobHandlerInfoCollection.Count,  tasks.Where(t => t.IsFaulted && t.Exception.InnerException.Equals(expected)).Count());
         }
 
         [Fact]
@@ -247,7 +247,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             await service.StartAsync(cancellationToken);
             await service.StopAsync(cancellationToken);
 
-            this.jobWorkerMock.Verify(j => j.Dispose(), Times.Exactly(this.jobHandlers.Count));
+            this.jobWorkerMock.Verify(j => j.Dispose(), Times.Exactly(this.jobHandlerInfoCollection.Count));
         }
 
         [Fact]
@@ -257,7 +257,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             await service.StartAsync(cancellationToken);
             service.Dispose();
 
-            this.jobWorkerMock.Verify(j => j.Dispose(), Times.Exactly(this.jobHandlers.Count));
+            this.jobWorkerMock.Verify(j => j.Dispose(), Times.Exactly(this.jobHandlerInfoCollection.Count));
         }
 
         #region Prepare
@@ -265,7 +265,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         public ZeebeHostedServiceTests()
         {            
             this.cancellationToken = new CancellationToken();
-            this.jobHandlers = new List<IJobHandlerInfo>() {
+            this.jobHandlerInfoCollection = new List<IJobHandlerInfo>() {
                CreateJobHandlerReference(
                     typeof(JobHandlerA)
                         .GetMethods()
@@ -297,7 +297,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
 
             this.bootstrapJobHandlerMock = CreateBootstrapJobHandlerMock(this.handleJobDelegateMock);
 
-            this.jobHandlerProviderMock = CreateIJobHandlerProviderMock();
+            this.jobHandlerInfoProviderMock = CreateIJobHandlerProviderMock();
             
             this.zeebeWorkerOptionsMock = CreateZeebeWorkerOptionsMock();
             this.zeebeClientBootstrapOptionsMock = CreateZeebeClientBootstrapOptionsMock(this.zeebeWorkerOptionsMock);
@@ -311,7 +311,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
              return new ZeebeHostedService(
                 this.bootstrapJobHandlerMock.Object, 
                 this.zeebeClientMock.Object, 
-                this.jobHandlerProviderMock.Object,
+                this.jobHandlerInfoProviderMock.Object,
                 this.optionsMock.Object,
                 this.loggerMock.Object
             );
@@ -388,7 +388,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         {
             var mock = new Mock<IJobHandlerInfoProvider>();            
 
-            mock.SetupGet(p => p.JobHandlerInfoCollection).Returns(this.jobHandlers);
+            mock.SetupGet(p => p.JobHandlerInfoCollection).Returns(this.jobHandlerInfoCollection);
 
             return mock;
         }

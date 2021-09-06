@@ -2,7 +2,7 @@ using System;
 using Zeebe.Client.Bootstrap.Abstractions;
 
 namespace Zeebe.Client.Bootstrap.Attributes 
-{    
+{
     public class JobTypeAttribute : AbstractJobAttribute
     {
         public JobTypeAttribute(string jobType)

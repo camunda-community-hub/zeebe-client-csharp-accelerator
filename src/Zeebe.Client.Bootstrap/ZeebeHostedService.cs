@@ -16,16 +16,16 @@ namespace Zeebe.Client.Bootstrap
     {
         private readonly IBootstrapJobHandler bootstrapJobHandler;
         private readonly IZeebeClient client;
-        private readonly IJobHandlerInfoProvider jobHandlerProvider;
+        private readonly IJobHandlerInfoProvider jobHandlerInfoProvider;
         private readonly WorkerOptions zeebeWorkerOptions;
         private readonly ILogger<ZeebeHostedService> logger;
         private readonly List<IJobWorker> workers = new List<IJobWorker>();
 
-        public ZeebeHostedService(IBootstrapJobHandler bootstrapJobHandler, IZeebeClient client, IJobHandlerInfoProvider jobHandlerProvider, IOptions<ZeebeClientBootstrapOptions> options, ILogger<ZeebeHostedService> logger)
+        public ZeebeHostedService(IBootstrapJobHandler bootstrapJobHandler, IZeebeClient client, IJobHandlerInfoProvider jobHandlerInfoProvider, IOptions<ZeebeClientBootstrapOptions> options, ILogger<ZeebeHostedService> logger)
         {
             this.bootstrapJobHandler = bootstrapJobHandler ?? throw new ArgumentNullException(nameof(bootstrapJobHandler));
             this.client = client ?? throw new ArgumentNullException(nameof(client));   
-            this.jobHandlerProvider = jobHandlerProvider ?? throw new ArgumentNullException(nameof(jobHandlerProvider));
+            this.jobHandlerInfoProvider = jobHandlerInfoProvider ?? throw new ArgumentNullException(nameof(jobHandlerInfoProvider));
             this.zeebeWorkerOptions = options?.Value?.Worker ?? throw new ArgumentNullException(nameof(options), $"{nameof(IOptions<ZeebeClientBootstrapOptions>)}.Value.{nameof(ZeebeClientBootstrapOptions.Worker)} is null.");
             ValidateZeebeWorkerOptions(zeebeWorkerOptions);
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));;            
@@ -33,7 +33,7 @@ namespace Zeebe.Client.Bootstrap
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            foreach(var jobHandlerInfo in jobHandlerProvider.JobHandlerInfoCollection) 
+            foreach(var jobHandlerInfo in jobHandlerInfoProvider.JobHandlerInfoCollection) 
             {
                 var worker = client.NewWorker()
                     .JobType(jobHandlerInfo.JobType)                    
