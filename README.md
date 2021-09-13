@@ -6,9 +6,9 @@
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/arjangeertsema/zeebe-client-csharp-bootstrap.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/arjangeertsema/zeebe-client-csharp-bootstrap/alerts/)
 [![](https://img.shields.io/badge/Community%20Extension-An%20open%20source%20community%20maintained%20project-FF4700)](https://github.com/camunda-community-hub/community)
 
-# Boostrap extension for the C# Zeebe client
+# Bootstrap extension for the C# Zeebe client
 
-This project is an extension of the [C# Zeebe client project](https://github.com/camunda-community-hub/zeebe-client-csharp). Zeebe Job handlers are automaticly recognized and boostrapped via a [.Net HostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
+This project is an extension of the [C# Zeebe client project](https://github.com/camunda-community-hub/zeebe-client-csharp). Zeebe Job handlers are automaticly recognized and bootstrapped via a [.Net HostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
 
 ## Requirements
 
@@ -18,15 +18,15 @@ This project is an extension of the [C# Zeebe client project](https://github.com
 
 ## How to use
 
-The Zeebe C# client boostrap extensions is available via nuget (https://www.nuget.org/packages/zb-client-bootstrap/).
+The Zeebe C# client bootstrap extensions is available via nuget (https://www.nuget.org/packages/zb-client-bootstrap/).
 
 See [examples] and [blog post](https://link.medium.com/4a3yax14gjb) for more information.
 
 ## Quick start
 
-All classes which implement `IJobHandler<TJob>`, `IJobHandler<TJob, TResponse>`, `IAsyncJobHandler<TJob>` or `IAsyncJobHandler<TJob, TResponse>` are automaticly found, added to the service collection and autowired to Zeebe when you register this boostrap project with the `IServiceCollection.BoostrapZeebe()` extension method.
+All classes which implement `IJobHandler<TJob>`, `IJobHandler<TJob, TResponse>`, `IAsyncJobHandler<TJob>` or `IAsyncJobHandler<TJob, TResponse>` are automaticly found, added to the service collection and autowired to Zeebe when you register this bootstrap project with the `IServiceCollection.BootstrapZeebe()` extension method.
 
-The `BoostrapZeebe` method has two parameters:
+The `BootstrapZeebe` method has two parameters:
 
 1. `ZeebeBootstrapOptions` via [configuration, action delegate or both](https://docs.microsoft.com/en-us/dotnet/core/extensions/options-library-authors).
 1. An array with assembly filters, only assemblies which start with one of the filters will be scanned for job handlers.
