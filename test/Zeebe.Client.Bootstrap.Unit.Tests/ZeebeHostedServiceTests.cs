@@ -266,19 +266,19 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         {            
             this.cancellationToken = new CancellationToken();
             this.jobHandlerInfoCollection = new List<IJobHandlerInfo>() {
-               CreateJobHandlerReference(
+               CreateJobHandlerInfo(
                     typeof(JobHandlerA)
                         .GetMethods()
                         .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
                         .First()
                ), 
-               CreateJobHandlerReference(
+               CreateJobHandlerInfo(
                     typeof(JobHandlerA)
                         .GetMethods()
                         .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
                         .ToArray()[1]
                ),
-               CreateJobHandlerReference(
+               CreateJobHandlerInfo(
                     typeof(JobHandlerB)
                         .GetMethods()
                         .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
@@ -426,7 +426,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             return mock;
         }
 
-        private static IJobHandlerInfo CreateJobHandlerReference(MethodInfo handler) 
+        private static IJobHandlerInfo CreateJobHandlerInfo(MethodInfo handler) 
         {
             var random = new Random();
             

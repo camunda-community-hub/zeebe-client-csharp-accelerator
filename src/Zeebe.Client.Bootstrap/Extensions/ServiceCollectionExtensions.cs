@@ -70,6 +70,7 @@ namespace Zeebe.Client.Bootstrap.Extensions
                 .AddSingleton(typeof(IAssemblyProvider), assemblyprovider)
                 .AddSingleton(typeof(IBootstrapJobHandler), typeof(BootstrapJobHandler))
                 .AddSingleton(typeof(IZeebeVariablesSerializer), typeof(ZeebeVariablesSerializer))
+                .AddSingleton(typeof(IZeebeVariablesDeserializer), typeof(ZeebeVariablesDeserializer))
                 .AddZeebeJobHandlers(assemblyprovider)
                 .AddZeebeClient()
                 .AddHostedService<ZeebeHostedService>();
