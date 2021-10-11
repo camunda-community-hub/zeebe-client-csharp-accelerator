@@ -68,7 +68,7 @@ namespace Zeebe.Client.Bootstrap.Extensions
 
             return services
                 .AddSingleton(typeof(IAssemblyProvider), assemblyprovider)
-                .AddSingleton(typeof(IBootstrapJobHandler), typeof(BootstrapJobHandler))
+                .AddScoped(typeof(IBootstrapJobHandler), typeof(BootstrapJobHandler))
                 .AddSingleton(typeof(IZeebeVariablesSerializer), typeof(ZeebeVariablesSerializer))
                 .AddSingleton(typeof(IZeebeVariablesDeserializer), typeof(ZeebeVariablesDeserializer))
                 .AddZeebeJobHandlers(assemblyprovider)
