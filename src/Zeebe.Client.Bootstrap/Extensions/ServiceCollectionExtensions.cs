@@ -7,12 +7,13 @@ using Zeebe.Client.Bootstrap.Abstractions;
 using Zeebe.Client.Api.Builder;
 using Microsoft.Extensions.Options;
 using Zeebe.Client.Bootstrap.Options;
+using System.Reflection;
 
 namespace Zeebe.Client.Bootstrap.Extensions
 {
     public static class ServiceCollectionExtensions 
     {
-        public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, params string[] assembliesStartsWith)
+        public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, params Assembly[] assemblies)
         {
             if (services is null)
             {
@@ -25,11 +26,11 @@ namespace Zeebe.Client.Bootstrap.Extensions
             }
 
             return services
-                .BootstrapZeebe(assembliesStartsWith)
+                .BootstrapZeebe(assemblies)
                 .Configure<ZeebeClientBootstrapOptions>(namedConfigurationSection);
         }
 
-        public static IServiceCollection BootstrapZeebe(this IServiceCollection services, Action<ZeebeClientBootstrapOptions> configureOptions, params string[] assembliesStartsWith) 
+        public static IServiceCollection BootstrapZeebe(this IServiceCollection services, Action<ZeebeClientBootstrapOptions> configureOptions, params Assembly[] assemblies) 
         {
             if (configureOptions is null)
             {
@@ -37,11 +38,11 @@ namespace Zeebe.Client.Bootstrap.Extensions
             }
 
             return services
-                .BootstrapZeebe(assembliesStartsWith)
+                .BootstrapZeebe(assemblies)
                 .Configure(configureOptions);
         }
 
-        public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, Action<ZeebeClientBootstrapOptions> postConfigureOptions, params string[] assembliesStartsWith)
+        public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, Action<ZeebeClientBootstrapOptions> postConfigureOptions, params Assembly[] assemblies)
         {
             if (namedConfigurationSection is null)
             {
@@ -54,30 +55,27 @@ namespace Zeebe.Client.Bootstrap.Extensions
             }
 
             return services                
-                .BootstrapZeebe(assembliesStartsWith)
+                .BootstrapZeebe(assemblies)
                 .Configure<ZeebeClientBootstrapOptions>(namedConfigurationSection)
                 .PostConfigure(postConfigureOptions);
         }
 
-        private static IServiceCollection BootstrapZeebe(this IServiceCollection services, params string[] assembliesStartsWith)
+        private static IServiceCollection BootstrapZeebe(this IServiceCollection services, params Assembly[] assemblies)
         {
             if (services == null) 
                 throw new ArgumentNullException(nameof(services));
 
-            var assemblyprovider = new AssemblyProvider(assembliesStartsWith);
-
             return services
-                .AddSingleton(typeof(IAssemblyProvider), assemblyprovider)
-                .AddSingleton(typeof(IBootstrapJobHandler), typeof(BootstrapJobHandler))
+                .AddScoped(typeof(IBootstrapJobHandler), typeof(BootstrapJobHandler))
                 .AddSingleton(typeof(IZeebeVariablesSerializer), typeof(ZeebeVariablesSerializer))
                 .AddSingleton(typeof(IZeebeVariablesDeserializer), typeof(ZeebeVariablesDeserializer))
-                .AddZeebeJobHandlers(assemblyprovider)
+                .AddZeebeJobHandlers(assemblies)
                 .AddZeebeClient()
                 .AddHostedService<ZeebeHostedService>();
         }
 
-        private static IServiceCollection AddZeebeJobHandlers(this IServiceCollection services, IAssemblyProvider assemblyprovider) {
-            var jobHandlerProvider = new JobHandlerInfoProvider(assemblyprovider);
+        private static IServiceCollection AddZeebeJobHandlers(this IServiceCollection services, Assembly[] assemblies) {
+            var jobHandlerProvider = new JobHandlerInfoProvider(assemblies);
             services.AddSingleton(typeof(IJobHandlerInfoProvider), jobHandlerProvider);
 
             foreach(var reference in jobHandlerProvider.JobHandlerInfoCollection)

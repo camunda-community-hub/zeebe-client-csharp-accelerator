@@ -17,12 +17,12 @@ namespace Zeebe.Client.Bootstrap
             typeof(IAsyncJobHandler<>),
             typeof(IAsyncJobHandler<,>)
         };
-        private readonly IAssemblyProvider assemblyProvider;
+        private readonly Assembly[] assemblies;
         private List<IJobHandlerInfo> jobHandlers;
 
-        public JobHandlerInfoProvider(IAssemblyProvider assemblyProvider)
+        public JobHandlerInfoProvider(params Assembly[] assemblies)
         {
-            this.assemblyProvider = assemblyProvider ?? throw new ArgumentNullException(nameof(assemblyProvider));
+            this.assemblies = assemblies ?? throw new ArgumentNullException(nameof(assemblies));
         }
 
         public IEnumerable<IJobHandlerInfo> JobHandlerInfoCollection
@@ -32,15 +32,14 @@ namespace Zeebe.Client.Bootstrap
                 if(jobHandlers != null)
                     return this.jobHandlers;
 
-                this.jobHandlers = GetJobHandlers(assemblyProvider).ToList();
+                this.jobHandlers = GetJobHandlers(this.assemblies).ToList();
                 return this.jobHandlers;
             }
         }
 
-        private static IEnumerable<IJobHandlerInfo> GetJobHandlers(IAssemblyProvider assemblyProvider)
+        private static IEnumerable<IJobHandlerInfo> GetJobHandlers(Assembly[] assemblies)
         {
-            return assemblyProvider
-                .Assemblies
+            return assemblies
                 .SelectMany(a => a.GetTypes())
                 .Where(t => ImplementsJobHandlerInterface(t))
                 .SelectMany(t => CreateJobHandlerInfo(t));
@@ -137,7 +136,26 @@ namespace Zeebe.Client.Bootstrap
         private static string[] GetFetchVariables(Type jobType)
         {
             var attr = jobType.GetCustomAttribute<FetchVariablesAttribute>();
-            return attr?.FetchVariables;
+            if(attr != null)
+                return attr.FetchVariables;
+
+            var fetchVariables = GetFetchVariablesFromJobState(jobType);
+            if(fetchVariables != null)
+                return fetchVariables;
+                
+            return null;
+        }
+
+        private static string[] GetFetchVariablesFromJobState(Type jobType)
+        {
+            var jobStateType = GetJobStateType(jobType);
+            if(jobStateType == null)
+                return null;
+
+            return jobStateType.GetProperties()
+                .Where(p => p.CanWrite)
+                .Select(p => p.Name)
+                .ToArray();                
         }
 
         private static bool ImplementsJobHandlerInterface(Type type)
@@ -170,6 +188,29 @@ namespace Zeebe.Client.Bootstrap
         {
             return i.IsGenericType && 
                 HANDLER_TYPES.Any(h => i.GetGenericTypeDefinition().Equals(h));
+        }
+        private static Type GetJobStateType(Type jobType)
+        {
+            var definition = typeof(AbstractJob<>);
+
+            var genericJobType = BaseTypes(jobType)
+                .Where(t => t.IsAbstract 
+                    && t.IsGenericType
+                    && t.GetGenericTypeDefinition().Equals(definition))
+                .SingleOrDefault();
+
+            if(genericJobType == null)
+                return null;
+
+            return genericJobType.GetGenericArguments().Single();
+        }
+        private static IEnumerable<Type> BaseTypes(Type type)
+        {
+            while (type != null)
+            {
+                yield return type;
+                type = type.BaseType;
+            }
         }
     }
 }

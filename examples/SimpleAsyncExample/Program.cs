@@ -18,7 +18,7 @@ namespace SimpleAsyncExample
                     .ConfigureServices((hostContext, services) => {
                         services.BootstrapZeebe(
                             hostContext.Configuration.GetSection("ZeebeBootstrap"),
-                            "SimpleAsyncExample"
+                            typeof(Program).Assembly
                         );
                     });
     }

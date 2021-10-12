@@ -12,8 +12,14 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Abstractions
         public void ThrowsArgumentNullExceptionWhenJobIsNull() 
         {
             Assert.Throws<ArgumentNullException>("job", () => new JobA(null));
+            Assert.Throws<ArgumentNullException>("job", () => new JobG(null, new JobGState()));
         }
 
+        [Fact]
+        public void ThrowsArgumentNullExceptionWhenStateIsNull() 
+        {
+            Assert.Throws<ArgumentNullException>("state", () => new JobG(new Mock<IJob>().Object, null));
+        }
 
         [Fact]
         public void AllPropertiesAreSetWhenCreated()
@@ -62,6 +68,23 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests.Abstractions
             Assert.Equal(deadline, job.Deadline);
             Assert.Equal(variables, job.Variables);
             Assert.Equal(customHeaders, job.CustomHeaders);
+
+            var state = new JobGState();
+            var genericJob = new JobG(mock.Object, state);
+            Assert.Equal(key, genericJob.Key);
+            Assert.Equal(type, genericJob.Type);
+            Assert.Equal(processInstanceKey, genericJob.ProcessInstanceKey);
+            Assert.Equal(bpmnProcessId, genericJob.BpmnProcessId);
+            Assert.Equal(processDefinitionVersion, genericJob.ProcessDefinitionVersion);
+            Assert.Equal(processDefinitionKey, genericJob.ProcessDefinitionKey);
+            Assert.Equal(elementId, genericJob.ElementId);
+            Assert.Equal(elementInstanceKey, genericJob.ElementInstanceKey);
+            Assert.Equal(worker, genericJob.Worker);
+            Assert.Equal(retries, genericJob.Retries);
+            Assert.Equal(deadline, genericJob.Deadline);
+            Assert.Equal(variables, genericJob.Variables);
+            Assert.Equal(customHeaders, genericJob.CustomHeaders);
+            Assert.Equal(state, genericJob.State);
         }
 
     }

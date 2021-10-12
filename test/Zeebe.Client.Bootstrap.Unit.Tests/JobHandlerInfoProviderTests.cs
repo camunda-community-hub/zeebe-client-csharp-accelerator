@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Zeebe.Client.Bootstrap.Abstractions;
@@ -10,16 +11,23 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
 {
     public class JobHandlerInfoProviderTests
     {
+        private readonly Assembly assembly;
+        public JobHandlerInfoProviderTests()
+        {
+            this.assembly = typeof(JobHandlerInfoProviderTests).Assembly;
+        }
+
+
         [Fact]
         public void ThrowsArgumentNullExceptionWhenAssemblyProviderIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("assemblyProvider", () => new JobHandlerInfoProvider(null));
+            Assert.Throws<ArgumentNullException>("assemblies", () => new JobHandlerInfoProvider(null));
         }
 
         [Fact]
         public void AllJobHandlersAreFoundWhenCreated() {
             var actual = Handlers();
-            var expected = 6;
+            var expected = 8;
 
             Assert.Equal(expected, actual.Count());
         }
@@ -30,7 +38,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             var handlers = Handlers();
 
             var actual = handlers.Select(h => h.WorkerName);
-            Assert.Contains(Meta.UNIT_TEST_PROJECT_NAME, actual);
+            Assert.Contains(this.assembly.GetName().Name, actual);
             Assert.Contains("TestWorkerName", actual);
         }
 
@@ -61,6 +69,28 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         public void FetchVariablesPropertyIsSetCorrectlyWhenCreated() 
         {
             var expected = new string[] { "1", "2", "3", "4", "5" };
+            var handlers = Handlers();
+
+            var actual = handlers.Select(h => h.FetchVariabeles);
+            Assert.Contains(new string[0], actual);
+            Assert.Contains(expected, actual);
+        }
+
+        [Fact]
+        public void FetchVariablesPropertyIsSetCorrectlyWhenGenericStateIsUsed() 
+        {
+            var expected = new string[] { "Guid", "Bool", "Int", "DateTime", "String", "Double" };
+            var handlers = Handlers();
+
+            var actual = handlers.Select(h => h.FetchVariabeles);
+            Assert.Contains(new string[0], actual);
+            Assert.Contains(expected, actual);
+        }
+
+        [Fact]
+        public void FetchVariablesPropertyIsSetCorrectlyWhenGenericStateAttributeIsUsed() 
+        {
+            var expected = new string[] { "100", "101", "102", "103", "104" };
             var handlers = Handlers();
 
             var actual = handlers.Select(h => h.FetchVariabeles);
@@ -108,12 +138,12 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             Assert.Contains(TimeSpan.FromMilliseconds(int.MaxValue - 3), actual);
         }
 
-        private static JobHandlerInfoProvider Create()
+        private JobHandlerInfoProvider Create()
         {
-            return new JobHandlerInfoProvider(new AssemblyProvider(Meta.UNIT_TEST_PROJECT_NAME));
+            return new JobHandlerInfoProvider(this.assembly);
         }
 
-        private static IEnumerable<IJobHandlerInfo> Handlers()
+        private IEnumerable<IJobHandlerInfo> Handlers()
         {
             var provider = Create();
             return provider.JobHandlerInfoCollection;
