@@ -104,7 +104,7 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
                                         PollIntervalInMilliseconds = 30000
                                     };
                                 },
-                                "Zeebe.Client.Bootstrap.Integration.Tests"
+                                typeof(IntegrationTestHelper).Assembly
                             )                            
                             .Add(new ServiceDescriptor(typeof(HandleJobDelegate), handleJobDelegate));
                     })

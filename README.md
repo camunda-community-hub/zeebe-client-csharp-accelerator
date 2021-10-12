@@ -29,13 +29,13 @@ All classes which implement `IJobHandler<TJob>`, `IJobHandler<TJob, TResponse>`,
 The `BootstrapZeebe` method has two parameters:
 
 1. `ZeebeBootstrapOptions` via [configuration, action delegate or both](https://docs.microsoft.com/en-us/dotnet/core/extensions/options-library-authors).
-1. An array with assembly filters, only assemblies which start with one of the filters will be scanned for job handlers.
+1. An array with assemblies which will be scanned for job handlers.
 
 ```csharp
 ConfigureServices((hostContext, services) => {
     services.BootstrapZeebe(
         hostContext.Configuration.GetSection("ZeebeBootstrap"),
-        "SimpleAsyncExample"
+        this.GetType().Assembly
     );
 })
 ```
