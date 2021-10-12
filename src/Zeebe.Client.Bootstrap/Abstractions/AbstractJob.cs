@@ -43,4 +43,18 @@ namespace Zeebe.Client.Bootstrap.Abstractions
 
         public string CustomHeaders => job.CustomHeaders;
     }
+
+    public abstract class AbstractJob<TState> : AbstractJob
+        where TState : class, new()
+    {
+        private readonly TState state;
+
+        public AbstractJob(IJob job, TState state)
+            : base(job)
+        {
+            this.state = state ?? throw new ArgumentNullException(nameof(state));
+        }
+
+        public TState State { get { return state; } }
+    }
 }

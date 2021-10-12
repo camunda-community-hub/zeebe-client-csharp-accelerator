@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,15 +15,17 @@ namespace Zeebe.Client.Bootstrap
         private readonly IServiceProvider serviceProvider;
         private readonly IZeebeClient client;
         private readonly IZeebeVariablesSerializer serializer;
+        private readonly IZeebeVariablesDeserializer deserializer;
         private readonly ILogger<BootstrapJobHandler> logger;
 
-        public BootstrapJobHandler(IServiceProvider serviceProvider, IZeebeClient client, IJobHandlerInfoProvider jobHandlerInfoProvider, IZeebeVariablesSerializer serializer, ILogger<BootstrapJobHandler> logger)
-        {
+        public BootstrapJobHandler(IServiceProvider serviceProvider, IZeebeClient client, IJobHandlerInfoProvider jobHandlerInfoProvider, IZeebeVariablesSerializer serializer, IZeebeVariablesDeserializer deserializer, ILogger<BootstrapJobHandler> logger)
+        {            
             this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.jobHandlerInfoProvider = jobHandlerInfoProvider ?? throw new ArgumentNullException(nameof(jobHandlerInfoProvider));
-            this.serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));   
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));;            
+            this.serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
+            this.deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task HandleJob(IJob job, CancellationToken cancellationToken)
@@ -40,30 +43,41 @@ namespace Zeebe.Client.Bootstrap
             {
                 await ThrowError(job, jobHandlerInfo, ex, cancellationToken);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                logger.LogError(ex, $"Unhandled exception while handling job '${jobHandlerInfo?.JobType ?? "null"}' with key '${job.Key}'. Process instance key = $'{job.ProcessInstanceKey}', process definition key = '{job.ProcessDefinitionKey}', process definition version = '{job.ProcessDefinitionVersion}'.");
-                throw;
+                var jobException = ex.InnerException as AbstractJobException;
+                if(jobException != null)
+                {
+                    await ThrowError(job, jobHandlerInfo, jobException, cancellationToken);
+                }
+                else
+                {
+                    logger.LogError(ex, $"Unhandled exception while handling job '${jobHandlerInfo?.JobType ?? "null"}' with key '${job.Key}'. Process instance key = $'{job.ProcessInstanceKey}', process definition key = '{job.ProcessDefinitionKey}', process definition version = '{job.ProcessDefinitionVersion}'.");
+                    throw;
+                }
             }
         }
 
         private async Task<object> HandleJob(IJob job, IJobHandlerInfo jobHandlerInfo, CancellationToken cancellationToken)
         {
-            if(jobHandlerInfo == null)
+            if (jobHandlerInfo == null)
                 throw new ArgumentNullException(nameof(jobHandlerInfo));
 
             var handlerInstance = serviceProvider.GetService(jobHandlerInfo.Handler.DeclaringType);
-            if(handlerInstance == null)
+            if (handlerInstance == null)
                 throw new InvalidOperationException($"There is no service of type {jobHandlerInfo.Handler.DeclaringType}.");
 
             var jobType = jobHandlerInfo.Handler.GetParameters()[0].ParameterType;
-            var abstractJob = CreateAbstractJobInstance(job, jobType);
+            var abstractJob = CreateAbstractJobInstance(job, jobType) ?? CreateGenericAbstractJobInstance(job, jobType);
 
-            var response = jobHandlerInfo.Handler.Invoke(handlerInstance, new object[]  { abstractJob, cancellationToken });
+            if(abstractJob == null)
+                throw new Exception($"Type {jobType.FullName} could not be constructed.");
+
+            var response = jobHandlerInfo.Handler.Invoke(handlerInstance, new object[] { abstractJob, cancellationToken });
 
             logger.LogInformation($"Job #{job.Key} ('{job.Type}') is handled by job handler '{jobHandlerInfo.Handler.DeclaringType.Name}'.");
 
-            if (response is Task task) 
+            if (response is Task task)
             {
                 await task;
                 response = task.GetType().GetProperty("Result")?.GetValue(task);
@@ -96,16 +110,57 @@ namespace Zeebe.Client.Bootstrap
                 .Send(cancellationToken);
         }
 
-        private static object CreateAbstractJobInstance(IJob job, Type jobType) 
+        private object CreateAbstractJobInstance(IJob job, Type jobType)
         {
-            if(!jobType.IsSubclassOf(typeof(AbstractJob)))
+            if (!jobType.IsSubclassOf(typeof(AbstractJob)))
                 throw new Exception($"Type {jobType.FullName} is not a subclass of {typeof(AbstractJob).FullName}.");
 
+            if (GetJobStateType(jobType) != null)
+                return null;
+
             var constructor = jobType.GetConstructor(new Type[] { typeof(IJob) });
-            if(constructor == null)
+            if (constructor == null)
                 throw new Exception($"Type {jobType.FullName} does not have a constructor with one parameter of type {typeof(IJob).FullName}.");
 
             return constructor.Invoke(new object[] { job });
+        }
+
+        private object CreateGenericAbstractJobInstance(IJob job, Type jobType)
+        {
+            var jobStateType = GetJobStateType(jobType);
+            if(jobStateType == null)
+                return null;
+
+            var constructor = jobType.GetConstructor(new Type[] { typeof(IJob), jobStateType });
+            if (constructor == null)
+                throw new Exception($"Type {jobType.FullName} does not have a constructor with two parameters of type {typeof(IJob).FullName} and {jobStateType.FullName}.");
+
+            var jobState = deserializer.Deserialize(job.Variables, jobStateType);
+            return constructor.Invoke(new object[] { job, jobState });
+        }
+
+        private static Type GetJobStateType(Type jobType)
+        {
+            var definition = typeof(AbstractJob<>);
+
+            var genericJobType = BaseTypes(jobType)
+                .Where(t => t.IsAbstract 
+                    && t.IsGenericType
+                    && t.GetGenericTypeDefinition().Equals(definition))
+                .SingleOrDefault();
+
+            if(genericJobType == null)
+                return null;
+
+            return genericJobType.GetGenericArguments().Single();
+        }
+        private static IEnumerable<Type> BaseTypes(Type type)
+        {
+            while (type != null)
+            {
+                yield return type;
+                type = type.BaseType;
+            }
         }
     }
 }

@@ -129,7 +129,6 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             
             this.zeebeClientMock.Verify(c => c.NewWorker(), Times.Exactly(this.jobHandlerInfoCollection.Count));
             this.serviceScopeFactoryMock.Verify(m => m.CreateScope(), Times.Once, "ServiceScope has not been created.");
-            this.serviceScopeMock.Verify(m => m.Dispose(), Times.Once, "ServiceScope has not been disposed.");
         }
 
         [Fact]
@@ -188,7 +187,6 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             this.handleJobDelegateMock.Setup(d => d.Invoke(It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
                 .Callback<IJob, CancellationToken>((job, cancellationToken) => {
                     Assert.NotNull(job);
-                    Assert.Equal(this.cancellationToken, cancellationToken);
                     jobs.Add(job);
                 });
 
@@ -245,23 +243,25 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         }
 
         [Fact]
-        public async Task AllWorkersAreDisposedWhenStopAsyncIsExecuted() 
+        public async Task AllIsDisposedWhenStopAsyncIsExecuted() 
         {
             var service = Create();
             await service.StartAsync(cancellationToken);
             await service.StopAsync(cancellationToken);
 
             this.jobWorkerMock.Verify(j => j.Dispose(), Times.Exactly(this.jobHandlerInfoCollection.Count));
+            this.serviceScopeMock.Verify(j => j.Dispose(), Times.Once);
         }
 
         [Fact]
-        public async Task AllWorkersAreDisposedWhenServiceIsDisposed() 
+        public async Task AllIsDisposedWhenServiceIsDisposed() 
         {
             var service = Create();
             await service.StartAsync(cancellationToken);
             service.Dispose();
 
             this.jobWorkerMock.Verify(j => j.Dispose(), Times.Exactly(this.jobHandlerInfoCollection.Count));
+            this.serviceScopeMock.Verify(j => j.Dispose(), Times.Once);
         }
 
         #region Prepare

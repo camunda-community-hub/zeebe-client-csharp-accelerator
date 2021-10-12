@@ -9,7 +9,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Zeebe.Client.Bootstrap.Abstractions;
 using Zeebe.Client.Bootstrap.Extensions;
-using Zeebe.Client.Bootstrap.Integration.Tests.Stubs;
 using static Zeebe.Client.Bootstrap.Options.ZeebeClientBootstrapOptions;
 
 namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
@@ -56,17 +55,14 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
 
         public async ValueTask DisposeAsync()
         {
-            cancellationTokenSource.Cancel();
-            cancellationTokenSource.Dispose();
+            await host.StopAsync();
+            host.Dispose();
 
             zeebeClient.Dispose();
-            
+
             await this.zeebeContainer.StopAsync();
             await this.zeebeContainer.CleanUpAsync();
             await this.zeebeContainer.DisposeAsync();
-            
-            await host.StopAsync();
-            host.Dispose();
         }
 
         private static TestcontainersContainer SetupZeebe(ILogger logger, string version)
@@ -123,7 +119,7 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
                     var topology = await client.TopologyRequest().Send();
                     ready = topology.Brokers[0].Partitions.Count == 1;
                 }
-                catch (Exception ex)
+                catch (System.Exception ex)
                 {
                     logger.LogWarning(ex, "Error requesting topology.");
                     Thread.Sleep(1000);

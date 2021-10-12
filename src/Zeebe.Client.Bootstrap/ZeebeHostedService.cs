@@ -16,6 +16,8 @@ namespace Zeebe.Client.Bootstrap
 {
     public class ZeebeHostedService : IHostedService, IDisposable
     {
+        private CancellationTokenSource cancellationTokenSource;
+        private IServiceScope serviceScope;
         private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly IJobHandlerInfoProvider jobHandlerInfoProvider;
         private readonly WorkerOptions zeebeWorkerOptions;
@@ -28,43 +30,52 @@ namespace Zeebe.Client.Bootstrap
             this.jobHandlerInfoProvider = jobHandlerInfoProvider ?? throw new ArgumentNullException(nameof(jobHandlerInfoProvider));
             this.zeebeWorkerOptions = options?.Value?.Worker ?? throw new ArgumentNullException(nameof(options), $"{nameof(IOptions<ZeebeClientBootstrapOptions>)}.Value.{nameof(ZeebeClientBootstrapOptions.Worker)} is null.");
             ValidateZeebeWorkerOptions(zeebeWorkerOptions);
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));;            
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            using(var scope = serviceScopeFactory.CreateScope())
+            this.cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
+            this.serviceScope = serviceScopeFactory.CreateScope();
+
+            foreach(var jobHandlerInfo in jobHandlerInfoProvider.JobHandlerInfoCollection) 
             {
-                foreach(var jobHandlerInfo in jobHandlerInfoProvider.JobHandlerInfoCollection) 
-                {
-                    var client = scope.ServiceProvider.GetRequiredService<IZeebeClient>();
-                    
-                    var worker = client.NewWorker()
-                        .JobType(jobHandlerInfo.JobType)                    
-                        .Handler((client, job) => HandleJob(job, cancellationToken))
-                        .FetchVariables(jobHandlerInfo.FetchVariabeles)
-                        .MaxJobsActive(jobHandlerInfo.MaxJobsActive ?? zeebeWorkerOptions.MaxJobsActive)
-                        .Name(zeebeWorkerOptions.Name ?? jobHandlerInfo.WorkerName)
-                        .PollingTimeout(jobHandlerInfo.PollingTimeout ?? zeebeWorkerOptions.PollingTimeout)
-                        .PollInterval(jobHandlerInfo.PollInterval ?? zeebeWorkerOptions.PollInterval)
-                        .Timeout(jobHandlerInfo.Timeout ?? zeebeWorkerOptions.Timeout)
-                        .Open();
+                var client = serviceScope.ServiceProvider.GetRequiredService<IZeebeClient>();
+                
+                var worker = client.NewWorker()
+                    .JobType(jobHandlerInfo.JobType)                    
+                    .Handler((client, job) => HandleJob(job, cancellationTokenSource.Token))
+                    .FetchVariables(jobHandlerInfo.FetchVariabeles)
+                    .MaxJobsActive(jobHandlerInfo.MaxJobsActive ?? zeebeWorkerOptions.MaxJobsActive)
+                    .Name(zeebeWorkerOptions.Name ?? jobHandlerInfo.WorkerName)
+                    .PollingTimeout(jobHandlerInfo.PollingTimeout ?? zeebeWorkerOptions.PollingTimeout)
+                    .PollInterval(jobHandlerInfo.PollInterval ?? zeebeWorkerOptions.PollInterval)
+                    .Timeout(jobHandlerInfo.Timeout ?? zeebeWorkerOptions.Timeout)
+                    .Open();
 
-                    logger.LogInformation($"Created job worker to delegate job '{jobHandlerInfo.JobType}' to the boostrap job handler.");
+                logger.LogInformation($"Created job worker to delegate job '{jobHandlerInfo.JobType}' to the boostrap job handler.");
 
-                    workers.Add(worker);
-                }
-
-                logger.LogInformation($"Created {workers.Count} job workers.");
+                workers.Add(worker);
             }
+
+            logger.LogInformation($"Created {workers.Count} job workers.");
 
             return Task.CompletedTask;            
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            workers.ForEach(w => w.Dispose());
-            workers.Clear();
+            try
+            {
+                this.cancellationTokenSource.Cancel();
+            }
+            finally
+            {
+                Dispose();
+            }
+
             return Task.CompletedTask;
         }
 
@@ -72,6 +83,12 @@ namespace Zeebe.Client.Bootstrap
         {
             workers.ForEach(w => w.Dispose());
             workers.Clear();
+            
+            if(this.serviceScope != null)
+            {
+                this.serviceScope.Dispose();
+                this.serviceScope = null;
+            }
         }
 
         private static void ValidateZeebeWorkerOptions(WorkerOptions zeebeWorkerOptions)
@@ -90,6 +107,9 @@ namespace Zeebe.Client.Bootstrap
 
         private Task HandleJob(IJob job, CancellationToken cancellationToken)
         {
+            if(cancellationToken.IsCancellationRequested)
+                return Task.FromCanceled(cancellationToken);
+
             using(var scope = serviceScopeFactory.CreateScope())
             {
                 var bootstrapJobHandler = scope.ServiceProvider.GetRequiredService<IBootstrapJobHandler>();

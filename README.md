@@ -55,6 +55,25 @@ public class SimpleJob : AbstractJob
 }
 ```
 
+There is also a generic version `AbstractJob<TState>` which will automaticly deserialize job variables into a typed object. Each property is automaticly added to the `FetchVariables` collection when the `FetchVariablesAttribute` is not used.
+
+```csharp
+public class SimpleJob : AbstractJob<SimpleJobState>
+{
+    public SimpleJob(IJob job, SimpleJobState state) 
+        : base(job, state)
+    {  }
+}
+
+public class SimpleJobState
+{
+    public bool Test { get; set; }
+}
+
+```
+
+
+
 ### Job handler
 
 The job handler is an implementation of `IJobHandler<TJob>`, `IJobHandler<TJob, TResponse>`, `IAsyncJobHandler<TJob>` or `IAsyncJobHandler<TJob, TResponse>`. Job handlers are automaticly added to the DI container, therefore you can use dependency injection inside the job handlers.  The default job handler configuration can be overwritten with `AbstractJobHandlerAttribute` implementations, see [attributes] for more information.

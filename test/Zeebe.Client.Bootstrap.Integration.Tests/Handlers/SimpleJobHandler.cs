@@ -1,9 +1,10 @@
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Bootstrap.Abstractions;
 
-namespace Zeebe.Client.Bootstrap.Integration.Tests.Stubs
+namespace Zeebe.Client.Bootstrap.Integration.Tests.Handlers
 {
     public class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
     {

@@ -27,7 +27,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         [Fact]
         public void AllJobHandlersAreFoundWhenCreated() {
             var actual = Handlers();
-            var expected = 6;
+            var expected = 8;
 
             Assert.Equal(expected, actual.Count());
         }
@@ -69,6 +69,28 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         public void FetchVariablesPropertyIsSetCorrectlyWhenCreated() 
         {
             var expected = new string[] { "1", "2", "3", "4", "5" };
+            var handlers = Handlers();
+
+            var actual = handlers.Select(h => h.FetchVariabeles);
+            Assert.Contains(new string[0], actual);
+            Assert.Contains(expected, actual);
+        }
+
+        [Fact]
+        public void FetchVariablesPropertyIsSetCorrectlyWhenGenericStateIsUsed() 
+        {
+            var expected = new string[] { "Guid", "Bool", "Int", "DateTime", "String", "Double" };
+            var handlers = Handlers();
+
+            var actual = handlers.Select(h => h.FetchVariabeles);
+            Assert.Contains(new string[0], actual);
+            Assert.Contains(expected, actual);
+        }
+
+        [Fact]
+        public void FetchVariablesPropertyIsSetCorrectlyWhenGenericStateAttributeIsUsed() 
+        {
+            var expected = new string[] { "100", "101", "102", "103", "104" };
             var handlers = Handlers();
 
             var actual = handlers.Select(h => h.FetchVariabeles);
