@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Zeebe.Client.Api.Responses;
+using Zeebe.Client.Api.Worker;
 using Zeebe.Client.Bootstrap.Abstractions;
 
 namespace Zeebe.Client.Bootstrap
@@ -13,22 +14,20 @@ namespace Zeebe.Client.Bootstrap
     {
         private readonly IJobHandlerInfoProvider jobHandlerInfoProvider;
         private readonly IServiceProvider serviceProvider;
-        private readonly IZeebeClient client;
         private readonly IZeebeVariablesSerializer serializer;
         private readonly IZeebeVariablesDeserializer deserializer;
         private readonly ILogger<BootstrapJobHandler> logger;
 
-        public BootstrapJobHandler(IServiceProvider serviceProvider, IZeebeClient client, IJobHandlerInfoProvider jobHandlerInfoProvider, IZeebeVariablesSerializer serializer, IZeebeVariablesDeserializer deserializer, ILogger<BootstrapJobHandler> logger)
+        public BootstrapJobHandler(IServiceProvider serviceProvider, IJobHandlerInfoProvider jobHandlerInfoProvider, IZeebeVariablesSerializer serializer, IZeebeVariablesDeserializer deserializer, ILogger<BootstrapJobHandler> logger)
         {            
             this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            this.client = client ?? throw new ArgumentNullException(nameof(client));
             this.jobHandlerInfoProvider = jobHandlerInfoProvider ?? throw new ArgumentNullException(nameof(jobHandlerInfoProvider));
             this.serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
             this.deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task HandleJob(IJob job, CancellationToken cancellationToken)
+        public async Task HandleJob(IJobClient jobClient, IJob job, CancellationToken cancellationToken)
         {
             var jobHandlerInfo = this.jobHandlerInfoProvider.JobHandlerInfoCollection
                 .Where(i => job.Type.Equals(i.JobType))
@@ -37,18 +36,18 @@ namespace Zeebe.Client.Bootstrap
             try
             {
                 var response = await HandleJob(job, jobHandlerInfo, cancellationToken);
-                await CompleteJob(job, response, cancellationToken);
+                await CompleteJob(jobClient, job, response, cancellationToken);
             }
             catch (AbstractJobException ex)
             {
-                await ThrowError(job, jobHandlerInfo, ex, cancellationToken);
+                await ThrowError(jobClient, job, jobHandlerInfo, ex, cancellationToken);
             }
             catch (Exception ex)
             {
                 var jobException = ex.InnerException as AbstractJobException;
                 if(jobException != null)
                 {
-                    await ThrowError(job, jobHandlerInfo, jobException, cancellationToken);
+                    await ThrowError(jobClient, job, jobHandlerInfo, jobException, cancellationToken);
                 }
                 else
                 {
@@ -86,9 +85,9 @@ namespace Zeebe.Client.Bootstrap
             return response;
         }
 
-        private async Task CompleteJob(IJob job, object response, CancellationToken cancellationToken)
+        private async Task CompleteJob(IJobClient jobClient, IJob job, object response, CancellationToken cancellationToken)
         {
-            var command = this.client.NewCompleteJobCommand(job.Key);
+            var command = jobClient.NewCompleteJobCommand(job.Key);
 
             if (response != null)
             {
@@ -99,11 +98,11 @@ namespace Zeebe.Client.Bootstrap
             await command.Send(cancellationToken);
         }
 
-        private async Task ThrowError(IJob job, IJobHandlerInfo jobHandlerInfo, AbstractJobException ex, CancellationToken cancellationToken)
+        private async Task ThrowError(IJobClient jobClient, IJob job, IJobHandlerInfo jobHandlerInfo, AbstractJobException ex, CancellationToken cancellationToken)
         {
             logger.LogInformation(ex, $"JobException while handling job '${jobHandlerInfo?.JobType ?? "null"}' with key '${job.Key}'. Process instance key = $'{job.ProcessInstanceKey}', process definition key = '{job.ProcessDefinitionKey}', process definition version = '{job.ProcessDefinitionVersion}'.");
 
-            await this.client
+            await jobClient
                 .NewThrowErrorCommand(job.Key)
                 .ErrorCode(ex.Code)
                 .ErrorMessage(ex.Message)

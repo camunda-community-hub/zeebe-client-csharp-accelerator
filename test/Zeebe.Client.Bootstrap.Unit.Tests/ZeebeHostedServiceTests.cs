@@ -128,7 +128,6 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             await service.StartAsync(cancellationToken);
             
             this.zeebeClientMock.Verify(c => c.NewWorker(), Times.Exactly(this.jobHandlerInfoCollection.Count));
-            this.serviceScopeFactoryMock.Verify(m => m.CreateScope(), Times.Once, "ServiceScope has not been created.");
         }
 
         [Fact]
@@ -243,14 +242,13 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         }
 
         [Fact]
-        public async Task AllIsDisposedWhenStopAsyncIsExecuted() 
+        public async Task AllIsStopedWhenStopAsyncIsExecuted() 
         {
             var service = Create();
             await service.StartAsync(cancellationToken);
             await service.StopAsync(cancellationToken);
 
             this.jobWorkerMock.Verify(j => j.Dispose(), Times.Exactly(this.jobHandlerInfoCollection.Count));
-            this.serviceScopeMock.Verify(j => j.Dispose(), Times.Once);
         }
 
         [Fact]
@@ -308,6 +306,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             
             this.loggerMock = new Mock<ILogger<ZeebeHostedService>>();
 
+
             this.serviceProviderMock = CreateServiceProviderMock(this.zeebeClientMock, this.jobHandlerInfoProviderMock);
             this.serviceScopeMock = CreateServiceScopeMock(this.serviceProviderMock);
             this.serviceScopeFactoryMock = CreateServiceScopeFactoryMock(this.serviceScopeMock);
@@ -323,22 +322,22 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             );
         }
 
-        private Mock<IServiceScopeFactory> CreateServiceScopeFactoryMock(Mock<IServiceScope> serviceScopeMock)
-        {
-            var mock = new Mock<IServiceScopeFactory>();
-
-            mock.Setup(m => m.CreateScope())
-                .Returns(serviceScopeMock.Object);
-
-            return mock;
-        }
-        
         private Mock<IServiceScope> CreateServiceScopeMock(Mock<IServiceProvider> serviceProviderMock)
         {
             var mock = new Mock<IServiceScope>();
 
             mock.Setup(m => m.ServiceProvider)
                 .Returns(serviceProviderMock.Object);
+
+            return mock;
+        }
+
+        private Mock<IServiceScopeFactory> CreateServiceScopeFactoryMock(Mock<IServiceScope> serviceScopeMock)
+        {
+            var mock = new Mock<IServiceScopeFactory>();
+
+            mock.Setup(m => m.CreateScope())
+                .Returns(serviceScopeMock.Object);
 
             return mock;
         }
@@ -360,8 +359,8 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         {
             var mock =  new Mock<IBootstrapJobHandler>();
 
-            mock.Setup(m => m.HandleJob(It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
-                .Returns<IJob, CancellationToken>((job, cancellationToken) => {
+            mock.Setup(m => m.HandleJob(It.IsAny<IJobClient>(), It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
+                .Returns<IJobClient, IJob, CancellationToken>((jobClient, job, cancellationToken) => {
                     try
                     {
                         handleJobDelegateMock.Object.Invoke(job, cancellationToken);

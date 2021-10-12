@@ -132,6 +132,8 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests
             {
                 Thread.Sleep(100);
             }
+
+            Thread.Sleep(500);
         }
     }
 }
