@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Zeebe.Client.Api.Responses;
+using Zeebe.Client.Bootstrap.Extensions;
 using Zeebe.Client.Bootstrap.Integration.Tests.Handlers;
 using Zeebe.Client.Bootstrap.Integration.Tests.Helpers;
 
@@ -74,6 +75,8 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests
         [Fact]
         public async Task InAndOutputVariablesAreCorrectlySerializedWhenProcesHasStarted()
         {
+            var expectedGuid = Guid.NewGuid();
+
             jobs = new List<IJob>();
 
             var zeebeClient = this.helper.ZeebeClient;
@@ -87,6 +90,9 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests
             var processInstance = await zeebeClient.NewCreateProcessInstanceCommand()
                 .BpmnProcessId("VariablesTest")
                 .LatestVersion()
+                .State(new {
+                    Guid = expectedGuid
+                })
                 .Send();
 
             Assert.NotNull(processInstance);
@@ -103,7 +109,7 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests
 
             Assert.Equal(expected.Bool, actual.State.Bool);
             Assert.Equal(expected.Int, actual.State.Int);
-            Assert.Equal(expected.Guid, actual.State.Guid);
+            Assert.Equal(expected.Guid, expectedGuid);
             Assert.Equal(expected.DateTime, actual.State.DateTime);
             Assert.Equal(expected.Int, actual.State.Int);
             Assert.Equal(expected.String, actual.State.String);

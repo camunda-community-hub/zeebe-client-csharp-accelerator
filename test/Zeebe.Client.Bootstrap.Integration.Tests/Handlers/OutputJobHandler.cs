@@ -26,14 +26,15 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Handlers
 
         public State HandleJob(OutputJob job, CancellationToken cancellationToken)
         {
+            State.Guid = job.State.Guid;
             handleJobDelegate(job, cancellationToken);
             return State;
         }
     }
 
-    public class OutputJob : AbstractJob
+    public class OutputJob : AbstractJob<State>
     {
-        public OutputJob(IJob job) : base(job) { }
+        public OutputJob(IJob job, State state) : base(job, state) { }
     }
 
     public class State

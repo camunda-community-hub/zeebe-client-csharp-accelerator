@@ -97,7 +97,8 @@ namespace Zeebe.Client.Bootstrap.Extensions
                     var options = sp.GetRequiredService<IOptions<ZeebeClientBootstrapOptions>>();
                     var builder = sp.GetRequiredService<IZeebeClientBuilder>();
                     var loggerFactory = sp.GetService<ILoggerFactory>();
-                    
+                    StateBuilderExtensions.Configure(sp.GetRequiredService<IZeebeVariablesSerializer>());
+
                     if(loggerFactory != null)
                         builder = builder.UseLoggerFactory(loggerFactory);
                         
