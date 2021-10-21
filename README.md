@@ -69,7 +69,6 @@ public class SimpleJobState
 {
     public bool Test { get; set; }
 }
-
 ```
 
 
@@ -85,7 +84,7 @@ public class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
     public async Task HandleJob(SimpleJob job, CancellationToken cancellationToken)
     {  
         //TODO: make the handling idempotent.
-        await Usecase.ExecuteAsync();
+        await Usecase.ExecuteAsync(cancellationToken);
     }
 }
 ```
@@ -95,6 +94,25 @@ A handled job has three outcomes:
 1. The job has been handled without exceptions: this will automaticly result in a `JobCompletedCommand` beeing send to the broker. The `TResponse` is automaticly serialized and added to the `JobCompletedCommand`.
 1. An exception has been thrown while handling the job and the exception implements `AbstractJobException`: this wil automaticly result in a `ThrowErrorCommand` beeing send to the broker;
 1. Any other exception will automaticly result in a `FailCommand` beeing send to the broker;
+
+The `JobCompletedCommand` accepts variables which are added to process instance. For this use case the job handler can be use with a second generic parameter `IJobHandler<TJob, TResponse>`. The response is automaticly serialized.
+
+```csharp
+public class SimpleJobHandler : IAsyncJobHandler<SimpleJob, SimpleResponse>
+{
+    public async Task<SimpleResponse> HandleJob(SimpleJob job, CancellationToken cancellationToken)
+    {
+        //TODO: make the handling idempotent.
+        var result = await Usecase.ExecuteAsync(cancellationToken);
+        return new SimpleResponse(result);
+    }
+}
+```
+
+
+## Extensions
+
+1. `IPublishMessageCommandStep3`, `ICreateProcessInstanceCommandStep3` and `ISetVariablesCommandStep1` are extended with the `State(object state)` method which uses the registered `IZeebeVariablesSerializer` service to automaticly serialize state and pass the result to the `Variables(string variables)` method.
 
 ## Conventions
 

@@ -18,8 +18,7 @@ namespace Zeebe.Client.Bootstrap.Extensions
 
         public static void Configure(IZeebeVariablesSerializer serializer) => _serializer = serializer;
 
-        public static IPublishMessageCommandStep3 State<TState>(this IPublishMessageCommandStep3 step, TState state)
-            where TState : class, new()
+        public static IPublishMessageCommandStep3 State(this IPublishMessageCommandStep3 step, object state)
         {
             if(state == null)
                 throw new ArgumentNullException(nameof(state));
@@ -28,8 +27,7 @@ namespace Zeebe.Client.Bootstrap.Extensions
             return step.Variables(variables);
         }
 
-        public static ICreateProcessInstanceCommandStep3 State<TState>(this ICreateProcessInstanceCommandStep3 step, TState state)
-            where TState : class, new()
+        public static ICreateProcessInstanceCommandStep3 State(this ICreateProcessInstanceCommandStep3 step, object state)
         {
             if(state == null)
                 throw new ArgumentNullException(nameof(state));
@@ -38,8 +36,7 @@ namespace Zeebe.Client.Bootstrap.Extensions
             return step.Variables(variables);
         }
 
-        public static ISetVariablesCommandStep2 State<TState>(this ISetVariablesCommandStep1 step, TState state)
-            where TState : class, new()
+        public static ISetVariablesCommandStep2 State<TState>(this ISetVariablesCommandStep1 step, object state)
         {
             if(state == null)
                 throw new ArgumentNullException(nameof(state));
