@@ -44,5 +44,14 @@ namespace Zeebe.Client.Bootstrap.Extensions
             var variables = GetSerializer().Serialize(state);
             return step.Variables(variables);
         }
+
+        public static ICompleteJobCommandStep1 State<TState>(this ICompleteJobCommandStep1 step, object state)
+        {
+            if(state == null)
+                throw new ArgumentNullException(nameof(state));
+
+            var variables = GetSerializer().Serialize(state);
+            return step.Variables(variables);
+        }
     }
 }
