@@ -26,7 +26,7 @@ For more information about the zeebe project please visit http://zeebe.io</Descr
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />    
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="5.0.0" />
-    <PackageReference Include="zb-client" Version="1.0.2" />
+    <PackageReference Include="zb-client" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
