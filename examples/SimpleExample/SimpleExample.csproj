@@ -4,14 +4,10 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <UseAppHost>false</UseAppHost>
-  </PropertyGroup>
-
-  <!-- <ItemGroup>
-    <PackageReference Include="zb-client-bootstrap" Version="*" />
-  </ItemGroup> -->
+  </PropertyGroup>  
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Zeebe.Client.Bootstrap\Zeebe.Client.Bootstrap.csproj" />
+    <PackageReference Include="zb-client-bootstrap" Version="0.1.0" />
   </ItemGroup>
 
 
