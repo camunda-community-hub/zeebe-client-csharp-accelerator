@@ -107,6 +107,15 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         }
 
         [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void ThrowsArgumentOutOfRangeExceptionWhenRetryTimeoutIsSmallerOrEqualThen0(int retryTimeout) 
+        {
+            this.zeebeWorkerOptionsMock.SetupGet(m => m.RetryTimeout).Returns(TimeSpan.FromMilliseconds(retryTimeout));
+            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.RetryTimeout", () => new ZeebeHostedService(this.serviceScopeFactoryMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+        }
+
+        [Theory]
         [InlineData("")]
         [InlineData(" ")]
         public void ThrowsArgumentExceptionWhenNameIsEmpty(string name) 

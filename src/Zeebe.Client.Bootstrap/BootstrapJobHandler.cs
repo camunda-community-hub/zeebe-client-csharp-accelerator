@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Api.Worker;
 using Zeebe.Client.Bootstrap.Abstractions;
+using Zeebe.Client.Bootstrap.Options;
 
 namespace Zeebe.Client.Bootstrap
 {
@@ -16,14 +18,16 @@ namespace Zeebe.Client.Bootstrap
         private readonly IServiceProvider serviceProvider;
         private readonly IZeebeVariablesSerializer serializer;
         private readonly IZeebeVariablesDeserializer deserializer;
+        private readonly ZeebeClientBootstrapOptions.WorkerOptions zeebeWorkerOptions;
         private readonly ILogger<BootstrapJobHandler> logger;
 
-        public BootstrapJobHandler(IServiceProvider serviceProvider, IJobHandlerInfoProvider jobHandlerInfoProvider, IZeebeVariablesSerializer serializer, IZeebeVariablesDeserializer deserializer, ILogger<BootstrapJobHandler> logger)
+        public BootstrapJobHandler(IServiceProvider serviceProvider, IJobHandlerInfoProvider jobHandlerInfoProvider, IZeebeVariablesSerializer serializer, IZeebeVariablesDeserializer deserializer, IOptions<ZeebeClientBootstrapOptions> options, ILogger<BootstrapJobHandler> logger)
         {            
             this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             this.jobHandlerInfoProvider = jobHandlerInfoProvider ?? throw new ArgumentNullException(nameof(jobHandlerInfoProvider));
             this.serializer = serializer ?? throw new ArgumentNullException(nameof(serializer));
             this.deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
+            this.zeebeWorkerOptions = options?.Value?.Worker ?? throw new ArgumentNullException(nameof(options), $"{nameof(IOptions<ZeebeClientBootstrapOptions>)}.Value.{nameof(ZeebeClientBootstrapOptions.Worker)} is null.");
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -95,7 +99,7 @@ namespace Zeebe.Client.Bootstrap
                 command.Variables(variables);
             }
 
-            await command.Send(cancellationToken);
+            await command.SendWithRetry(null, cancellationToken);
         }
 
         private async Task ThrowError(IJobClient jobClient, IJob job, IJobHandlerInfo jobHandlerInfo, AbstractJobException ex, CancellationToken cancellationToken)

@@ -98,6 +98,8 @@ namespace Zeebe.Client.Bootstrap
                 throw new ArgumentOutOfRangeException($"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.PollInterval)}");
             if (zeebeWorkerOptions.PollingTimeout.TotalMilliseconds < 1)
                 throw new ArgumentOutOfRangeException($"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.PollingTimeout)}");
+            if (zeebeWorkerOptions.RetryTimeout.TotalMilliseconds < 1)
+                throw new ArgumentOutOfRangeException($"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.RetryTimeout)}");
             if (String.IsNullOrWhiteSpace(zeebeWorkerOptions.Name) && zeebeWorkerOptions.Name != null)
                 throw new ArgumentException($"'{nameof(zeebeWorkerOptions.Name)}' cannot be empty or whitespace.", $"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.Name)}");
         }
