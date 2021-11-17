@@ -12,7 +12,7 @@ This project is an extension of the [C# Zeebe client project](https://github.com
 
 ## Requirements
 
-* .Net 5.0
+* .Net 6.0
 * latest [C# Zeebe client release](https://www.nuget.org/packages/zb-client/)
 * latest [Zeebe release](https://github.com/zeebe-io/zeebe/releases/)
 
