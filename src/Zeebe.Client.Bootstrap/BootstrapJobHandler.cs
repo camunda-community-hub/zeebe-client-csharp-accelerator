@@ -91,15 +91,15 @@ namespace Zeebe.Client.Bootstrap
 
         private async Task CompleteJob(IJobClient jobClient, IJob job, object response, CancellationToken cancellationToken)
         {
-            var command = jobClient.NewCompleteJobCommand(job.Key);
+            var completeJobCommand = jobClient.NewCompleteJobCommand(job.Key);
 
             if (response != null)
             {
                 var variables = this.serializer.Serialize(response);
-                command.Variables(variables);
+                completeJobCommand.Variables(variables);
             }
 
-            await command.SendWithRetry(null, cancellationToken);
+            await completeJobCommand.SendWithRetry(this.zeebeWorkerOptions.RetryTimeout, cancellationToken);
         }
 
         private async Task ThrowError(IJobClient jobClient, IJob job, IJobHandlerInfo jobHandlerInfo, AbstractJobException ex, CancellationToken cancellationToken)
@@ -110,7 +110,7 @@ namespace Zeebe.Client.Bootstrap
                 .NewThrowErrorCommand(job.Key)
                 .ErrorCode(ex.Code)
                 .ErrorMessage(ex.Message)
-                .Send(cancellationToken);
+                .SendWithRetry(this.zeebeWorkerOptions.RetryTimeout, cancellationToken);
         }
 
         private object CreateAbstractJobInstance(IJob job, Type jobType)

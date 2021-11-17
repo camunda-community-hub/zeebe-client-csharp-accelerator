@@ -25,14 +25,14 @@ For more information about the zeebe project please visit http://zeebe.io</Descr
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.0" />    
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />    
     <PackageReference Include="zb-client" Version="1.1.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\zeebe-logo.png"  Pack="true" PackagePath="" />
-    <None Include="..\..\README.md"  Pack="true" PackagePath="" />
-    <None Include="..\..\LICENSE"  Pack="true" PackagePath="" />
+    <None Include="..\..\zeebe-logo.png" Pack="true" PackagePath="" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
   
