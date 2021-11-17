@@ -97,7 +97,8 @@ namespace Zeebe.Client.Bootstrap.Integration.Tests.Helpers
                                         MaxJobsActive = 1,
                                         TimeoutInMilliseconds = 10000,
                                         PollingTimeoutInMilliseconds = 10000,
-                                        PollIntervalInMilliseconds = 30000
+                                        PollIntervalInMilliseconds = 30000,
+                                        RetryTimeoutInMilliseconds = 1000
                                     };
                                 },
                                 typeof(IntegrationTestHelper).Assembly

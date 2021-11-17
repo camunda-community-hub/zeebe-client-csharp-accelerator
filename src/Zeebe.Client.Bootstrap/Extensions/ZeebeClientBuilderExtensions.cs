@@ -1,18 +1,17 @@
 using System;
 using Zeebe.Client.Api.Builder;
-using Zeebe.Client.Bootstrap.Options;
 using static Zeebe.Client.Bootstrap.Options.ZeebeClientBootstrapOptions;
 
 namespace Zeebe.Client.Bootstrap.Extensions
 {
      public static class ZeebeClientBuilderExtensions 
      {
-         public static IZeebeClient Build(this IZeebeClientBuilder builder, ZeebeClientBootstrapOptions options)
+         public static IZeebeClient Build(this IZeebeClientBuilder builder, ClientOptions options)
          {
              return builder
-                .BuildTransportBuilder(options.Client)
-                .BuildFinalStep(options.Client)
-                .BuildClient(options.Client);
+                .BuildTransportBuilder(options)
+                .BuildFinalStep(options)
+                .BuildClient(options);
          }
 
         private static IZeebeClientTransportBuilder BuildTransportBuilder(this IZeebeClientBuilder builder, ClientOptions options)

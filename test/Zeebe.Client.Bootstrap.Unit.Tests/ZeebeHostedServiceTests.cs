@@ -70,60 +70,6 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             Assert.Throws<ArgumentNullException>("options", () => new ZeebeHostedService(this.serviceScopeFactoryMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        public void ThrowsArgumentOutOfRangeExceptionWhenMaxJobsActiveIsSmallerOrEqualThen0(int maxJobsActive) 
-        {
-            this.zeebeWorkerOptionsMock.SetupGet(m => m.MaxJobsActive).Returns(maxJobsActive);
-            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.MaxJobsActive", () => new ZeebeHostedService(this.serviceScopeFactoryMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        public void ThrowsArgumentOutOfRangeExceptionWhenTimeoutIsSmallerOrEqualThen0(int timeout) 
-        {
-            this.zeebeWorkerOptionsMock.SetupGet(m => m.Timeout).Returns(TimeSpan.FromMilliseconds(timeout));
-            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.Timeout", () => new ZeebeHostedService(this.serviceScopeFactoryMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        public void ThrowsArgumentOutOfRangeExceptionWhenPollIntervalIsSmallerOrEqualThen0(int pollInterval) 
-        {
-            this.zeebeWorkerOptionsMock.SetupGet(m => m.PollInterval).Returns(TimeSpan.FromMilliseconds(pollInterval));
-            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.PollInterval", () => new ZeebeHostedService(this.serviceScopeFactoryMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        public void ThrowsArgumentOutOfRangeExceptionWhenPollingTimeoutIsSmallerOrEqualThen0(int pollingTimeout) 
-        {
-            this.zeebeWorkerOptionsMock.SetupGet(m => m.PollingTimeout).Returns(TimeSpan.FromMilliseconds(pollingTimeout));
-            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.PollingTimeout", () => new ZeebeHostedService(this.serviceScopeFactoryMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
-        public void ThrowsArgumentOutOfRangeExceptionWhenRetryTimeoutIsSmallerOrEqualThen0(int retryTimeout) 
-        {
-            this.zeebeWorkerOptionsMock.SetupGet(m => m.RetryTimeout).Returns(TimeSpan.FromMilliseconds(retryTimeout));
-            Assert.Throws<ArgumentOutOfRangeException>("WorkerOptions.RetryTimeout", () => new ZeebeHostedService(this.serviceScopeFactoryMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
-        }
-
-        [Theory]
-        [InlineData("")]
-        [InlineData(" ")]
-        public void ThrowsArgumentExceptionWhenNameIsEmpty(string name) 
-        {
-            this.zeebeWorkerOptionsMock.SetupGet(m => m.Name).Returns(name);
-            Assert.Throws<ArgumentException>("WorkerOptions.Name", () => new ZeebeHostedService(this.serviceScopeFactoryMock.Object, this.jobHandlerInfoProviderMock.Object, this.optionsMock.Object, this.loggerMock.Object));
-        }
-
         [Fact]
         public void ThrowsArgumentNullExceptionWhenLoggerIsNull() 
         {
@@ -315,7 +261,6 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             
             this.loggerMock = new Mock<ILogger<ZeebeHostedService>>();
 
-
             this.serviceProviderMock = CreateServiceProviderMock(this.zeebeClientMock, this.jobHandlerInfoProviderMock);
             this.serviceScopeMock = CreateServiceScopeMock(this.serviceProviderMock);
             this.serviceScopeFactoryMock = CreateServiceScopeFactoryMock(this.serviceScopeMock);
@@ -469,6 +414,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             mock.SetupGet(m => m.PollingTimeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
             mock.SetupGet(m => m.PollInterval).Returns(TimeSpan.FromMilliseconds(random.Next()));
             mock.SetupGet(m => m.Timeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
+            mock.SetupGet(m => m.RetryTimeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
 
             return mock;
         }

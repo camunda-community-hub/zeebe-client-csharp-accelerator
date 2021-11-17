@@ -30,7 +30,6 @@ namespace Zeebe.Client.Bootstrap
             this.serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
             this.jobHandlerInfoProvider = jobHandlerInfoProvider ?? throw new ArgumentNullException(nameof(jobHandlerInfoProvider));
             this.zeebeWorkerOptions = options?.Value?.Worker ?? throw new ArgumentNullException(nameof(options), $"{nameof(IOptions<ZeebeClientBootstrapOptions>)}.Value.{nameof(ZeebeClientBootstrapOptions.Worker)} is null.");
-            ValidateZeebeWorkerOptions(zeebeWorkerOptions);
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.serviceScope = serviceScopeFactory.CreateScope();
             this.zeebeClient = serviceScope.ServiceProvider.GetRequiredService<IZeebeClient>();
@@ -86,22 +85,6 @@ namespace Zeebe.Client.Bootstrap
         {
             workers.ForEach(w => w.Dispose());
             workers.Clear();
-        }
-
-        private static void ValidateZeebeWorkerOptions(WorkerOptions zeebeWorkerOptions)
-        {
-            if (zeebeWorkerOptions.MaxJobsActive < 1)
-                throw new ArgumentOutOfRangeException($"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.MaxJobsActive)}");
-            if (zeebeWorkerOptions.Timeout.TotalMilliseconds < 1)
-                throw new ArgumentOutOfRangeException($"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.Timeout)}");
-            if (zeebeWorkerOptions.PollInterval.TotalMilliseconds < 1)
-                throw new ArgumentOutOfRangeException($"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.PollInterval)}");
-            if (zeebeWorkerOptions.PollingTimeout.TotalMilliseconds < 1)
-                throw new ArgumentOutOfRangeException($"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.PollingTimeout)}");
-            if (zeebeWorkerOptions.RetryTimeout.TotalMilliseconds < 1)
-                throw new ArgumentOutOfRangeException($"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.RetryTimeout)}");
-            if (String.IsNullOrWhiteSpace(zeebeWorkerOptions.Name) && zeebeWorkerOptions.Name != null)
-                throw new ArgumentException($"'{nameof(zeebeWorkerOptions.Name)}' cannot be empty or whitespace.", $"{nameof(WorkerOptions)}.{nameof(zeebeWorkerOptions.Name)}");
         }
 
         private Task HandleJob(IJobClient jobClient, IJob job, CancellationToken cancellationToken)

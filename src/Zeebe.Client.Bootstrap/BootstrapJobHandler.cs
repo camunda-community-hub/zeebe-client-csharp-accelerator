@@ -110,7 +110,7 @@ namespace Zeebe.Client.Bootstrap
                 .NewThrowErrorCommand(job.Key)
                 .ErrorCode(ex.Code)
                 .ErrorMessage(ex.Message)
-                .SendWithRetry(this.zeebeWorkerOptions.RetryTimeout, cancellationToken);
+                .Send(this.zeebeWorkerOptions.RetryTimeout, cancellationToken);
         }
 
         private object CreateAbstractJobInstance(IJob job, Type jobType)

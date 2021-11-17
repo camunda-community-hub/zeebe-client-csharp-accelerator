@@ -74,7 +74,9 @@ namespace Zeebe.Client.Bootstrap.Extensions
 
         private static bool ValidateZeebeClientBootstrapOptions(ZeebeClientBootstrapOptions options)
         {
-            throw new NotImplementedException();
+            var validator = new ZeebeClientBootstrapOptionsValidator();
+            validator.Validate(options);
+            return true;
         }
 
         private static IServiceCollection BootstrapZeebe(this IServiceCollection services, params Assembly[] assemblies)
@@ -120,7 +122,7 @@ namespace Zeebe.Client.Bootstrap.Extensions
                         builder = builder.UseLoggerFactory(loggerFactory);
                         
                     return builder
-                        .Build(options.Value);                        
+                        .Build(options.Value.Client);                        
                 });
         }
 
