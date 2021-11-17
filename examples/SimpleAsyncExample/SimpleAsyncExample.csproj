@@ -6,13 +6,8 @@
     <UseAppHost>false</UseAppHost>
   </PropertyGroup>
 
-  <!-- <ItemGroup>
-    <PackageReference Include="zb-client-bootstrap" Version="*" />
-  </ItemGroup> -->
-
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Zeebe.Client.Bootstrap\Zeebe.Client.Bootstrap.csproj" />
+    <PackageReference Include="zb-client-bootstrap" Version="0.1.0" />
   </ItemGroup>
-
 
 </Project>
