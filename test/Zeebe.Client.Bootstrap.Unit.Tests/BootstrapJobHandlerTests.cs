@@ -13,6 +13,9 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Api.Commands;
+using static Zeebe.Client.Bootstrap.Options.ZeebeClientBootstrapOptions;
+using Zeebe.Client.Bootstrap.Options;
+using Microsoft.Extensions.Options;
 
 namespace Zeebe.Client.Bootstrap.Unit.Tests
 {
@@ -33,37 +36,60 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         private readonly Mock<IJobHandlerInfoProvider> jobHandlerInfoProviderMock;
         private readonly Mock<IZeebeVariablesSerializer> serializerMock;
         private readonly Mock<IZeebeVariablesDeserializer> deserializerMock;
+        private readonly Mock<WorkerOptions> zeebeWorkerOptionsMock;
+        private readonly Mock<ZeebeClientBootstrapOptions> zeebeClientBootstrapOptionsMock;
+        private readonly Mock<IOptions<ZeebeClientBootstrapOptions>> optionsMock;
         private readonly Mock<ILogger<BootstrapJobHandler>> loggerMock;
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenServiceProviderIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("serviceProvider", () => new BootstrapJobHandler(null, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("serviceProvider", () => new BootstrapJobHandler(null, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenJobHandlerInfoProviderIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("jobHandlerInfoProvider", () => new BootstrapJobHandler(this.serviceProviderMock.Object, null, this.serializerMock.Object, this.deserializerMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("jobHandlerInfoProvider", () => new BootstrapJobHandler(this.serviceProviderMock.Object, null, this.serializerMock.Object, this.deserializerMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenSerializerIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("serializer", () => new BootstrapJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, null, this.deserializerMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("serializer", () => new BootstrapJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, null, this.deserializerMock.Object, this.optionsMock.Object, this.loggerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenDeserializerIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("deserializer", () => new BootstrapJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, null, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("deserializer", () => new BootstrapJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, null, this.optionsMock.Object, this.loggerMock.Object));
+        }
+
+        [Fact]
+        public void ThrowsArgumentNullExceptionWhenOptionsIsNull() 
+        {
+            Assert.Throws<ArgumentNullException>("options", () => new BootstrapJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, null, this.loggerMock.Object));            
+        }
+
+        [Fact]
+        public void ThrowsArgumentNullExceptionWhenOptionsValueIsNull() 
+        {
+            this.optionsMock.SetupGet(m => m.Value).Returns((ZeebeClientBootstrapOptions)null);
+            Assert.Throws<ArgumentNullException>("options", () => new BootstrapJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, null, this.loggerMock.Object));            
+        }
+
+        [Fact]
+        public void ThrowsArgumentNullExceptionWhenOptionsValueWorkerIsNull() 
+        {
+            this.zeebeClientBootstrapOptionsMock.SetupGet(m => m.Worker).Returns((WorkerOptions)null);
+            Assert.Throws<ArgumentNullException>("options", () => new BootstrapJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, null, this.loggerMock.Object));            
         }
 
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenLoggerIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("logger", () => new BootstrapJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, null));
+            Assert.Throws<ArgumentNullException>("logger", () => new BootstrapJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, this.optionsMock.Object, null));
         }
 
         [Fact]
@@ -109,7 +135,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
 
             this.jobClientMock.Verify(c => c.NewCompleteJobCommand(expectedKey), Times.Once);
             this.completeJobCommandStep1Mock.Verify(c => c.Variables(It.IsAny<string>()), Times.Never);
-            this.completeJobCommandStep1Mock.Verify(c => c.Send(cancellationToken), Times.Once);
+            this.completeJobCommandStep1Mock.Verify(c => c.SendWithRetry(It.IsAny<TimeSpan>(), cancellationToken), Times.Once);
         }
 
         [Fact]
@@ -135,7 +161,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             this.jobClientMock.Verify(c => c.NewThrowErrorCommand(expectedKey), Times.Never);
             this.jobClientMock.Verify(c => c.NewFailCommand(expectedKey), Times.Never);
             this.completeJobCommandStep1Mock.Verify(c => c.Variables(expectedSerializedResponse), Times.Once);
-            this.completeJobCommandStep1Mock.Verify(c => c.Send(cancellationToken), Times.Once);
+            this.completeJobCommandStep1Mock.Verify(c => c.SendWithRetry(It.IsAny<TimeSpan>(), cancellationToken), Times.Once);
         }
 
         [Fact]
@@ -161,6 +187,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             this.jobClientMock.Verify(c => c.NewFailCommand(expectedKey), Times.Never);
             this.throwErrorCommandStep1Mock.Verify(c => c.ErrorCode("12345"), Times.Once);
             this.throwErrorCommandStep2Mock.Verify(c => c.ErrorMessage("54321"), Times.Once);
+            this.throwErrorCommandStep2Mock.Verify(c => c.Send(It.IsAny<TimeSpan>(), cancellationToken), Times.Once);
         }
 
         [Fact]
@@ -229,6 +256,56 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         }
 
 
+        [Fact]        
+        public async Task RetryTimeOutIsUsedWhenJobIsCompleted() 
+        {
+            var random = new Random();
+            PrepareJobHandlersFor<JobC>();
+            var expectedHandler = jobHandlerInfoCollection.First();
+            var expectedKey = random.Next();
+            var expectedRetryTimeout = this.zeebeWorkerOptionsMock.Object.RetryTimeout;
+
+            var jobMock = new Mock<IJob>();
+            jobMock.SetupGet(m => m.Type).Returns(expectedHandler.JobType);
+            jobMock.SetupGet(m => m.Key).Returns(expectedKey);
+
+            var handler = Create();
+
+            await handler.HandleJob(jobClientMock.Object, jobMock.Object, cancellationToken);
+
+            this.jobClientMock.Verify(c => c.NewCompleteJobCommand(expectedKey), Times.Once);
+            this.jobClientMock.Verify(c => c.NewThrowErrorCommand(expectedKey), Times.Never);
+            this.jobClientMock.Verify(c => c.NewFailCommand(expectedKey), Times.Never);
+            this.completeJobCommandStep1Mock.Verify(c => c.SendWithRetry(expectedRetryTimeout, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+        [Fact]        
+        public async Task RetryTimeOutIsUsedWhenJobErrorIsThrown() 
+        {
+            var random = new Random();
+
+            PrepareJobHandlersFor<JobE>();
+            var expectedHandler = jobHandlerInfoCollection.First();
+            var expectedKey = random.Next();
+            var expectedSerializedResponse = Guid.NewGuid().ToString();
+            var expectedRetryTimeout = this.zeebeWorkerOptionsMock.Object.RetryTimeout;
+
+            var jobMock = new Mock<IJob>();            
+            jobMock.SetupGet(m => m.Type).Returns(expectedHandler.JobType);
+            jobMock.SetupGet(m => m.Key).Returns(expectedKey);
+
+            var handler = Create();
+
+            await handler.HandleJob(jobClientMock.Object, jobMock.Object, cancellationToken);
+
+            this.jobClientMock.Verify(c => c.NewCompleteJobCommand(expectedKey), Times.Never);
+            this.jobClientMock.Verify(c => c.NewThrowErrorCommand(expectedKey), Times.Once);
+            this.jobClientMock.Verify(c => c.NewFailCommand(expectedKey), Times.Never);            
+
+            this.throwErrorCommandStep2Mock.Verify(c => c.Send(expectedRetryTimeout, It.IsAny<CancellationToken>()), Times.Once);
+        }
+
+
         #region Prepare
 
         public BootstrapJobHandlerTests()
@@ -258,17 +335,22 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
             
             this.serializerMock = CreateSerializerMock();
             this.deserializerMock = CreateDeserializerMock();
+
+            this.zeebeWorkerOptionsMock = CreateZeebeWorkerOptionsMock();
+            this.zeebeClientBootstrapOptionsMock = CreateZeebeClientBootstrapOptionsMock(this.zeebeWorkerOptionsMock);
+            this.optionsMock = CreateOptionsMock(this.zeebeClientBootstrapOptionsMock);
             
             this.loggerMock = new Mock<ILogger<BootstrapJobHandler>>();
         }
 
         private BootstrapJobHandler Create() 
         {
-             return new BootstrapJobHandler(
+            return new BootstrapJobHandler(
                 this.serviceProviderMock.Object,
                 this.jobHandlerInfoProviderMock.Object,
                 this.serializerMock.Object,
                 this.deserializerMock.Object,
+                this.optionsMock.Object,
                 this.loggerMock.Object
             );
         }
@@ -377,6 +459,40 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         private Mock<IZeebeVariablesDeserializer> CreateDeserializerMock()
         {
             var mock = new Mock<IZeebeVariablesDeserializer>();
+
+            return mock;
+        }
+
+        private static Mock<IOptions<ZeebeClientBootstrapOptions>> CreateOptionsMock(Mock<ZeebeClientBootstrapOptions> zeebeClientBootstrapOptionsMock)
+        {
+            var mock = new Mock<IOptions<ZeebeClientBootstrapOptions>>();
+            
+            mock.SetupGet(m => m.Value).Returns(zeebeClientBootstrapOptionsMock.Object);
+
+            return mock;
+        }
+
+        private static Mock<ZeebeClientBootstrapOptions> CreateZeebeClientBootstrapOptionsMock(Mock<WorkerOptions> workerOptionsMock)
+        {
+            var mock = new Mock<ZeebeClientBootstrapOptions>();
+
+            mock.SetupGet(m => m.Worker).Returns(workerOptionsMock.Object);
+
+            return mock;
+        }
+
+        private static Mock<WorkerOptions> CreateZeebeWorkerOptionsMock() 
+        {            
+            var mock = new Mock<WorkerOptions>();
+
+            var random = new Random();
+
+            mock.SetupGet(m => m.Name).Returns(Guid.NewGuid().ToString());
+            mock.SetupGet(m => m.MaxJobsActive).Returns(random.Next(1, int.MaxValue));
+            mock.SetupGet(m => m.PollingTimeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
+            mock.SetupGet(m => m.PollInterval).Returns(TimeSpan.FromMilliseconds(random.Next()));
+            mock.SetupGet(m => m.Timeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
+            mock.SetupGet(m => m.RetryTimeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
 
             return mock;
         }

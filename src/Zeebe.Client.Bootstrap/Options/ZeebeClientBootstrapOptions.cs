@@ -33,6 +33,8 @@ namespace Zeebe.Client.Bootstrap.Options
             public virtual TimeSpan PollInterval { get { return TimeSpan.FromMilliseconds(PollIntervalInMilliseconds); } }
             public virtual long PollingTimeoutInMilliseconds { get; set; }
             public virtual TimeSpan PollingTimeout { get { return TimeSpan.FromMilliseconds(PollingTimeoutInMilliseconds); } }
+            public virtual long RetryTimeoutInMilliseconds { get; set; }
+            public virtual TimeSpan RetryTimeout { get { return TimeSpan.FromMilliseconds(RetryTimeoutInMilliseconds); } }
             public virtual string Name { get; set; }
         }
     }

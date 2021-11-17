@@ -25,9 +25,13 @@ namespace Zeebe.Client.Bootstrap.Extensions
                 throw new ArgumentNullException(nameof(namedConfigurationSection));
             }
 
-            return services
+            services
                 .BootstrapZeebe(assemblies)
-                .Configure<ZeebeClientBootstrapOptions>(namedConfigurationSection);
+                .AddOptions<ZeebeClientBootstrapOptions>()
+                .Bind(namedConfigurationSection)
+                .Validate(ValidateZeebeClientBootstrapOptions);
+
+            return services;
         }
 
         public static IServiceCollection BootstrapZeebe(this IServiceCollection services, Action<ZeebeClientBootstrapOptions> configureOptions, params Assembly[] assemblies) 
@@ -37,9 +41,13 @@ namespace Zeebe.Client.Bootstrap.Extensions
                 throw new ArgumentNullException(nameof(configureOptions));
             }
 
-            return services
+            services
                 .BootstrapZeebe(assemblies)
-                .Configure(configureOptions);
+                .AddOptions<ZeebeClientBootstrapOptions>()
+                .Configure(configureOptions)
+                .Validate(ValidateZeebeClientBootstrapOptions);
+
+            return services;
         }
 
         public static IServiceCollection BootstrapZeebe(this IServiceCollection services, IConfiguration namedConfigurationSection, Action<ZeebeClientBootstrapOptions> postConfigureOptions, params Assembly[] assemblies)
@@ -54,10 +62,21 @@ namespace Zeebe.Client.Bootstrap.Extensions
                 throw new ArgumentNullException(nameof(postConfigureOptions));
             }
 
-            return services                
+            services
                 .BootstrapZeebe(assemblies)
-                .Configure<ZeebeClientBootstrapOptions>(namedConfigurationSection)
-                .PostConfigure(postConfigureOptions);
+                .AddOptions<ZeebeClientBootstrapOptions>()
+                .Bind(namedConfigurationSection)
+                .PostConfigure(postConfigureOptions)
+                .Validate(ValidateZeebeClientBootstrapOptions);
+
+            return services;
+        }
+
+        private static bool ValidateZeebeClientBootstrapOptions(ZeebeClientBootstrapOptions options)
+        {
+            var validator = new ZeebeClientBootstrapOptionsValidator();
+            validator.Validate(options);
+            return true;
         }
 
         private static IServiceCollection BootstrapZeebe(this IServiceCollection services, params Assembly[] assemblies)
@@ -103,7 +122,7 @@ namespace Zeebe.Client.Bootstrap.Extensions
                         builder = builder.UseLoggerFactory(loggerFactory);
                         
                     return builder
-                        .Build(options.Value);                        
+                        .Build(options.Value.Client);                        
                 });
         }
 
