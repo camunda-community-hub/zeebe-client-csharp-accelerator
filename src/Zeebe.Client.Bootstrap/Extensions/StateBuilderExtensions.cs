@@ -36,7 +36,7 @@ namespace Zeebe.Client.Bootstrap.Extensions
             return step.Variables(variables);
         }
 
-        public static ISetVariablesCommandStep2 State<TState>(this ISetVariablesCommandStep1 step, object state)
+        public static ISetVariablesCommandStep2 State(this ISetVariablesCommandStep1 step, object state)
         {
             if(state == null)
                 throw new ArgumentNullException(nameof(state));
@@ -45,7 +45,7 @@ namespace Zeebe.Client.Bootstrap.Extensions
             return step.Variables(variables);
         }
 
-        public static ICompleteJobCommandStep1 State<TState>(this ICompleteJobCommandStep1 step, object state)
+        public static ICompleteJobCommandStep1 State(this ICompleteJobCommandStep1 step, object state)
         {
             if(state == null)
                 throw new ArgumentNullException(nameof(state));
