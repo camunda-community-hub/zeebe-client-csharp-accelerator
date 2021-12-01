@@ -10,15 +10,19 @@
 
 This project is an extension of the [C# Zeebe client project](https://github.com/camunda-community-hub/zeebe-client-csharp). Zeebe Job handlers are automaticly recognized and bootstrapped via a [.Net HostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
 
+Read the [Zeebe documentation](https://docs.camunda.io/docs/components/zeebe/zeebe-overview/) for more information about the Zeebe project.
+
 ## Requirements
 
-* .Net 6.0
+* net standard 2.0 or higher, which means
+    * .net core 2.1 or higher
+    * or .net framework 4.7.1 or higher
 * latest [C# Zeebe client release](https://www.nuget.org/packages/zb-client/)
 * latest [Zeebe release](https://github.com/zeebe-io/zeebe/releases/)
 
 ## How to use
 
-The Zeebe C# client bootstrap extensions is available via nuget (https://www.nuget.org/packages/zb-client-bootstrap/).
+The Zeebe C# client bootstrap extension is available via nuget (https://www.nuget.org/packages/zb-client-bootstrap/).
 
 See [examples] and [blog post](https://link.medium.com/4a3yax14gjb) for more information.
 
