@@ -1,4 +1,7 @@
 extraction:
   csharp:
     index:
-      solution: Zeebe.Client.Bootstrap.sln
+      dotnet:
+        version: 6.0.101
+      solution: 
+        - Zeebe.Client.Bootstrap.sln

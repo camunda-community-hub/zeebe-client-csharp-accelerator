@@ -309,7 +309,7 @@ namespace Zeebe.Client.Bootstrap.Unit.Tests
         #region Prepare
 
         public BootstrapJobHandlerTests()
-        {            
+        {
             this.cancellationToken = new CancellationToken();
 
             this.jobHandlerInfoCollection = new List<IJobHandlerInfo>(
