@@ -17,7 +17,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="DotNet.Testcontainers" Version="1.6.0-beta.2130" />
+    <PackageReference Include="DotNet.Testcontainers" Version="1.6.0-beta.2219" />
   </ItemGroup>
 
   <ItemGroup>
