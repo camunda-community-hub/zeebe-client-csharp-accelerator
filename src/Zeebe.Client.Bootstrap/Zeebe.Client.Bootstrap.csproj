@@ -8,13 +8,13 @@ This project is an extension of the zb-client (https://www.nuget.org/packages/zb
 
 Zeebe Job handlers are automaticly recognized and boostrapped via a .Net HostedService.
 
-For more information about the zeebe project please visit http://zeebe.io</Description>
+For more information about the zeebe project please visit https://camunda.com/platform/zeebe/</Description>
     <Product>Zeebe C# client Boostrap extension</Product>
-    <RepositoryUrl>https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap</RepositoryUrl>
+    <RepositoryUrl>https://github.com/camunda-community-hub/zeebe-client-csharp-bootstrap</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 
     <PackageId>zb-client-bootstrap</PackageId>
-    <PackageProjectUrl>https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/camunda-community-hub/zeebe-client-csharp-bootstrap</PackageProjectUrl>
     <PackageTags>zeebe;zb;zb-csharp;zb-client;grpc</PackageTags>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
