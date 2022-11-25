@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 5
     steps:    
     - name: Pull zeebe
-      run: docker pull camunda/zeebe:1.1.0
+      run: docker pull camunda/zeebe:8.1.2
     - name: Checkout
       uses: actions/checkout@v2
     - name: Setup
@@ -21,6 +21,6 @@ jobs:
     - name: Pack
       run: dotnet pack --configuration Release /p:Version=${VERSION} --output .
     - name: Nuget Push nuget.org
-      run: dotnet nuget push "zb-client-bootstrap.${VERSION}.nupkg" -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push "zb-client-accelerator.${VERSION}.nupkg" -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
       env:
         NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}

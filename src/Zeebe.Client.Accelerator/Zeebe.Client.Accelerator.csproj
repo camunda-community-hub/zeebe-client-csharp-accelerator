@@ -1,0 +1,47 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Gunnar von der Beck</Authors>
+    <Description>
+This project is an extension of the zb-client (https://www.nuget.org/packages/zb-client/). 
+
+Zeebe Job handlers are automaticly recognized and boostrapped via a .Net HostedService.
+
+For more information about the zeebe project please visit https://camunda.com/platform/zeebe/
+
+The basic idea for this came from https://github.com/camunda-community-hub/zeebe-client-csharp-bootstrap.
+We loved the idea, but had in some parts our own preferences for defaults and behaviour. So this is our version of a good Bootstrap
+Extension for the C# Zeebe Client. Credits still belong to https://github.com/arjangeertsema.</Description>
+    <Product>Zeebe C# Client Boostrap extension</Product>
+    <RepositoryUrl>https://github.com/VonDerBeck/zeebe-client-csharp-accelerator</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <PackageId>zb-client-accelerator</PackageId>
+    <PackageProjectUrl>https://github.com/VonDerBeck/zeebe-client-csharp-accelerator</PackageProjectUrl>
+    <PackageTags>zeebe;zb;zb-csharp;zb-client;grpc</PackageTags>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>zeebe-logo.png</PackageIcon>
+    <Company>Accso - Accelerated Solutions GmbH</Company>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />    
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />    
+    <PackageReference Include="zb-client" Version="1.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\zeebe-logo.png" Pack="true" PackagePath="" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  
+</Project>

@@ -1,6 +1,6 @@
 using System.Threading;
 using Zeebe.Client.Api.Responses;
-using Zeebe.Client.Bootstrap.Abstractions;
+using Zeebe.Client.Accelerator.Abstractions;
 
 namespace SimpleExample
 {

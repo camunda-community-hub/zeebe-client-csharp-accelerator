@@ -1,18 +1,21 @@
-[![BUILD](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/actions/workflows/build.yml/badge.svg)](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/actions/workflows/build.yml)
-[![ANALYZE](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/actions/workflows/analyze.yml/badge.svg)](https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/actions/workflows/analyze.yml)
-[![](https://img.shields.io/nuget/v/zb-client-bootstrap.svg)](https://www.nuget.org/packages/zb-client-bootstrap/) 
-[![](https://img.shields.io/nuget/dt/zb-client-bootstrap)](https://www.nuget.org/stats/packages/zb-client-bootstrap?groupby=Version) 
-[![](https://img.shields.io/github/license/arjangeertsema/zeebe-client-csharp-bootstrap.svg)](https://www.apache.org/licenses/LICENSE-2.0) 
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/arjangeertsema/zeebe-client-csharp-bootstrap.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/arjangeertsema/zeebe-client-csharp-bootstrap/alerts/)
+[![BUILD](https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/actions/workflows/build.yml/badge.svg)](https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/actions/workflows/build.yml)
+[![ANALYZE](https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/actions/workflows/analyze.yml/badge.svg)](https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/actions/workflows/analyze.yml)
+[![](https://img.shields.io/nuget/v/zb-client-accelerator.svg)](https://www.nuget.org/packages/zb-client-accelerator/) 
+[![](https://img.shields.io/nuget/dt/zb-client-accelerator)](https://www.nuget.org/stats/packages/zb-client-accelerator?groupby=Version) 
+[![](https://img.shields.io/github/license/VonDerBeck/zeebe-client-csharp-accelerator.svg)](https://www.apache.org/licenses/LICENSE-2.0) 
 [![](https://img.shields.io/badge/Community%20Extension-An%20open%20source%20community%20maintained%20project-FF4700)](https://github.com/camunda-community-hub/community)
 ![Compatible with: Camunda Platform 8](https://img.shields.io/badge/Compatible%20with-Camunda%20Platform%208-0072Ce)
 [![](https://img.shields.io/badge/Lifecycle-Incubating-blue)](https://github.com/Camunda-Community-Hub/community/blob/main/extension-lifecycle.md#incubating-)
 
-# Bootstrap extension for the C# Zeebe client
+# Bootstrap accelerator for the C# Zeebe client
 
 This project is an extension of the [C# Zeebe client project](https://github.com/camunda-community-hub/zeebe-client-csharp). Zeebe Job handlers are automaticly recognized and bootstrapped via a [.Net HostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
 
 Read the [Zeebe documentation](https://docs.camunda.io/docs/components/zeebe/zeebe-overview/) for more information about the Zeebe project.
+
+The basic idea for this came from https://github.com/camunda-community-hub/zeebe-client-csharp-bootstrap.
+We loved the idea, but had in some parts our own preferences for defaults and behaviour. So this is our version of a good Bootstrap
+Extension for the C# Zeebe Client. Credits for the base work still belong to https://github.com/arjangeertsema.
 
 ## Requirements
 
@@ -24,13 +27,15 @@ Read the [Zeebe documentation](https://docs.camunda.io/docs/components/zeebe/zee
 
 ## How to use
 
-The Zeebe C# client bootstrap extension is available via nuget (https://www.nuget.org/packages/zb-client-bootstrap/).
-
-See [examples] and [blog post](https://link.medium.com/4a3yax14gjb) for more information.
+The Zeebe C# client bootstrap extension is available via nuget (https://www.nuget.org/packages/zb-client-accelerator/).
 
 ## Quick start
 
-All classes which implement `IJobHandler<TJob>`, `IJobHandler<TJob, TResponse>`, `IAsyncJobHandler<TJob>` or `IAsyncJobHandler<TJob, TResponse>` are automaticly found, added to the service collection and autowired to Zeebe when you register this bootstrap project with the `IServiceCollection.BootstrapZeebe()` extension method.
+All classes which implement `IJobHandler<ZeebeJob>`, `IJobHandler<ZeebeJob, TResponse>`, `IAsyncJobHandler<ZeebeJob>` or `IAsyncJobHandler<ZeebeJob, TResponse>` are automaticly found, added to the service collection and autowired to Zeebe when you register this bootstrap project with the `IServiceCollection.BootstrapZeebe()` extension method.
+
+All the other important magic is provided by `using global::Zeebe.Client.Accelerator.Extensions;` which provides you with extensions for `IServiceCollection`, `IHost`, `IZeebeClient` etc.
+
+### Bootstrap Zeebe
 
 The `BootstrapZeebe` method has two parameters:
 
@@ -40,57 +45,111 @@ The `BootstrapZeebe` method has two parameters:
 ```csharp
 ConfigureServices((hostContext, services) => {
     services.BootstrapZeebe(
-        hostContext.Configuration.GetSection("ZeebeBootstrap"),
+        hostContext.Configuration.GetSection("ZeebeConfiguration"),
         this.GetType().Assembly
     );
 })
 ```
 
-### Job
-
-The job is an implementation of `AbstractJob`. By default the simple name of the job is mapped to BPMN task job type. Job types must be unique. The default job configuration can be overwritten with `AbstractJobAttribute` implementations, see [attributes] for more information.
+Example Web Application:
 
 ```csharp
-public class SimpleJob : AbstractJob
+// Start building my WebApplication
+var builder = WebApplication.CreateBuilder(args);
+
+// Bootstrap Zeebe Integration
+builder.Services.BootstrapZeebe(
+    builder.Configuration.GetSection("ZeebeConfiguration"),
+    typeof(Program).Assembly);
+```
+
+Of course we want to deploy some processes right before the final startup (provided as extension for `IHost` and `IServiceProvider`):
+
+```csharp
+var app = builder.Build();
+...
+// Deploy all process resources
+app.CreateZeebeDeployment()
+    .UsingDirectory("Resources")
+    .AddResource("insurance_application.bpmn")
+    .AddResource("document_request.bpmn")
+    .AddResource("risk_check.dmn")
+    .Deploy();
+
+// Now run the application
+app.Run();
+```
+
+### Job Handler
+
+The job handler is an implementation of `IJobHandler<ZeebeJob>`, `IJobHandler<ZeebeJob, TResponse>`, `IAsyncJobHandler<ZeebeJob>` or `IAsyncJobHandler<ZeebeJob, TResponse>`. Job handlers are automaticly added to the DI container, therefore you can use dependency injection inside the job handlers.  The default job handler configuration can be overwritten with `AbstractJobHandlerAttribute` implementations, see [attributes] for more information.
+
+```csharp
+[JobType("callSampleService")]
+public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
 {
-    public SimpleJob(IJob job) 
-        : base(job)
-    { 
-        //Variable mapping logic can be added here.
+    public async Task HandleJob(ZeebeJob job, CancellationToken cancellationToken)
+    {  
+        // execute business service etc.
+        await Usecase.ExecuteAsync(cancellationToken);
     }
 }
 ```
 
-There is also a generic version `AbstractJob<TState>` which will automaticly deserialize job variables into a typed object. Each property is automaticly added to the `FetchVariables` collection when the `FetchVariablesAttribute` is not used.
+Of course you are able to access process variables and access custom headers. E.g.:
 
 ```csharp
-public class SimpleJob : AbstractJob<SimpleJobState>
+[JobType("doAwesomeWork")]
+public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob<SimpleJobPayload>>
 {
-    public SimpleJob(IJob job, SimpleJobState state) 
-        : base(job, state)
-    {  }
-}
+    public async Task HandleJob(ZeebeJob<SimpleJobPayload> job, CancellationToken cancellationToken)
+    {  
+        // get variables
+        var variables = job.getVariables();
 
-public class SimpleJobState
-{
-    public bool Test { get; set; }
+        // execute business service etc.
+        await Usecase.ExecuteAsync(variables.CustomerNo, cancellationToken);
+    }
+
+    class SimpleJobPayload
+    {
+        public string CustomerNo { get; set; }
+    }
 }
 ```
 
-
-
-### Job handler
-
-The job handler is an implementation of `IJobHandler<TJob>`, `IJobHandler<TJob, TResponse>`, `IAsyncJobHandler<TJob>` or `IAsyncJobHandler<TJob, TResponse>`. Job handlers are automaticly added to the DI container, therefore you can use dependency injection inside the job handlers.  The default job handler configuration can be overwritten with `AbstractJobHandlerAttribute` implementations, see [attributes] for more information.
-
+And there are more options, including the option to get custom headers configured in the process model:
 
 ```csharp
-public class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
+[JobType("doComplexWork")]
+public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
 {
-    public async Task HandleJob(SimpleJob job, CancellationToken cancellationToken)
+    public async Task HandleJob(ZeebeJob job, CancellationToken cancellationToken)
     {  
-        //TODO: make the handling idempotent.
-        await Usecase.ExecuteAsync(cancellationToken);
+        // get all variables
+        ProcessVariables variables = job.getVariables<ProcessVariables>();
+        // get custom headers
+        MyCustomHeaders headers = job.getCustomHeaders<MyCustomHeaders>();
+
+        // execute business service etc.
+        await Usecase.ExecuteAsync(variables.Application, headers.SomeConfiguration, cancellationToken);
+        ...
+    }
+
+    class ProcessVariables
+    {
+        public string? BusinessKey { get; set; }
+
+        public NewApplication Application { get; set; }
+
+        public string? ApplicantName { get; set; }
+
+        ...
+    }
+
+    class MyCustomHeaders
+    {
+        public string SomeConfiguration { get; set; }
     }
 }
 ```
@@ -98,15 +157,15 @@ public class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
 A handled job has three outcomes:
 
 1. The job has been handled without exceptions: this will automaticly result in a `JobCompletedCommand` beeing send to the broker. The `TResponse` is automaticly serialized and added to the `JobCompletedCommand`.
-1. An exception has been thrown while handling the job and the exception implements `AbstractJobException`: this wil automaticly result in a `ThrowErrorCommand` beeing send to the broker;
-1. Any other exception will automaticly result in a `FailCommand` beeing send to the broker;
+1. A `BpmnErrorException` has been thrown while handling the job: this will automaticly result in a `ThrowErrorCommand` beeing send to the broker;
+1. Any other unexpected exception will automatically result in a `FailCommand` beeing send to the broker including message details and reducing the number of retries;
 
-The `JobCompletedCommand` accepts variables which are added to process instance. For this use case the job handler can be use with a second generic parameter `IJobHandler<TJob, TResponse>`. The response is automaticly serialized.
+The `JobCompletedCommand` accepts variables which are added to process instance. For this use case the job handler can be used with a second generic parameter `IJobHandler<ZeebeJob, TResponse>`. The response is automaticly serialized.
 
 ```csharp
-public class SimpleJobHandler : IAsyncJobHandler<SimpleJob, SimpleResponse>
+public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob, SimpleResponse>
 {
-    public async Task<SimpleResponse> HandleJob(SimpleJob job, CancellationToken cancellationToken)
+    public async Task<SimpleResponse> HandleJob(ZeebeJob job, CancellationToken cancellationToken)
     {
         //TODO: make the handling idempotent.
         var result = await Usecase.ExecuteAsync(cancellationToken);
@@ -115,19 +174,36 @@ public class SimpleJobHandler : IAsyncJobHandler<SimpleJob, SimpleResponse>
 }
 ```
 
+### Dynamic message receiver
 
-## Extensions
+See [Example for synchronous responses from processes](https://github.com/camunda-community-hub/camunda-8-examples/tree/main/synchronous-response-springboot) for a description of the scenario.
 
-1. `IPublishMessageCommandStep3`, `ICreateProcessInstanceCommandStep3` and `ISetVariablesCommandStep1` are extended with the `State(object state)` method which uses the registered `IZeebeVariablesSerializer` service to automaticly serialize state and pass the result to the `Variables(string variables)` method.
+You can create a dynamic job handlers for receiving a message once as follows:
 
-## Conventions
+```csharp
+try
+{
+    string jsonContent = _zeebeClient.ReceiveMessage("received_" + number, TimeSpan.FromSeconds(5), "someNewVariable");
+    ...
+} catch (MessageTimeoutException)
+{
+    // nothing received
+    ...
+}
+```
 
-This project uses the following conventions:
+Or without receiving any variables:
 
-1. By default the simple name of the `AbstractJob` implementation is used to match the `Type` which is specified in the BPMN model. This can be overriden by adding the `JobTypeAttribute` to the `AbstractJob` implementation, see [attributes] for more information.
-1. By default the assembly name which contains the job handler is used as the `Worker name`. This can be overriden by adding the `WorkerNameAttribute` to the `AbstractJob` implementation, see [attributes] for more information.
+```csharp
+    bool messageReceived = _zeebeClient.ReceiveMessage("received_" + number, TimeSpan.FromSeconds(3));
+```
+
+The one-time job handler will be destroyed after `ReceiveMessage` returns.
+
+## Hints
+
 1. By default the job handlers are added to de DI container with a `Transient` service lifetime. This can be overriden by adding the `ServiceLifetimeAttribute` to the job handler, see [attributes] for more information.
-1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. You can override this registration by registering your service after the `BootstrapZeebe` method or you can register `System.Text.Json.JsonSerializerOptions` to configure the `System.Text.Json.JsonSerializer`. 
+1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. Serialization / Deserialization uses CamelCase as naming policy. 
 
 ## How to build
 
@@ -137,5 +213,5 @@ Run `dotnet build Zeebe.Client.Bootstrap.sln`
 
 Run `dotnet test Zeebe.Client.Bootstrap.sln`
 
-[examples]:  https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/tree/main/examples
-[attributes]: https://github.com/arjangeertsema/zeebe-client-csharp-bootstrap/tree/main/src/Zeebe.Client.Bootstrap/Attributes
+[examples]:  https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/examples
+[attributes]: https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/src/Zeebe.Client.Bootstrap/Attributes

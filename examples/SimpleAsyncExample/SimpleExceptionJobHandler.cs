@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Zeebe.Client.Api.Responses;
-using Zeebe.Client.Bootstrap.Abstractions;
+using Zeebe.Client.Accelerator.Abstractions;
 
 namespace SimpleAsyncExample
 {
@@ -26,7 +26,7 @@ namespace SimpleAsyncExample
         { }       
     }
 
-    class SimpleJobException : AbstractJobException
+    class SimpleJobException : BpmnErrorException
     {
         public SimpleJobException() 
             : base("1", "A business exception has been thrown.")

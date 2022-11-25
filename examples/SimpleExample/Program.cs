@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Hosting;
-using Zeebe.Client.Bootstrap.Extensions;
+using Zeebe.Client.Accelerator.Extensions;
 
 namespace SimpleExample
 {

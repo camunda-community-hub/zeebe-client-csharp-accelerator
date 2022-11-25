@@ -4,4 +4,4 @@ extraction:
       dotnet:
         version: 6.0.101
       solution: 
-        - Zeebe.Client.Bootstrap.sln
+        - Zeebe.Client.Accelerator.sln
