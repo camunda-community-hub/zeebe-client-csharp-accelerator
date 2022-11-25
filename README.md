@@ -205,6 +205,7 @@ public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
 {
    ...
 }
+```
 
 A handled job has three outcomes:
 
