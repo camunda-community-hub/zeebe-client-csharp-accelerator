@@ -4,7 +4,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
 {
-    public class ExceptionJobHandler : IJobHandler<ExceptionJob>
+    public class ExceptionJobHandler : IJobHandler<ZeebeJob>
     {
         private readonly HandleJobDelegate handleJobDelegate;
 
@@ -13,16 +13,11 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
             this.handleJobDelegate = handleJobDelegate;
         }
 
-        public void HandleJob(ExceptionJob job, CancellationToken cancellationToken)
+        public void HandleJob(ZeebeJob job, CancellationToken cancellationToken)
         {
             handleJobDelegate(job, cancellationToken);
             throw new BusinessException();
         }
-    }
-
-    public class ExceptionJob : AbstractJob
-    {
-        public ExceptionJob(IJob job) : base(job) { }
     }
 
     public class BusinessException : BpmnErrorException

@@ -8,6 +8,7 @@ using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Accelerator.Extensions;
 using Zeebe.Client.Accelerator.Integration.Tests.Handlers;
 using Zeebe.Client.Accelerator.Integration.Tests.Helpers;
+using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests
 {
@@ -102,18 +103,19 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             Assert.True(this.jobs.Count == 2);
 
             var expected = OutputJobHandler.State;
-            var actual = jobs[1] as InputJob;
+            var actual = jobs[1] as ZeebeJob<State>;
 
             Assert.NotNull(actual);
-            Assert.NotNull(actual.State);
+            Assert.NotNull(actual.getVariables());
+            var state = actual.getVariables();
 
-            Assert.Equal(expected.Bool, actual.State.Bool);
-            Assert.Equal(expected.Int, actual.State.Int);
+            Assert.Equal(expected.Bool, state.Bool);
+            Assert.Equal(expected.Int, state.Int);
             Assert.Equal(expected.Guid, expectedGuid);
-            Assert.Equal(expected.DateTime, actual.State.DateTime);
-            Assert.Equal(expected.Int, actual.State.Int);
-            Assert.Equal(expected.String, actual.State.String);
-            Assert.Equal(expected.Double, actual.State.Double);
+            Assert.Equal(expected.DateTime, state.DateTime);
+            Assert.Equal(expected.Int, state.Int);
+            Assert.Equal(expected.String, state.String);
+            Assert.Equal(expected.Double, state.Double);
         }
 
         public async Task InitializeAsync()

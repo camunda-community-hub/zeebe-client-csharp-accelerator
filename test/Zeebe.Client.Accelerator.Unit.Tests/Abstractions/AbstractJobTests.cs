@@ -3,6 +3,7 @@ using System;
 using Moq;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Accelerator.Unit.Tests.Stubs;
+using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
 {
@@ -11,7 +12,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
         [Fact]
         public void ThrowsArgumentNullExceptionWhenJobIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("job", () => new JobA(null));
+            Assert.Throws<ArgumentNullException>("job", () => new ZeebeJob(null, new ZeebeVariablesDeserializer()));
             Assert.Throws<ArgumentNullException>("job", () => new JobG(null, new JobGState()));
         }
 
@@ -54,7 +55,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
             mock.SetupGet(j => j.Variables).Returns(variables);
             mock.SetupGet(j => j.CustomHeaders).Returns(customHeaders);
 
-            var job = new JobA(mock.Object);
+            var job = new ZeebeJob(mock.Object, new ZeebeVariablesDeserializer());
             Assert.Equal(key, job.Key);
             Assert.Equal(type, job.Type);
             Assert.Equal(processInstanceKey, job.ProcessInstanceKey);

@@ -12,7 +12,7 @@ This project is an extension of the [C# Zeebe client project](https://github.com
 
 Read the [Zeebe documentation](https://docs.camunda.io/docs/components/zeebe/zeebe-overview/) for more information about the Zeebe project.
 
-The basic idea for this came from https://github.com/camunda-community-hub/zeebe-client-csharp-bootstrap.
+The basic idea and implementation for this came from https://github.com/camunda-community-hub/zeebe-client-csharp-bootstrap.
 We loved the idea, but had in some parts our own preferences for defaults and behaviour. So this is our version of a good Bootstrap
 Extension for the C# Zeebe Client. Credits for the base work still belong to https://github.com/arjangeertsema.
 
@@ -32,7 +32,7 @@ The Zeebe C# client bootstrap extension is available via nuget (https://www.nuge
 
 All classes which implement `IJobHandler<ZeebeJob>`, `IJobHandler<ZeebeJob, TResponse>`, `IAsyncJobHandler<ZeebeJob>` or `IAsyncJobHandler<ZeebeJob, TResponse>` are automatically found, added to the service collection and autowired to Zeebe when you register this bootstrap project with the `IServiceCollection.BootstrapZeebe()` extension method.
 
-More magic is provided by `using global::Zeebe.Client.Accelerator.Extensions;` which provides you with further extensions for `IHost`, `IZeebeClient` etc. in
+More power is provided by `using global::Zeebe.Client.Accelerator.Extensions;` which provides you with further extensions for `IHost`, `IZeebeClient` etc. in
 order to deploy processes or create one time message receivers.
 
 ### Bootstrap Zeebe

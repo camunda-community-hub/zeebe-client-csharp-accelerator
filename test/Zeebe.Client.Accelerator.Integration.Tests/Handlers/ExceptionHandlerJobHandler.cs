@@ -4,7 +4,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
 {
-    public class ExceptionHandlerJobHandler : IJobHandler<ExceptionHandlerJob>
+    public class ExceptionHandlerJobHandler : IJobHandler<ZeebeJob>
     {
         private readonly HandleJobDelegate handleJobDelegate;
 
@@ -14,14 +14,10 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
         }
 
         
-        public void HandleJob(ExceptionHandlerJob job, CancellationToken cancellationToken)
+        public void HandleJob(ZeebeJob job, CancellationToken cancellationToken)
         { 
             handleJobDelegate(job, cancellationToken);
         }
     }
 
-    public class ExceptionHandlerJob : AbstractJob
-    {
-        public ExceptionHandlerJob(IJob job) : base(job) { }
-    }
 }

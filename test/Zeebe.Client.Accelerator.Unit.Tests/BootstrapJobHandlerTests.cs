@@ -156,7 +156,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         public async Task JobIsCompletedWithVariablesWhenJobIsHandledWithAResponse()
         {
             var random = new Random();
-            PrepareJobHandlersFor<JobD>();
+            PrepareAsyncJobHandlersFor<JobHandlerD, ResponseD>();
             var expectedHandler = jobHandlerInfoCollection.First();
             var expectedKey = random.Next();
             var expectedSerializedResponse = Guid.NewGuid().ToString();
@@ -183,7 +183,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         {
             var random = new Random();
 
-            PrepareJobHandlersFor<JobE>();
+            PrepareAsyncJobHandlersFor<JobHandlerE>();
             var expectedHandler = jobHandlerInfoCollection.First();
             var expectedKey = random.Next();
             var expectedSerializedResponse = Guid.NewGuid().ToString();
@@ -209,7 +209,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         {
             var random = new Random();
 
-            PrepareJobHandlersFor<JobF>();
+            PrepareJobHandlersFor<JobHandlerF>();
             var expectedHandler = jobHandlerInfoCollection.First();
             var expectedKey = random.Next();
             var expectedSerializedResponse = Guid.NewGuid().ToString();
@@ -245,7 +245,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             deserializerMock.Setup(m => m.Deserialize(expectedVariables, typeof(JobGState)))
                 .Returns(expected);
 
-            PrepareJobHandlersFor<JobG>();
+            PrepareClassicJobHandlersFor<JobHandlerG, JobG>();
             var expectedHandler = jobHandlerInfoCollection.First();
             var expectedKey = random.Next();
             var expectedSerializedResponse = Guid.NewGuid().ToString();
@@ -271,7 +271,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         public async Task RetryTimeOutIsUsedWhenJobIsCompleted() 
         {
             var random = new Random();
-            PrepareJobHandlersFor<JobC>();
+            PrepareAsyncJobHandlersFor<JobHandlerC>();
             var expectedHandler = jobHandlerInfoCollection.First();
             var expectedKey = random.Next();
             var expectedRetryTimeout = this.zeebeWorkerOptionsMock.Object.RetryTimeout;
@@ -295,7 +295,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         {
             var random = new Random();
 
-            PrepareJobHandlersFor<JobE>();
+            PrepareAsyncJobHandlersFor<JobHandlerE>();
             var expectedHandler = jobHandlerInfoCollection.First();
             var expectedKey = random.Next();
             var expectedSerializedResponse = Guid.NewGuid().ToString();
@@ -324,7 +324,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             this.cancellationToken = new CancellationToken();
 
             this.jobHandlerInfoCollection = new List<IJobHandlerInfo>(
-                new Type[] { typeof(JobHandlerA), typeof(JobHandlerB) }
+                new Type[] { typeof(JobHandlerA), typeof(JobHandlerC) }
                     .SelectMany(t => t.GetMethods())
                     .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
                     .Select(m => CreateJobHandlerReference(m))
@@ -374,7 +374,13 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
 
             mock.Setup(m => m.GetService(typeof(JobHandlerA))).Returns(new JobHandlerA(handleJobDelegateMock.Object));
             mock.Setup(m => m.GetService(typeof(JobHandlerB))).Returns(new JobHandlerB(handleJobDelegateMock.Object));
-            
+            mock.Setup(m => m.GetService(typeof(JobHandlerC))).Returns(new JobHandlerC(handleJobDelegateMock.Object));
+            mock.Setup(m => m.GetService(typeof(JobHandlerD))).Returns(new JobHandlerD(handleJobDelegateMock.Object));
+            mock.Setup(m => m.GetService(typeof(JobHandlerE))).Returns(new JobHandlerE(handleJobDelegateMock.Object));
+            mock.Setup(m => m.GetService(typeof(JobHandlerF))).Returns(new JobHandlerF(handleJobDelegateMock.Object));
+            mock.Setup(m => m.GetService(typeof(JobHandlerG))).Returns(new JobHandlerG(handleJobDelegateMock.Object));
+            mock.Setup(m => m.GetService(typeof(JobHandlerH))).Returns(new JobHandlerH(handleJobDelegateMock.Object));
+
             return mock;
         }
 
@@ -553,13 +559,14 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         }
 
         private void PrepareJobHandlersFor<T>() 
-            where T : AbstractJob
+            where T : IJobHandler<ZeebeJob>
         {
+            var jobHandlerType = typeof(T);
             this.jobHandlerInfoCollection.Clear();
             this.jobHandlerInfoCollection.Add(new JobHandlerInfo(
-                typeof(JobHandlerB)
+                    jobHandlerType
                     .GetMethods()
-                    .Where(m => m.Name.Equals(nameof(JobHandlerB.HandleJob)) && m.GetParameters()[0].ParameterType == typeof(T))
+                    .Where(m => m.Name.Equals(nameof(IJobHandler<ZeebeJob>.HandleJob)))
                     .Single(),
                 ServiceLifetime.Transient,
                 typeof(T).GetTypeInfo().Name,
@@ -567,6 +574,53 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             ));
         }
 
+        private void PrepareAsyncJobHandlersFor<T>()
+            where T : IAsyncJobHandler<ZeebeJob>
+        {
+            var jobHandlerType = typeof(T);
+            this.jobHandlerInfoCollection.Clear();
+            this.jobHandlerInfoCollection.Add(new JobHandlerInfo(
+                    jobHandlerType
+                    .GetMethods()
+                    .Where(m => m.Name.Equals(nameof(IAsyncJobHandler<ZeebeJob>.HandleJob)))
+                    .Single(),
+                ServiceLifetime.Transient,
+                typeof(T).GetTypeInfo().Name,
+                "Test"
+            ));
+        }
         #endregion
+        private void PrepareAsyncJobHandlersFor<T, TResponse>()
+            where T : IAsyncJobHandler<ZeebeJob, TResponse> where TResponse : class
+        {
+            var jobHandlerType = typeof(T);
+            this.jobHandlerInfoCollection.Clear();
+            this.jobHandlerInfoCollection.Add(new JobHandlerInfo(
+                    jobHandlerType
+                    .GetMethods()
+                    .Where(m => m.Name.Equals(nameof(IAsyncJobHandler<ZeebeJob, TResponse>.HandleJob)))
+                    .Single(),
+                ServiceLifetime.Transient,
+                typeof(T).GetTypeInfo().Name,
+                "Test"
+            ));
+        }
+
+        private void PrepareClassicJobHandlersFor<T, J>()
+            where T : IAsyncJobHandler<J> where J : AbstractJob
+        {
+            var jobHandlerType = typeof(T);
+            this.jobHandlerInfoCollection.Clear();
+            this.jobHandlerInfoCollection.Add(new JobHandlerInfo(
+                    jobHandlerType
+                    .GetMethods()
+                    .Where(m => m.Name.Equals(nameof(IAsyncJobHandler<J>.HandleJob)))
+                    .Single(),
+                ServiceLifetime.Transient,
+                typeof(T).GetTypeInfo().Name,
+                "Test"
+            ));
+        }
+
     }
 }

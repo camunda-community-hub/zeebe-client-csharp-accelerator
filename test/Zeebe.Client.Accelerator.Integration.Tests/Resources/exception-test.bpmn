@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0uxb735" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.0.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0uxb735" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.4.2" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.0.0">
   <bpmn:collaboration id="Collaboration_1vjpsk8">
     <bpmn:participant id="Participant_1k0envb" name="Exception test" processRef="ExceptionTest" />
   </bpmn:collaboration>
@@ -12,14 +12,14 @@
     </bpmn:endEvent>
     <bpmn:serviceTask id="Activity_09k7ma1" name="Handle Job">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="ExceptionJob" />
+        <zeebe:taskDefinition type="ExceptionJobHandler" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_00w34ec</bpmn:incoming>
       <bpmn:outgoing>Flow_0g6vjwu</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Activity_1l1ruk5" name="Handle Job">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="ExceptionHandlerJob" />
+        <zeebe:taskDefinition type="ExceptionHandlerJobHandler" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1ofte7f</bpmn:incoming>
       <bpmn:outgoing>Flow_0n6h2io</bpmn:outgoing>
@@ -42,6 +42,33 @@
       <bpmndi:BPMNShape id="Participant_1k0envb_di" bpmnElement="Participant_1k0envb" isHorizontal="true">
         <dc:Bounds x="160" y="117" width="600" height="250" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="239" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="245" y="202" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1x4elkp_di" bpmnElement="Event_1x4elkp">
+        <dc:Bounds x="662" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="670" y="202" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0mdx447_di" bpmnElement="Activity_09k7ma1">
+        <dc:Bounds x="330" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0r8h3qg_di" bpmnElement="Activity_1l1ruk5">
+        <dc:Bounds x="450" y="260" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0wklmmq_di" bpmnElement="Event_0wklmmq">
+        <dc:Bounds x="662" y="282" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="656" y="325" width="49" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_14540m0_di" bpmnElement="Event_0k0huhm">
+        <dc:Bounds x="362" y="199" width="36" height="36" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_00w34ec_di" bpmnElement="Flow_00w34ec">
         <di:waypoint x="275" y="177" />
         <di:waypoint x="330" y="177" />
@@ -59,33 +86,6 @@
         <di:waypoint x="550" y="300" />
         <di:waypoint x="662" y="300" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
-        <dc:Bounds x="239" y="159" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="245" y="202" width="24" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_1x4elkp_di" bpmnElement="Event_1x4elkp">
-        <dc:Bounds x="662" y="159" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="670" y="202" width="20" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0wklmmq_di" bpmnElement="Event_0wklmmq">
-        <dc:Bounds x="662" y="282" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="656" y="325" width="49" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0mdx447_di" bpmnElement="Activity_09k7ma1">
-        <dc:Bounds x="330" y="137" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0r8h3qg_di" bpmnElement="Activity_1l1ruk5">
-        <dc:Bounds x="450" y="260" width="100" height="80" />
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_14540m0_di" bpmnElement="Event_0k0huhm">
-        <dc:Bounds x="362" y="199" width="36" height="36" />
-      </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

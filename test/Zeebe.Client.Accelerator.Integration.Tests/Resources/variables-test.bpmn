@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0xm8j0e" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.8.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.0.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_0xm8j0e" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.4.2" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="1.0.0">
   <bpmn:collaboration id="Collaboration_03jz4qc">
     <bpmn:participant id="Participant_0x6giu0" name="Variable test" processRef="VariablesTest" />
   </bpmn:collaboration>
@@ -12,14 +12,14 @@
     </bpmn:endEvent>
     <bpmn:serviceTask id="Activity_1ars87m" name="Handle job">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="OutputJob" />
+        <zeebe:taskDefinition type="OutputJobHandler" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1wmg03l</bpmn:incoming>
       <bpmn:outgoing>Flow_1meujrx</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:serviceTask id="Activity_1c12lwe" name="Handle job">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="InputJob" />
+        <zeebe:taskDefinition type="InputJobHandler" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1meujrx</bpmn:incoming>
       <bpmn:outgoing>Flow_0v9gyj4</bpmn:outgoing>
@@ -33,18 +33,6 @@
       <bpmndi:BPMNShape id="Participant_0x6giu0_di" bpmnElement="Participant_0x6giu0" isHorizontal="true">
         <dc:Bounds x="160" y="60" width="629" height="250" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="Flow_0v9gyj4_di" bpmnElement="Flow_0v9gyj4">
-        <di:waypoint x="590" y="177" />
-        <di:waypoint x="652" y="177" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1meujrx_di" bpmnElement="Flow_1meujrx">
-        <di:waypoint x="430" y="177" />
-        <di:waypoint x="490" y="177" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1wmg03l_di" bpmnElement="Flow_1wmg03l">
-        <di:waypoint x="275" y="177" />
-        <di:waypoint x="330" y="177" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="239" y="159" width="36" height="36" />
         <bpmndi:BPMNLabel>
@@ -63,6 +51,18 @@
       <bpmndi:BPMNShape id="Activity_0cfdalm_di" bpmnElement="Activity_1c12lwe">
         <dc:Bounds x="490" y="137" width="100" height="80" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1wmg03l_di" bpmnElement="Flow_1wmg03l">
+        <di:waypoint x="275" y="177" />
+        <di:waypoint x="330" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1meujrx_di" bpmnElement="Flow_1meujrx">
+        <di:waypoint x="430" y="177" />
+        <di:waypoint x="490" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0v9gyj4_di" bpmnElement="Flow_0v9gyj4">
+        <di:waypoint x="590" y="177" />
+        <di:waypoint x="652" y="177" />
+      </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

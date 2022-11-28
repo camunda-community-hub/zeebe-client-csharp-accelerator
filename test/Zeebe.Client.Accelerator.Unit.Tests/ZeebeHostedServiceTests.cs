@@ -160,7 +160,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             this.handleJobDelegateMock.Verify(d => d.Invoke(It.IsAny<IJob>(), It.IsAny<CancellationToken>()), Times.Exactly(this.jobHandlerInfoCollection.Count));
             Assert.Equal(jobs.Count, this.jobHandlerInfoCollection.Count);
 
-            (new Type[] { typeof(JobA), typeof(JobB), typeof(JobC) })
+            (new Type[] { typeof(ZeebeJob), typeof(JobG), typeof(JobH) })
                 .All(t => jobs.Where(j => j.GetType().Equals(t)).Any());
             
             this.serviceScopeFactoryMock.Verify(m => m.CreateScope(), Times.Exactly(jobs.Count), "ServiceScope has not been created for each job handling.");
@@ -230,17 +230,47 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
                         .First()
                ), 
                CreateJobHandlerInfo(
-                    typeof(JobHandlerA)
-                        .GetMethods()
-                        .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
-                        .ToArray()[1]
-               ),
-               CreateJobHandlerInfo(
                     typeof(JobHandlerB)
                         .GetMethods()
-                        .Where(m => m.Name.Equals(nameof(JobHandlerA.HandleJob)))
+                        .Where(m => m.Name.Equals(nameof(JobHandlerB.HandleJob)))
                         .First()
-               )
+               ),
+               CreateJobHandlerInfo(
+                    typeof(JobHandlerC)
+                        .GetMethods()
+                        .Where(m => m.Name.Equals(nameof(JobHandlerC.HandleJob)))
+                        .First()
+               ),
+               CreateJobHandlerInfo(
+                    typeof(JobHandlerD)
+                        .GetMethods()
+                        .Where(m => m.Name.Equals(nameof(JobHandlerD.HandleJob)))
+                        .First()
+               ),
+               CreateJobHandlerInfo(
+                    typeof(JobHandlerE)
+                        .GetMethods()
+                        .Where(m => m.Name.Equals(nameof(JobHandlerE.HandleJob)))
+                        .First()
+               ),
+               CreateJobHandlerInfo(
+                    typeof(JobHandlerF)
+                        .GetMethods()
+                        .Where(m => m.Name.Equals(nameof(JobHandlerF.HandleJob)))
+                        .First()
+               ),
+               CreateJobHandlerInfo(
+                    typeof(JobHandlerG)
+                        .GetMethods()
+                        .Where(m => m.Name.Equals(nameof(JobHandlerG.HandleJob)))
+                        .First()
+               ),
+               CreateJobHandlerInfo(
+                    typeof(JobHandlerH)
+                        .GetMethods()
+                        .Where(m => m.Name.Equals(nameof(JobHandlerH.HandleJob)))
+                        .First()
+               ),
             };
 
             this.handleJobDelegateMock = new Mock<HandleJobDelegate>();

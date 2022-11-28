@@ -49,7 +49,7 @@ namespace Zeebe.Client.Accelerator
         private static IEnumerable<IJobHandlerInfo> CreateJobHandlerInfo(Type jobHandlerType)
         {
             return GetJobHandlerMethods(jobHandlerType)
-                .Select(m => CreateJobHandlerInfo(m, jobHandlerType));
+                .Select(m => CreateJobHandlerInfo(jobHandlerType, m));
         }
 
         private static IEnumerable<MethodInfo> GetJobHandlerMethods(Type jobHandlerType)
@@ -58,34 +58,29 @@ namespace Zeebe.Client.Accelerator
                 .Where(i => IsJobHandlerInterface(i))
                 .SelectMany(i => i.GetMethods());
 
+            if (jobHandlerMethods.Count() > 1)
+            {
+                throw new InvalidOperationException(jobHandlerType.Name + " must not have more than one 'HandleJob' method");
+            }
+
             return jobHandlerType.GetMethods()
                 .Where(m => IsJobHandlerMethod(m, jobHandlerMethods));
         }
 
-        private static IJobHandlerInfo CreateJobHandlerInfo(MethodInfo jobHandlerMethod, Type jobHandlerType)
+        private static IJobHandlerInfo CreateJobHandlerInfo(Type jobHandlerType, MethodInfo jobHandlerMethod)
         {
             var jobType = jobHandlerMethod.GetParameters()[0].ParameterType;
-
-            string jobTypeName = null;
-            if (typeof(ZeebeJob).IsAssignableFrom(jobType))
-            {
-                jobTypeName = GetJobType(jobHandlerType);
-            }
-            else
-            {
-                jobTypeName = GetJobType(jobType);
-            }
 
             return new JobHandlerInfo
             (
                 jobHandlerMethod, 
                 GetServiceLifetime(jobHandlerMethod),
-                jobTypeName, 
-                GetWorkerName(jobType), 
-                GetMaxJobsActive(jobType), 
-                GetTimeout(jobType),
-                GetPollInterval(jobType), 
-                GetPollingTimeout(jobType),
+                GetJobType(jobHandlerType), 
+                GetWorkerName(jobHandlerType), 
+                GetMaxJobsActive(jobHandlerType), 
+                GetTimeout(jobHandlerType),
+                GetPollInterval(jobHandlerType), 
+                GetPollingTimeout(jobHandlerType),
                 GetFetchVariables(jobType, jobHandlerType)
             );
         }

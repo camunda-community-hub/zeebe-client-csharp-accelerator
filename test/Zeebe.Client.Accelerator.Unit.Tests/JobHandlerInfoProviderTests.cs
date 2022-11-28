@@ -27,7 +27,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [Fact]
         public void AllJobHandlersAreFoundWhenCreated() {
             var actual = Handlers();
-            var expected = 9;
+            var expected = 8;
 
             Assert.Equal(expected, actual.Count());
         }
@@ -48,10 +48,9 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             var handlers = Handlers();
 
             var actual = handlers.Select(h => h.JobType);
-            Assert.Contains(nameof(JobA), actual);
             Assert.Contains("TestJobType", actual);
-            Assert.Contains(nameof(JobC), actual);
-            Assert.DoesNotContain(nameof(JobB), actual);
+            Assert.DoesNotContain(nameof(JobHandlerA), actual);
+            Assert.Contains(nameof(JobHandlerC), actual);
         }
 
 
