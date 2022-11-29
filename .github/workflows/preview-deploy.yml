@@ -2,7 +2,7 @@ name: PREVIEW DEPLOY
 on:
   push:
     tags:
-    - "v[0-9]+.[0-9]+.[0-9]+-preview[0-9][0-9][0-9]"
+    - "[0-9]+.[0-9]+.[0-9]+-preview[0-9][0-9][0-9]"
 jobs:
   build:
     runs-on: ubuntu-latest
