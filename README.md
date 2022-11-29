@@ -115,6 +115,12 @@ public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
         _myApiService = myApiService;
     }
 
+
+    /// <summary>
+    /// Handles the job "doSomeWork".
+    /// </summary>
+    /// <param name="job">the Zeebe job</param>
+    /// <param name="cancellationToken">cancellation token</param>
     public async Task HandleJob(ZeebeJob job, CancellationToken cancellationToken)
     {  
         // execute business service etc.
@@ -129,12 +135,7 @@ Of course you are able to access process variables and return a result. E.g.:
 [JobType("doAwesomeWork")]
 public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob<SimpleJobPayload>, SimpleResponse>
 {
-    private readonly MyApiService _myApiService;
-
-    public SimpleJobHandler(MyApiService myApiService)
-    {
-        _myApiService = myApiService;
-    }
+    ...
 
     public async Task<SimpleResponse> HandleJob(ZeebeJob<SimpleJobPayload> job, CancellationToken cancellationToken)
     {  
@@ -159,12 +160,7 @@ And there are more options, including the option to access custom headers config
 [JobType("doComplexWork")]
 public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
 {
-    private readonly MyApiService _myApiService;
-
-    public SimpleJobHandler(MyApiService myApiService)
-    {
-        _myApiService = myApiService;
-    }
+    ...
 
     public async Task HandleJob(ZeebeJob job, CancellationToken cancellationToken)
     {  
@@ -247,11 +243,11 @@ The one time job handler will be destroyed after `ReceiveMessage` returns.
 
 ## How to build
 
-Run `dotnet build Zeebe.Client.Bootstrap.sln`
+Run `dotnet build Zeebe.Client.Accelerator.sln`
 
 ## How to test
 
-Run `dotnet test Zeebe.Client.Bootstrap.sln`
+Run `dotnet test Zeebe.Client.Accelerator.sln`
 
 [examples]:  https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/examples
-[attributes]: https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/src/Zeebe.Client.Bootstrap/Attributes
+[attributes]: https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/src/Zeebe.Client.Accelerator/Attributes
