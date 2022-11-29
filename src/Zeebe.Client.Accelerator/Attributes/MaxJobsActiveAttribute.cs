@@ -3,7 +3,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Attributes 
 {    
-    public class MaxJobsActiveAttribute : AbstractJobAttribute
+    public class MaxJobsActiveAttribute : AbstractJobHandlerAttribute
     {
         public MaxJobsActiveAttribute(int maxJobsActive)
         {

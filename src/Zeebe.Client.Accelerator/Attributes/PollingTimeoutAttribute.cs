@@ -3,7 +3,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Attributes 
 {    
-    public class PollingTimeoutAttribute : AbstractJobAttribute
+    public class PollingTimeoutAttribute : AbstractJobHandlerAttribute
     {
         public PollingTimeoutAttribute(long pollingTimeoutInMilliseconds)
         {

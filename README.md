@@ -83,7 +83,7 @@ The configuration will e.g. look as follows:
 }
 ```
 
-If we want to deploy some processes right before the final startup of our application (provided as extension for `IHost` and `IServiceProvider`) we create a deployment as follows:
+If we want to deploy some processes right before the final startup of our application we create a deployment using the extension for `IHost` or `IServiceProvider` as follows:
 
 ```csharp
 var app = builder.Build();
@@ -138,7 +138,7 @@ public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob<SimpleJobPayload>, Sim
 
     public async Task<SimpleResponse> HandleJob(ZeebeJob<SimpleJobPayload> job, CancellationToken cancellationToken)
     {  
-        // get variables
+        // get variables as declared (SimpleJobPayload)
         var variables = job.getVariables();
 
         // execute business service etc.
@@ -168,13 +168,13 @@ public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
 
     public async Task HandleJob(ZeebeJob job, CancellationToken cancellationToken)
     {  
-        // get all variables
+        // get all variables (and deserialize to a given type)
         ProcessVariables variables = job.getVariables<ProcessVariables>();
         // get custom headers
         MyCustomHeaders headers = job.getCustomHeaders<MyCustomHeaders>();
 
         // execute business service etc.
-        await _myApiService.DoSomethingComplex(variables.Application, headers.SomeConfiguration, cancellationToken);
+        await _myApiService.DoSomethingComplex(variables.Customer, headers.SomeConfiguration, cancellationToken);
         ...
     }
 
@@ -182,9 +182,9 @@ public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
     {
         public string? BusinessKey { get; set; }
 
-        public NewApplication Application { get; set; }
+        public CustomerData Customer { get; set; }
 
-        public string? ApplicantName { get; set; }
+        public string? AccountName { get; set; }
 
         ...
     }
@@ -217,12 +217,12 @@ A handled job has three outcomes:
 
 See [Example for synchronous responses from processes](https://github.com/camunda-community-hub/camunda-8-examples/tree/main/synchronous-response-springboot) for a description of the scenario.
 
-You can create a dynamic job handlers for receiving a message once as follows:
+You can create a one time job handler for receiving a message for a dynamic job type `"received_" + number` as follows:
 
 ```csharp
 try
 {
-    string jsonContent = _zeebeClient.ReceiveMessage("received_" + number, TimeSpan.FromSeconds(5), "someNewVariable1", "someVariable2");
+    string jsonContent = _zeebeClient.ReceiveMessage("received_" + number, TimeSpan.FromSeconds(5), "someVariable1", "someVariable2");
     ...
 } catch (MessageTimeoutException)
 {
@@ -242,7 +242,8 @@ The one time job handler will be destroyed after `ReceiveMessage` returns.
 ## Hints
 
 1. By default the job handlers are added to de DI container with a `Transient` service lifetime. This can be overriden by adding the `ServiceLifetimeAttribute` to the job handler, see [attributes] for more information.
-1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. Serialization / Deserialization uses CamelCase as naming policy. 
+1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. Serialization / Deserialization uses CamelCase as naming policy.
+1. The default job type of a job handler is the class name of the job handler. This can be overriden by adding the `JobTypeAttribute` to the job handler, e.g. `[JobType("myJobName")]`.
 
 ## How to build
 

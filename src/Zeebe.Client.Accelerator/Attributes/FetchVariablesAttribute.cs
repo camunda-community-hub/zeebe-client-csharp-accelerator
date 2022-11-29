@@ -3,7 +3,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Attributes 
 {    
-    public class FetchVariablesAttribute : AbstractJobAttribute
+    public class FetchVariablesAttribute : AbstractJobHandlerAttribute
     {
         public FetchVariablesAttribute(params string[] fetchVariables)
         {
