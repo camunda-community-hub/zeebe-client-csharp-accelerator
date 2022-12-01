@@ -1,12 +1,10 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Zeebe.Client.Accelerator.Abstractions;
-using Zeebe.Client.Accelerator.Attributes;
 
 namespace Zeebe.Client.Accelerator.Unit.Tests.Stubs
 {
-    public class JobHandlerF : IJobHandler<ZeebeJob>
+    public class JobHandlerF : IZeebeWorker
     {private readonly HandleJobDelegate handleJobDelegate;
 
         public JobHandlerF(HandleJobDelegate handleJobDelegate)

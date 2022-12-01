@@ -12,6 +12,7 @@ using static Zeebe.Client.Accelerator.Options.ZeebeClientAcceleratorOptions;
 using Microsoft.Extensions.DependencyInjection;
 using Zeebe.Client.Api.Responses;
 using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Zeebe.Client.Accelerator
 {
@@ -55,10 +56,16 @@ namespace Zeebe.Client.Accelerator
 
                 if (jobHandlerInfo.FetchVariabeles.Length > 0)
                 {
-                    logger.LogInformation($"Created job worker for type '{jobHandlerInfo.JobType}' with variables {String.Join(",",jobHandlerInfo.FetchVariabeles)}.");
+                    if (jobHandlerInfo.FetchVariabeles.Length == 1 && "".Equals(jobHandlerInfo.FetchVariabeles.First()))
+                    {
+                        logger.LogInformation($"Created job worker for type '{jobHandlerInfo.JobType}' fetching no variables.");
+                    } else
+                    {
+                        logger.LogInformation($"Created job worker for type '{jobHandlerInfo.JobType}' with variables {String.Join(",", jobHandlerInfo.FetchVariabeles)}.");
+                    }
                 }
                 else {
-                    logger.LogInformation($"Created job worker for type '{jobHandlerInfo.JobType}'.");
+                    logger.LogInformation($"Created job worker for type '{jobHandlerInfo.JobType}' fetching all variables.");
                 }
 
                 workers.Add(worker);
@@ -101,7 +108,7 @@ namespace Zeebe.Client.Accelerator
 
             using (var scope = this.serviceScopeFactory.CreateScope())
             {
-                var bootstrapJobHandler = scope.ServiceProvider.GetRequiredService<IZeebeJobHandler>();
+                var bootstrapJobHandler = scope.ServiceProvider.GetRequiredService<IBootstrapJobHandler>();
                 return bootstrapJobHandler.HandleJob(jobClient, job, cancellationToken);
             }
         }

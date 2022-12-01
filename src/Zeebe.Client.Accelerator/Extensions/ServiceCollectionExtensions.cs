@@ -85,7 +85,7 @@ namespace Zeebe.Client.Accelerator.Extensions
                 throw new ArgumentNullException(nameof(services));
 
             return services
-                .AddScoped(typeof(IZeebeJobHandler), typeof(ZeebeJobHandler))
+                .AddScoped(typeof(IBootstrapJobHandler), typeof(ZeebeJobHandler))
                 .AddSingleton(typeof(IZeebeVariablesSerializer), typeof(ZeebeVariablesSerializer))
                 .AddSingleton(typeof(IZeebeVariablesDeserializer), typeof(ZeebeVariablesDeserializer))
                 .AddZeebeJobHandlers(assemblies)

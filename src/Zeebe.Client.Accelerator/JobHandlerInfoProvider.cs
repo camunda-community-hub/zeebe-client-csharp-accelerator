@@ -141,12 +141,12 @@ namespace Zeebe.Client.Accelerator
 
         private static string[] GetFetchVariables(Type jobType, Type jobHandlerType)
         {
-            var attr = jobType.GetCustomAttribute<FetchVariablesAttribute>();
-            if(attr != null)
-                return attr.FetchVariables;
-            attr = jobHandlerType.GetCustomAttribute<FetchVariablesAttribute>();
+            var attr = jobHandlerType.GetCustomAttribute<FetchVariablesAttribute>();
             if (attr != null)
-                return attr.FetchVariables;
+                return attr.None ? new string[1] { "" } : attr.FetchVariables;
+            attr = jobType.GetCustomAttribute<FetchVariablesAttribute>();
+            if (attr != null)
+                return attr.None ? new string[1] { "" } : attr.FetchVariables;
 
             var fetchVariables = GetFetchVariablesFromJobState(jobType);
             if(fetchVariables != null)

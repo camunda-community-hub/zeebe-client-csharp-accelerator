@@ -8,7 +8,7 @@
 
 # Bootstrap Accelerator for the C# Zeebe client
 
-This project is an extension of the [C# Zeebe client project](https://github.com/camunda-community-hub/zeebe-client-csharp). Zeebe Job handlers are automaticly recognized and bootstrapped via a [.Net HostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
+This project is an extension of the [C# Zeebe client project](https://github.com/camunda-community-hub/zeebe-client-csharp). Zeebe workers are automaticly recognized and bootstrapped via a [.Net HostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
 
 Read the [Zeebe documentation](https://docs.camunda.io/docs/components/zeebe/zeebe-overview/) for more information about the Zeebe project.
 
@@ -30,7 +30,7 @@ The Zeebe C# client bootstrap extension is available via nuget (https://www.nuge
 
 ## Quick start
 
-All classes which implement `IJobHandler<ZeebeJob>`, `IJobHandler<ZeebeJob, TResponse>`, `IAsyncJobHandler<ZeebeJob>` or `IAsyncJobHandler<ZeebeJob, TResponse>` are automatically found, added to the service collection and autowired to Zeebe when you register this bootstrap project with the `IServiceCollection.BootstrapZeebe()` extension method.
+All classes which implement `IZeebeWorker`, `IAsyncZeebeWorker`, `IZeebeWorkerWithResult` or `IAsyncZeebeWorkerWithResult` are automatically found, added to the service collection and autowired to Zeebe when you register this bootstrap project with the `IServiceCollection.BootstrapZeebe()` extension method.
 
 More power is provided by `using global::Zeebe.Client.Accelerator.Extensions;` which provides you with further extensions for `IHost`, `IZeebeClient` etc. in
 order to deploy processes or create one time message receivers.
@@ -79,7 +79,6 @@ The configuration will e.g. look as follows:
       "RetryTimeoutInMilliseconds": 1000
     }
   },
-  ...
 }
 ```
 
@@ -100,13 +99,13 @@ app.CreateZeebeDeployment()
 app.Run();
 ```
 
-### Job Handler
+### Zeebe Workers
 
-The job handler is an implementation of `IJobHandler<ZeebeJob>`, `IJobHandler<ZeebeJob, TResponse>`, `IAsyncJobHandler<ZeebeJob>` or `IAsyncJobHandler<ZeebeJob, TResponse>`. Job handlers are automaticly added to the DI container, therefore you can use dependency injection inside the job handlers.  The default job handler configuration can be overwritten with `AbstractJobHandlerAttribute` implementations, see [attributes] for more information.
+A Zeebe Worker is an implementation of `IZeebeWorker`, `IAsyncZeebeWorker`, `IZeebeWorkerWithResult` or `IAsyncZeebeWorkerWithResult`. Zeebe Workers are automatically added to the DI container, therefore you can use dependency injection inside.  The default worker configuration can be overwritten with `AbstractWorkerAttribute` implementations, see [attributes] for more information.
 
 ```csharp
 [JobType("doSomeWork")]
-public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
+public class SomeWorker : IAsyncZeebeWorker
 {
     private readonly MyApiService _myApiService;
 
@@ -114,7 +113,6 @@ public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
     {
         _myApiService = myApiService;
     }
-
 
     /// <summary>
     /// Handles the job "doSomeWork".
@@ -133,7 +131,7 @@ Of course you are able to access process variables and return a result. E.g.:
 
 ```csharp
 [JobType("doAwesomeWork")]
-public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob<SimpleJobPayload>, SimpleResponse>
+public class AwesomeWorker : IAsyncZeebeWorker<SimpleJobPayload, SimpleResponse>
 {
     ...
 
@@ -153,12 +151,13 @@ public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob<SimpleJobPayload>, Sim
     }
 }
 ```
+The above code will fetch exactly the variables defined as attributes in `SimpleJobPaylad` from the process.
 
 And there are more options, including the option to access custom headers configured in the process model:
 
 ```csharp
 [JobType("doComplexWork")]
-public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
+public class ComplexWorker : IAsyncZeebeWorker
 {
     ...
 
@@ -166,7 +165,7 @@ public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
     {  
         // get all variables (and deserialize to a given type)
         ProcessVariables variables = job.getVariables<ProcessVariables>();
-        // get custom headers
+        // get custom headers (and deserialize to a given type)
         MyCustomHeaders headers = job.getCustomHeaders<MyCustomHeaders>();
 
         // execute business service etc.
@@ -192,12 +191,36 @@ public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
 }
 ```
 
+The following table gives you an overview of the available options:
+
+| **Interface**                            | **Description**                                                    | **Fetched Variables**                                                                       |
+|------------------------------------------|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
+| `IAsyncZeebeWorker`                      | Asynchronous worker without specific input and no response         | Default is to fetch all process variables.  Use `FetchVariables` attribute for restictions. |
+| `IAsyncZeebeWorker<TInput>`              | Asynchronous worker with specific input and no response            | Fetches exactly the variables defined as attributes in `TInput`.                            |
+| `IAsyncZeebeWorker<TInput, TResponse>`   | Asynchronous worker with specific input and specific response      | Fetches exactly the variables defined as attributes in `TInput`.                            |   |   |
+| `IAsyncZeebeWorkerWithResult<TResponse>` | Asynchronous worker without specific input but a specific response | Default is to fetch all process variables. Use `FetchVariables` attribute for restrictions. |
+| `IZeebeWorker`                           | Synchronous worker without specific input and no response          | Default is to fetch all process variables.  Use `FetchVariables` attribute for restictions. |
+| `IZeebeWorker<TInput>`                   | Synchronous worker with specific input and no response             | Fetches exactly the variables defined as attributes in `TInput`.                            |
+| `IZeebeWorker<TInput, TResponse>`        | Synchronous worker with specific input and specific response       | Fetches exactly the variables defined as attributes in `TInput`.                            |
+| `IZeebeWorkerWithResult<TResponse>`      | Synchronous worker without specific input but a specific response  | Default is to fetch all process variables. Use `FetchVariables` attribute for restrictions. |
+
 If you like to explicitely restrict the variables fetched from Zeebe, you have the following additional option:
 
 ```csharp
 [JobType("doComplexWork")]
 [FetchVariables("businessKey", "applicantName")]
-public class SimpleJobHandler : IAsyncJobHandler<ZeebeJob>
+public class SimpleWorker : IAsyncZeebeWorker
+{
+   ...
+}
+```
+
+In case you do not want to fetch any variables at all from Zeebe, use `[FetchVariables(none: true)]`:
+
+```csharp
+[JobType("doSimpleWork")]
+[FetchVariables(none: true)]
+class SimpleWorker : IZeebeWorker
 {
    ...
 }
@@ -237,9 +260,9 @@ The one time job handler will be destroyed after `ReceiveMessage` returns.
 
 ## Hints
 
-1. By default the job handlers are added to de DI container with a `Transient` service lifetime. This can be overriden by adding the `ServiceLifetimeAttribute` to the job handler, see [attributes] for more information.
-1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. Serialization / Deserialization uses CamelCase as naming policy.
-1. The default job type of a job handler is the class name of the job handler. This can be overriden by adding the `JobTypeAttribute` to the job handler, e.g. `[JobType("myJobName")]`.
+1. By default the workers are added to de DI container with a `Transient` service lifetime. This can be overriden by adding the `ServiceLifetimeAttribute` to the worker, see [attributes] for more information.
+1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. Serialization / Deserialization always uses CamelCase as naming policy!
+1. The default job type of a worker is the class name of the worker. This can be overriden by adding the `JobTypeAttribute` to the worker, e.g. `[JobType("myJobName")]`.
 
 ## How to build
 

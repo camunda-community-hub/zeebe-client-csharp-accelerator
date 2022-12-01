@@ -14,7 +14,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Stubs
     [PollInterval(int.MaxValue - 4)]
     [FetchVariables("1", "2", "3", "4", "5")]
     [WorkerName("TestWorkerName")]
-    public class JobHandlerA : IJobHandler<ZeebeJob>
+    public class JobHandlerA : IZeebeWorker
     {
         private readonly HandleJobDelegate handleJobDelegate;
 

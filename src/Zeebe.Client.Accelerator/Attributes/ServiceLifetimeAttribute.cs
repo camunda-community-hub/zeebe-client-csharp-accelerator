@@ -4,7 +4,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Attributes 
 {    
-    public class ServiceLifetimeAttribute : AbstractJobHandlerAttribute
+    public class ServiceLifetimeAttribute : AbstractWorkerAttribute
     {
         public ServiceLifetimeAttribute(ServiceLifetime serviceLifetime)
         {            

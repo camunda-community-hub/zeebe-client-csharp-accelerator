@@ -4,7 +4,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
 {
-    public class ExceptionHandlerJobHandler : IJobHandler<ZeebeJob>
+    public class ExceptionHandlerJobHandler : IZeebeWorker
     {
         private readonly HandleJobDelegate handleJobDelegate;
 

@@ -3,7 +3,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Attributes 
 {    
-    public class TimeoutAttribute : AbstractJobHandlerAttribute
+    public class TimeoutAttribute : AbstractWorkerAttribute
     {
         public TimeoutAttribute(long timeoutInMilliseconds)
         {

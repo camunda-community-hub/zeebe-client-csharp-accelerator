@@ -1,14 +1,9 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Zeebe.Client.Api.Responses;
-using Zeebe.Client.Api.Worker;
+using static Google.Apis.Requests.BatchRequest;
 
 namespace Zeebe.Client.Accelerator.Abstractions
 {
-    public interface IZeebeJobHandler
-    {
-        Task HandleJob(IJobClient jobClient, IJob job, CancellationToken cancellationToken);
-    }
 
     public interface IAsyncJobHandler<TJob>  where TJob : AbstractJob
     {
@@ -21,4 +16,12 @@ namespace Zeebe.Client.Accelerator.Abstractions
     {
         Task<TResponse> HandleJob(TJob job, CancellationToken cancellationToken);
     }
+
+
+    public interface IAsyncZeebeWorker : IAsyncJobHandler<ZeebeJob> { }
+    public interface IAsyncZeebeWorker<TInput> : IAsyncJobHandler<ZeebeJob<TInput>> where TInput : class, new() { }
+    public interface IAsyncZeebeWorker<TInput, TResponse> : IAsyncJobHandler<ZeebeJob<TInput>,TResponse> 
+        where TInput : class, new ()
+        where TResponse : class { }
+    public interface IAsyncZeebeWorkerWithResult<TResponse> : IAsyncJobHandler<ZeebeJob, TResponse> where TResponse : class { }
 }

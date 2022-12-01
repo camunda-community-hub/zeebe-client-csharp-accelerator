@@ -24,7 +24,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         private readonly List<IJobHandlerInfo> jobHandlerInfoCollection;
         private readonly Mock<HandleJobDelegate> handleJobDelegateMock;
         private readonly Mock<IZeebeClient> zeebeClientMock;
-        private readonly Mock<IZeebeJobHandler> bootstrapJobHandlerMock;
+        private readonly Mock<IBootstrapJobHandler> bootstrapJobHandlerMock;
         private readonly Mock<IServiceProvider> serviceProviderMock;
         private readonly Mock<IServiceScope> serviceScopeMock;
         private readonly Mock<IServiceScopeFactory> serviceScopeFactoryMock;
@@ -333,15 +333,15 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             mock.Setup(m => m.GetService(It.Is<Type>(t => t.Equals(typeof(IZeebeClient)))))
                 .Returns(zeebeClientMock.Object);
 
-            mock.Setup(m => m.GetService(It.Is<Type>(t => t.Equals(typeof(IZeebeJobHandler)))))
+            mock.Setup(m => m.GetService(It.Is<Type>(t => t.Equals(typeof(IBootstrapJobHandler)))))
                 .Returns(bootstrapJobHandlerMock.Object);
 
             return mock;
         }
 
-        private static Mock<IZeebeJobHandler> CreateBootstrapJobHandlerMock(Mock<HandleJobDelegate> handleJobDelegateMock)
+        private static Mock<IBootstrapJobHandler> CreateBootstrapJobHandlerMock(Mock<HandleJobDelegate> handleJobDelegateMock)
         {
-            var mock =  new Mock<IZeebeJobHandler>();
+            var mock =  new Mock<IBootstrapJobHandler>();
 
             mock.Setup(m => m.HandleJob(It.IsAny<IJobClient>(), It.IsAny<IJob>(), It.IsAny<CancellationToken>()))
                 .Returns<IJobClient, IJob, CancellationToken>((jobClient, job, cancellationToken) => {

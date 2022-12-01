@@ -3,7 +3,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Attributes 
 {
-    public class JobTypeAttribute : AbstractJobHandlerAttribute
+    public class JobTypeAttribute : AbstractWorkerAttribute
     {
         public JobTypeAttribute(string jobType)
         {

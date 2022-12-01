@@ -3,7 +3,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Attributes 
 {    
-    public class FetchVariablesAttribute : AbstractJobHandlerAttribute
+    public class FetchVariablesAttribute : AbstractWorkerAttribute
     {
         public FetchVariablesAttribute(params string[] fetchVariables)
         {
@@ -12,9 +12,18 @@ namespace Zeebe.Client.Accelerator.Attributes
                 throw new ArgumentNullException(nameof(fetchVariables));
             }
 
+            this.None = false;
             this.FetchVariables = fetchVariables;
         }
 
         public string[] FetchVariables { get; }
+
+        public FetchVariablesAttribute(bool none)
+        {
+            this.None = none;
+            this.FetchVariables = new string[0];
+        }
+
+        public bool None { get; }
     }
 }

@@ -12,7 +12,7 @@ using Zeebe.Client.Accelerator.Options;
 
 namespace Zeebe.Client.Accelerator
 {
-    public class ZeebeJobHandler : IZeebeJobHandler
+    public class ZeebeJobHandler : IBootstrapJobHandler
     {
         private readonly IJobHandlerInfoProvider jobHandlerInfoProvider;
         private readonly IServiceProvider serviceProvider;

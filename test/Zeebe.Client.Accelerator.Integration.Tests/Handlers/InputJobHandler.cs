@@ -4,7 +4,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
 {
-    public class InputJobHandler : IJobHandler<ZeebeJob<State>>
+    public class InputJobHandler : IZeebeWorker<State>
     {
         private readonly HandleJobDelegate handleJobDelegate;
 

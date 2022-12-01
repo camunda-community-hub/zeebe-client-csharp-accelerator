@@ -3,7 +3,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Attributes 
 {    
-    public class PollIntervalAttribute : AbstractJobHandlerAttribute
+    public class PollIntervalAttribute : AbstractWorkerAttribute
     {
         public PollIntervalAttribute(long pollIntervalInMilliseconds)
         {

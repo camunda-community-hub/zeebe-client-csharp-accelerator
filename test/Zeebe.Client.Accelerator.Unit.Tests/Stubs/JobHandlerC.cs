@@ -6,7 +6,8 @@ using Zeebe.Client.Accelerator.Attributes;
 
 namespace Zeebe.Client.Accelerator.Unit.Tests.Stubs
 {
-    public class JobHandlerC : IAsyncJobHandler<ZeebeJob>
+    [FetchVariables(none: true)]
+    public class JobHandlerC : IAsyncZeebeWorker
     {private readonly HandleJobDelegate handleJobDelegate;
 
         public JobHandlerC(HandleJobDelegate handleJobDelegate)
