@@ -8,12 +8,12 @@
 
 # Bootstrap Accelerator for the C# Zeebe client
 
-This project is an extension of the [C# Zeebe client project](https://github.com/camunda-community-hub/zeebe-client-csharp). Zeebe workers are automaticly recognized and bootstrapped via a [.Net HostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
+This project is an extension of the [C# Zeebe client project](https://github.com/camunda-community-hub/zeebe-client-csharp). Zeebe Workers are automatically recognized and bootstrapped via a [.Net HostedService](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/multi-container-microservice-net-applications/background-tasks-with-ihostedservice).
 
 Read the [Zeebe documentation](https://docs.camunda.io/docs/components/zeebe/zeebe-overview/) for more information about the Zeebe project.
 
 The basic idea and implementation for this came from https://github.com/camunda-community-hub/zeebe-client-csharp-bootstrap.
-We loved the idea, but had in some parts our own preferences for defaults and behaviour. So this is our version of a good Bootstrap
+We loved the idea, but had in some parts our own preferences for defaults, behaviour and separation of concerns. So this is our version of a good Bootstrap
 Extension for the C# Zeebe Client. Credits for the base work still belong to https://github.com/arjangeertsema.
 
 ## Requirements
