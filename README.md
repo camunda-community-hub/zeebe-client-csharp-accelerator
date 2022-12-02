@@ -28,6 +28,8 @@ Extension for the C# Zeebe Client. Credits for the base work still belong to htt
 
 The Zeebe C# client bootstrap extension is available via nuget (https://www.nuget.org/packages/zb-client-accelerator/).
 
+A complete sample project using this extension can be found in [examples].
+
 ## Quick start
 
 All classes which implement `IZeebeWorker`, `IAsyncZeebeWorker`, `IZeebeWorkerWithResult` or `IAsyncZeebeWorkerWithResult` are automatically found, added to the service collection and autowired to Zeebe when you register this bootstrap project with the `IServiceCollection.BootstrapZeebe()` extension method.

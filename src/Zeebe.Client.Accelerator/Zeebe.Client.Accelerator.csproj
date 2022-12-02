@@ -13,7 +13,7 @@ For more information about the zeebe project please visit https://camunda.com/pl
 The basic idea for this came from https://github.com/camunda-community-hub/zeebe-client-csharp-bootstrap.
 We loved the idea, but had in some parts our own preferences for defaults, behaviour and separation of concerns. 
 So this is our version of a good Bootstrap Extension for the C# Zeebe Client. Credits still belong to https://github.com/arjangeertsema.</Description>
-    <Product>Zeebe C# Client Boostrap extension</Product>
+    <Product>Zeebe C# Client Accelerator extension</Product>
     <RepositoryUrl>https://github.com/VonDerBeck/zeebe-client-csharp-accelerator</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
 

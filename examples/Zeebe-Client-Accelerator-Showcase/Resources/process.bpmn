@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1vdm7pj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.5.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.1.0">
+  <bpmn:process id="Process_ApplicationFullfillment" isExecutable="true">
+    <bpmn:extensionElements>
+      <zeebe:userTaskForm id="userTaskForm_0oal3ou">{
+  "components": [
+    {
+      "label": "New User",
+      "type": "textfield",
+      "id": "Field_1lgf0jz",
+      "key": "applicantName",
+      "disabled": true
+    },
+    {
+      "label": "Approve User?",
+      "type": "checkbox",
+      "id": "Field_0kmb7yg",
+      "key": "approved"
+    },
+    {
+      "action": "submit",
+      "label": "Complete",
+      "type": "button",
+      "id": "Field_0am3ij9",
+      "key": "field_17wbu9f"
+    }
+  ],
+  "type": "default",
+  "id": "Form_19q4j7x",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.1.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.5.1"
+  },
+  "schemaVersion": 5
+}</zeebe:userTaskForm>
+    </bpmn:extensionElements>
+    <bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received">
+      <bpmn:outgoing>Flow_1lo5qbn</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1lo5qbn" sourceRef="StartEvent_ApplicationReceived" targetRef="Task_AppoveUser" />
+    <bpmn:userTask id="Task_AppoveUser" name="Approve User">
+      <bpmn:extensionElements>
+        <zeebe:formDefinition formKey="camunda-forms:bpmn:userTaskForm_0oal3ou" />
+        <zeebe:assignmentDefinition assignee="demo" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1lo5qbn</bpmn:incoming>
+      <bpmn:outgoing>Flow_0wzu2c9</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_CheckApproval" name="approved?" default="Flow_0e8w1op">
+      <bpmn:incoming>Flow_0wzu2c9</bpmn:incoming>
+      <bpmn:outgoing>Flow_0e8w1op</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1sz61z8</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0wzu2c9" sourceRef="Task_AppoveUser" targetRef="Gateway_CheckApproval" />
+    <bpmn:sequenceFlow id="Flow_0e8w1op" sourceRef="Gateway_CheckApproval" targetRef="Activity_CreateUserAccount" />
+    <bpmn:serviceTask id="Activity_CreateUserAccount" name="Create User Account">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="accountService" />
+        <zeebe:taskHeaders>
+          <zeebe:header key="action" value="create" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0e8w1op</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ze9naf</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_ApplicationApproved" name="Application approved">
+      <bpmn:incoming>Flow_0ze9naf</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0ze9naf" sourceRef="Activity_CreateUserAccount" targetRef="EndEvent_ApplicationApproved" />
+    <bpmn:endEvent id="EndEvent_ApplicationDenied" name="Application denied">
+      <bpmn:incoming>Flow_1sz61z8</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1sz61z8" name="no" sourceRef="Gateway_CheckApproval" targetRef="EndEvent_ApplicationDenied">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=not(approved)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_ApplicationFullfillment">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_ApplicationReceived">
+        <dc:Bounds x="162" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="154" y="145" width="53" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0os2wmx_di" bpmnElement="Task_AppoveUser">
+        <dc:Bounds x="300" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1in1eiv_di" bpmnElement="Gateway_CheckApproval" isMarkerVisible="true">
+        <dc:Bounds x="445" y="95" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="446" y="65" width="52" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1fc40ha_di" bpmnElement="Activity_CreateUserAccount">
+        <dc:Bounds x="570" y="80" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_174hyoz_di" bpmnElement="EndEvent_ApplicationApproved">
+        <dc:Bounds x="722" y="102" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="714" y="145" width="53" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1fu3qbv_di" bpmnElement="EndEvent_ApplicationDenied">
+        <dc:Bounds x="722" y="242" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="696" y="285" width="89" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1lo5qbn_di" bpmnElement="Flow_1lo5qbn">
+        <di:waypoint x="198" y="120" />
+        <di:waypoint x="300" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0wzu2c9_di" bpmnElement="Flow_0wzu2c9">
+        <di:waypoint x="400" y="120" />
+        <di:waypoint x="445" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0e8w1op_di" bpmnElement="Flow_0e8w1op">
+        <di:waypoint x="495" y="120" />
+        <di:waypoint x="570" y="120" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1sz61z8_di" bpmnElement="Flow_1sz61z8">
+        <di:waypoint x="470" y="145" />
+        <di:waypoint x="470" y="260" />
+        <di:waypoint x="722" y="260" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="479" y="200" width="13" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ze9naf_di" bpmnElement="Flow_0ze9naf">
+        <di:waypoint x="670" y="120" />
+        <di:waypoint x="722" y="120" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
