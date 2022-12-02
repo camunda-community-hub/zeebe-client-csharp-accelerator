@@ -20,7 +20,7 @@ namespace Zeebe.Client.Accelerator.Extensions
         {
             try
             {
-                ReceiveMessage(zeebeClient, jobType, timeSpan, null);
+                ReceiveMessage(zeebeClient, jobType, timeSpan, "");
                 return true;
             } catch (MessageTimeoutException)
             {
