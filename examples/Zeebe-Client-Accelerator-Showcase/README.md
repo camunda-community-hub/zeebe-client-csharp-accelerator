@@ -12,7 +12,7 @@ and a [docker-compose.yaml](docker-compose.yaml) file for local development.
 
 The showcase consists of a simple process including a User Task as well as a Service Task
 
-![process](Docs/process.PNG)
+![process](Docs/process.png)
 
 The application includes a REST API for starting the process.
 
@@ -118,7 +118,7 @@ The process is startet using the REST API and can be found in `ShowccaseControll
 
 The service task definition for "Create User Account" does not only define the required Task Definition Type, but also custom header information:
 
-![process](Docs/task-definition.PNG)
+![task-definition](Docs/task-definition.png)
 
 The corresponding worker code can be found in `AccountServiceWorker` and is quite simple:
 
