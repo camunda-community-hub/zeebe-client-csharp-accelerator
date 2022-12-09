@@ -11,12 +11,14 @@ namespace Zeebe.Client.Accelerator
 {
     public class JobHandlerInfoProvider : IJobHandlerInfoProvider
     {
-        private static readonly List<Type> HANDLER_TYPES = new List<Type>()
+        private static readonly List<Type> GENERIC_HANDLER_TYPES = new List<Type>()
         {
-            typeof(IJobHandler<>),
-            typeof(IJobHandler<,>),
-            typeof(IAsyncJobHandler<>),
-            typeof(IAsyncJobHandler<,>)
+            typeof(IZeebeWorker<>),
+            typeof(IAsyncZeebeWorker<>),
+            typeof(IZeebeWorker<,>),
+            typeof(IAsyncZeebeWorker<,>),
+            typeof(IZeebeWorkerWithResult<>),
+            typeof(IAsyncZeebeWorkerWithResult<>)
         };
         private readonly Assembly[] assemblies;
         private List<IJobHandlerInfo> jobHandlers;
@@ -42,7 +44,7 @@ namespace Zeebe.Client.Accelerator
         {
             return assemblies
                 .SelectMany(a => a.GetTypes())
-                .Where(t => ImplementsJobHandlerInterface(t))
+                .Where(t => IsZeebeWorker(t))
                 .SelectMany(t => CreateJobHandlerInfo(t));
         }
 
@@ -55,7 +57,7 @@ namespace Zeebe.Client.Accelerator
         private static IEnumerable<MethodInfo> GetJobHandlerMethods(Type jobHandlerType)
         {
             var jobHandlerMethods = jobHandlerType.GetInterfaces()
-                .Where(i => IsJobHandlerInterface(i))
+                .Where(i => IsZeebeWorkerInterface(i))
                 .SelectMany(i => i.GetMethods());
 
             if (jobHandlerMethods.Count() > 1)
@@ -167,9 +169,14 @@ namespace Zeebe.Client.Accelerator
                 .ToArray();                
         }
 
-        private static bool ImplementsJobHandlerInterface(Type type)
+        private static bool IsZeebeWorker(Type t)
         {
-            return HANDLER_TYPES.Any(h => ImplementsGenericType(type, h));
+            var interfaces = t.GetInterfaces();
+            return
+                interfaces.Contains(typeof(IZeebeWorker)) ||
+                interfaces.Contains(typeof(IAsyncZeebeWorker))
+                || interfaces.Any(i => i.IsGenericType && GENERIC_HANDLER_TYPES.Contains(i.GetGenericTypeDefinition()))
+                ;
         }
 
         private static bool IsJobHandlerMethod(MethodInfo method, IEnumerable<MethodInfo> jobHandlerMethods)
@@ -184,23 +191,16 @@ namespace Zeebe.Client.Accelerator
                 h.ReturnParameter.ParameterType.Equals(method.ReturnParameter.ParameterType)
             );
         }
-
-        private static bool ImplementsGenericType(Type type, Type genericType)
-        {
-            return
-                type.IsClass && 
-                type.GetInterfaces()
-                    .Any(i => i.IsGenericType && i.GetGenericTypeDefinition() == genericType);
-        }
         
-        private static bool IsJobHandlerInterface(Type i)
+        private static bool IsZeebeWorkerInterface(Type i)
         {
-            return i.IsGenericType && 
-                HANDLER_TYPES.Any(h => i.GetGenericTypeDefinition().Equals(h));
+            return 
+                i.Equals(typeof(IZeebeWorker)) ||
+                i.Equals(typeof(IAsyncZeebeWorker)) ||
+                i.IsGenericType && GENERIC_HANDLER_TYPES.Any(h => i.GetGenericTypeDefinition().Equals(h));
         }
         private static Type GetJobStateType(Type jobType)
         {
-            var definition = typeof(AbstractJob<>);
             var zDefinition = typeof(ZeebeJob<>);
 
             var genericJobType = BaseTypes(jobType)
@@ -208,14 +208,6 @@ namespace Zeebe.Client.Accelerator
                     && (t.GetGenericTypeDefinition().Equals(zDefinition)))
                 .SingleOrDefault();
 
-            if(genericJobType == null)
-            {
-                genericJobType = BaseTypes(jobType)
-                .Where(t => t.IsAbstract
-                    && t.IsGenericType
-                    && (t.GetGenericTypeDefinition().Equals(definition)))
-                .SingleOrDefault();
-            }
             if (genericJobType == null)
                 return null;
 

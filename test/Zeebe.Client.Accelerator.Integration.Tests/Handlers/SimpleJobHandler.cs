@@ -6,7 +6,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
 {
-    public class SimpleJobHandler : IAsyncJobHandler<SimpleJob>
+    public class SimpleJobHandler : IAsyncZeebeWorker
     {
         private readonly HandleJobDelegate handleJobDelegate;
 
@@ -15,16 +15,11 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
             this.handleJobDelegate = handleJobDelegate;
         }
 
-        public Task HandleJob(SimpleJob job, CancellationToken cancellationToken)
+        public Task HandleJob(ZeebeJob job, CancellationToken cancellationToken)
         {  
             handleJobDelegate(job, cancellationToken);
             return Task.CompletedTask;
         }
     }
 
-    public class SimpleJob : AbstractJob
-    {
-        public SimpleJob(IJob job) : base(job)
-        { }
-    }
 }

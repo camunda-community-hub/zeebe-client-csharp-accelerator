@@ -166,7 +166,7 @@ namespace Zeebe.Client.Accelerator
 
         private static Type GetJobStateType(Type jobType)
         {
-            var definition = typeof(AbstractJob<>);
+            var definition = typeof(AbstractJob);
 
             var genericJobType = BaseTypes(jobType)
                 .Where(t => t.IsAbstract

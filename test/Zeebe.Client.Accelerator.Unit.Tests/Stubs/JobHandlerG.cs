@@ -6,15 +6,16 @@ using Zeebe.Client.Accelerator.Attributes;
 
 namespace Zeebe.Client.Accelerator.Unit.Tests.Stubs
 {
-    public class JobHandlerG : IAsyncJobHandler<JobG>
-    {private readonly HandleJobDelegate handleJobDelegate;
+    public class JobHandlerG : IAsyncZeebeWorker<JobGState>
+    {
+        private readonly HandleJobDelegate handleJobDelegate;
 
         public JobHandlerG(HandleJobDelegate handleJobDelegate)
         {
             this.handleJobDelegate = handleJobDelegate;
         }
         
-        public Task HandleJob(JobG job, CancellationToken cancellationToken)
+        public Task HandleJob(ZeebeJob<JobGState> job, CancellationToken cancellationToken)
         {
             this.handleJobDelegate(job, cancellationToken);
             return Task.CompletedTask;

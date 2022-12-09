@@ -5,7 +5,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
 {
-    public class OutputJobHandler : IJobHandler<OutputJob, State>
+    public class OutputJobHandler : IZeebeWorker<State, State>
     {
         public static State State = new State()
         {
@@ -24,17 +24,12 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
             this.handleJobDelegate = handleJobDelegate;
         }
 
-        public State HandleJob(OutputJob job, CancellationToken cancellationToken)
+        public State HandleJob(ZeebeJob<State> job, CancellationToken cancellationToken)
         {
-            State.Guid = job.State.Guid;
+            State.Guid = job.getVariables().Guid;
             handleJobDelegate(job, cancellationToken);
             return State;
         }
-    }
-
-    public class OutputJob : AbstractJob<State>
-    {
-        public OutputJob(IJob job, State state) : base(job, state) { }
     }
 
     public class State

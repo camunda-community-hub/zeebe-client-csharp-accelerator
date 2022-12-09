@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using Xunit.Abstractions;
 using Zeebe.Client.Accelerator.Abstractions;
 using Zeebe.Client.Accelerator.Unit.Tests.Stubs;
 
@@ -12,12 +13,11 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
     public class JobHandlerInfoProviderTests
     {
         private readonly Assembly assembly;
-        public JobHandlerInfoProviderTests()
+        public JobHandlerInfoProviderTests(ITestOutputHelper testOutputHelper)
         {
             this.assembly = typeof(JobHandlerInfoProviderTests).Assembly;
         }
-
-
+ 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenAssemblyProviderIsNull() 
         {

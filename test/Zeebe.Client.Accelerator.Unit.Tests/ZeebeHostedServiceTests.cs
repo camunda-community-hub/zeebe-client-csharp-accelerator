@@ -159,10 +159,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
 
             this.handleJobDelegateMock.Verify(d => d.Invoke(It.IsAny<IJob>(), It.IsAny<CancellationToken>()), Times.Exactly(this.jobHandlerInfoCollection.Count));
             Assert.Equal(jobs.Count, this.jobHandlerInfoCollection.Count);
-
-            (new Type[] { typeof(ZeebeJob), typeof(JobG), typeof(JobH) })
-                .All(t => jobs.Where(j => j.GetType().Equals(t)).Any());
-            
+         
             this.serviceScopeFactoryMock.Verify(m => m.CreateScope(), Times.Exactly(jobs.Count), "ServiceScope has not been created for each job handling.");
             this.serviceScopeMock.Verify(m => m.Dispose(), Times.Exactly(jobs.Count), "ServiceScope has not been disposed for each job handling.");
         }

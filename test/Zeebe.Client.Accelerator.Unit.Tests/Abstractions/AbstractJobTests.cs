@@ -13,13 +13,6 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
         public void ThrowsArgumentNullExceptionWhenJobIsNull() 
         {
             Assert.Throws<ArgumentNullException>("job", () => new ZeebeJob(null, new ZeebeVariablesDeserializer()));
-            Assert.Throws<ArgumentNullException>("job", () => new JobG(null, new JobGState()));
-        }
-
-        [Fact]
-        public void ThrowsArgumentNullExceptionWhenStateIsNull() 
-        {
-            Assert.Throws<ArgumentNullException>("state", () => new JobG(new Mock<IJob>().Object, null));
         }
 
         [Fact]
@@ -37,7 +30,8 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
             var worker = Guid.NewGuid().ToString();
             var retries = random.Next();
             var deadline = new DateTime((long)random.Next());
-            var variables = Guid.NewGuid().ToString();
+            var state = new JobGState() { Guid = Guid.NewGuid() };
+            var variables = new ZeebeVariablesSerializer().Serialize(state);
             var customHeaders = Guid.NewGuid().ToString();
 
             var mock = new Mock<IJob>();
@@ -70,8 +64,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
             Assert.Equal(variables, job.Variables);
             Assert.Equal(customHeaders, job.CustomHeaders);
 
-            var state = new JobGState();
-            var genericJob = new JobG(mock.Object, state);
+            var genericJob = new ZeebeJob<JobGState>(mock.Object, new ZeebeVariablesDeserializer());
             Assert.Equal(key, genericJob.Key);
             Assert.Equal(type, genericJob.Type);
             Assert.Equal(processInstanceKey, genericJob.ProcessInstanceKey);
@@ -85,7 +78,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
             Assert.Equal(deadline, genericJob.Deadline);
             Assert.Equal(variables, genericJob.Variables);
             Assert.Equal(customHeaders, genericJob.CustomHeaders);
-            Assert.Equal(state, genericJob.State);
+            Assert.Equal(state, genericJob.getVariables());
         }
 
     }

@@ -3,6 +3,9 @@ using Zeebe.Client.Api.Responses;
 
 namespace Zeebe.Client.Accelerator.Abstractions
 {
+     /// <summary>
+     /// Data of a Job. Not intended for direct usage - please use class ZeebeJob.
+     /// </summary>
     public abstract class AbstractJob : IJob
     {
         protected readonly IJob job;
@@ -44,17 +47,4 @@ namespace Zeebe.Client.Accelerator.Abstractions
         public string CustomHeaders => job.CustomHeaders;
     }
 
-    public abstract class AbstractJob<TState> : AbstractJob
-        where TState : class, new()
-    {
-        private readonly TState state;
-
-        public AbstractJob(IJob job, TState state)
-            : base(job)
-        {
-            this.state = state ?? throw new ArgumentNullException(nameof(state));
-        }
-
-        public TState State { get { return state; } }
-    }
 }
