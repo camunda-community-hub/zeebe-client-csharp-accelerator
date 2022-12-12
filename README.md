@@ -32,7 +32,7 @@ A complete sample project using this extension can be found in [examples].
 
 ## Quick start
 
-All classes which implement `IZeebeWorker`, `IAsyncZeebeWorker`, `IZeebeWorkerWithResult` or `IAsyncZeebeWorkerWithResult` are automatically found, added to the service collection and autowired to Zeebe when you register this bootstrap project with the `IServiceCollection.BootstrapZeebe()` extension method.
+All classes which implement `IZeebeWorker`, `IAsyncZeebeWorker`, `IZeebeWorkerWithResult` or `IAsyncZeebeWorkerWithResult` are automatically added to the service collection and autowired to Zeebe when you register this bootstrap project with the `IServiceCollection.BootstrapZeebe()` extension method.
 
 More power is provided by `using global::Zeebe.Client.Accelerator.Extensions;` which provides you with further extensions for `IHost`, `IZeebeClient` etc. in
 order to deploy processes or create one time message receivers.
@@ -83,6 +83,8 @@ The configuration will e.g. look as follows:
   },
 }
 ```
+
+### Deploy Processes
 
 If we want to deploy some processes right before the final startup of our application we create a deployment using the extension for `IHost` or `IServiceProvider` as follows:
 
