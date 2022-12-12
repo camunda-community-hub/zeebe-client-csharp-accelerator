@@ -201,7 +201,7 @@ The following table gives you an overview of the available options:
 |------------------------------------------|--------------------------------------------------------------------|---------------------------------------------------------------------------------------------|
 | `IAsyncZeebeWorker`                      | Asynchronous worker without specific input and no response         | Default is to fetch all process variables.  Use `FetchVariables` attribute for restictions. |
 | `IAsyncZeebeWorker<TInput>`              | Asynchronous worker with specific input and no response            | Fetches exactly the variables defined as attributes in `TInput`.                            |
-| `IAsyncZeebeWorker<TInput, TResponse>`   | Asynchronous worker with specific input and specific response      | Fetches exactly the variables defined as attributes in `TInput`.                            |   |   |
+| `IAsyncZeebeWorker<TInput, TResponse>`   | Asynchronous worker with specific input and specific response      | Fetches exactly the variables defined as attributes in `TInput`.                            |
 | `IAsyncZeebeWorkerWithResult<TResponse>` | Asynchronous worker without specific input but a specific response | Default is to fetch all process variables. Use `FetchVariables` attribute for restrictions. |
 | `IZeebeWorker`                           | Synchronous worker without specific input and no response          | Default is to fetch all process variables.  Use `FetchVariables` attribute for restictions. |
 | `IZeebeWorker<TInput>`                   | Synchronous worker with specific input and no response             | Fetches exactly the variables defined as attributes in `TInput`.                            |
