@@ -28,7 +28,7 @@ Extension for the C# Zeebe Client. Credits for the base work still belong to htt
 
 The Zeebe C# client bootstrap extension is available via nuget (https://www.nuget.org/packages/zb-client-accelerator/).
 
-A complete sample project using this extension can be found in [examples].
+**Recommendation:** a complete sample project using this extension can be found in [examples].
 
 ## Quick start
 
