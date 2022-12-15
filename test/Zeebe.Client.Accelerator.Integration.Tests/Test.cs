@@ -116,6 +116,10 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             Assert.Equal(expected.Int, state.Int);
             Assert.Equal(expected.String, state.String);
             Assert.Equal(expected.Double, state.Double);
+
+            var doneMessage = zeebeClient.ReceiveMessage<DoneMessage>("SendDoneMessage", TimeSpan.FromSeconds(5));
+            Assert.Equal(expected.Guid, doneMessage.Guid);
+            Assert.Equal(expected.DateTime, doneMessage.DateTime);
         }
 
         public async Task InitializeAsync()
@@ -142,6 +146,12 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             }
 
             Thread.Sleep(500);
+        }
+
+        private class DoneMessage
+        {
+            public Guid Guid { get; set; }
+            public DateTime DateTime { get; set; }
         }
     }
 }

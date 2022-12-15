@@ -254,6 +254,12 @@ try
     ...
 }
 ```
+Of course it is possible to use a typed response, which will automatically fetch and deserialize all variables defined as attributes in the given type:
+
+```csharp
+MyVariables typedContent = _zeebeClient.ReceiveMessage<MyVariables>("received_" + number, TimeSpan.FromSeconds(3));
+```
+
 
 Simply waiting without receiving any variables:
 

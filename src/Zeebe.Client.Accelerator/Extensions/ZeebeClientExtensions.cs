@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Zeebe.Client.Accelerator.Abstractions;
+using Zeebe.Client.Accelerator.Utils;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Api.Worker;
 
@@ -67,6 +71,27 @@ namespace Zeebe.Client.Accelerator.Extensions
             }
 
         }
+
+        /// <summary>
+        /// Creates a dynamic job worker for retrieving an expected Zeebe message in a defined timespan. Blocks
+        /// until the message has been received or the timeout has been reached. The job worker will be closed
+        /// afterwards.
+        /// </summary>
+        /// <param name="jobType">job type</param>
+        /// <param name="timeSpan">timeout duration</param>
+        /// <typeparam name="T">return type - all attributes of this type will automatically be treated as variables to fetch (CamelCase)</typeparam>
+        /// <returns>fetched variables deserialized to the given type</returns>
+        /// <exception cref="MessageTimeoutException">in case the timout has been reached without receiving the message</exception>
+        public static T ReceiveMessage<T>(this IZeebeClient zeebeClient, string jobType, TimeSpan timeSpan)
+        {
+            var fetchVariables = typeof(T).GetProperties()
+                .Where(p => p.CanWrite)
+                .Select(p => StringUtils.ToCamelCase(p.Name))
+                .ToArray();
+            var result = ReceiveMessage(zeebeClient,jobType, timeSpan, fetchVariables);
+            return new ZeebeVariablesDeserializer().Deserialize<T>(result);
+        }
+
 
         private class ZeebeMessageReceiver
         {

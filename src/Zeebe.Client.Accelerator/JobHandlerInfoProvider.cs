@@ -6,6 +6,7 @@ using Zeebe.Client.Accelerator.Abstractions;
 using Zeebe.Client.Accelerator.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.RegularExpressions;
+using Zeebe.Client.Accelerator.Utils;
 
 namespace Zeebe.Client.Accelerator
 {
@@ -165,7 +166,7 @@ namespace Zeebe.Client.Accelerator
 
             return jobStateType.GetProperties()
                 .Where(p => p.CanWrite)
-                .Select(p => ToCamelCase(p.Name))
+                .Select(p => StringUtils.ToCamelCase(p.Name))
                 .ToArray();                
         }
 
@@ -222,21 +223,5 @@ namespace Zeebe.Client.Accelerator
             }
         }
 
-        private static string ToCamelCase(string str)
-        {
-            var words = str.Split(new[] { "_", " " }, StringSplitOptions.RemoveEmptyEntries);
-
-            var leadWord = Regex.Replace(words[0], @"([A-Z])([A-Z]+|[a-z0-9]+)($|[A-Z]\w*)",
-                m =>
-                {
-                    return m.Groups[1].Value.ToLower() + m.Groups[2].Value.ToLower() + m.Groups[3].Value;
-                });
-
-            var tailWords = words.Skip(1)
-                .Select(word => char.ToUpper(word[0]) + word.Substring(1))
-                .ToArray();
-
-            return $"{leadWord}{string.Join(string.Empty, tailWords)}";
-        }
     }
 }
