@@ -30,7 +30,7 @@
     </bpmn:endEvent>
     <bpmn:intermediateThrowEvent id="Event_1mp4lh3" name="Done">
       <bpmn:extensionElements>
-        <zeebe:taskDefinition type="SendDoneMessage" />
+        <zeebe:taskDefinition type="=&#34;responseFor_&#34; + guid" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0v9gyj4</bpmn:incoming>
       <bpmn:outgoing>Flow_1vj0j6p</bpmn:outgoing>

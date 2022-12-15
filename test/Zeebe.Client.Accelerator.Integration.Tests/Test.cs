@@ -117,7 +117,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             Assert.Equal(expected.String, state.String);
             Assert.Equal(expected.Double, state.Double);
 
-            var doneMessage = zeebeClient.ReceiveMessage<DoneMessage>("SendDoneMessage", TimeSpan.FromSeconds(5));
+            var doneMessage = zeebeClient.ReceiveMessage<DoneMessage>("responseFor_" + expectedGuid, TimeSpan.FromSeconds(5));
             Assert.Equal(expected.Guid, doneMessage.Guid);
             Assert.Equal(expected.DateTime, doneMessage.DateTime);
         }
