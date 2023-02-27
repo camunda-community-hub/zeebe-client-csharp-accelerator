@@ -100,7 +100,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [Fact]
         public void FetchVariablesPropertyIsSetCorrectlyWhenGenericStateAttributeIsUsed() 
         {
-            var expected = new string[] { "100", "101", "102", "103", "104" };
+            var expected = new string[] { "var100", "var101", "variable102", "variable103", "differentThing104" };
             var handlers = Handlers();
 
             var actual = handlers.Select(h => h.FetchVariabeles);

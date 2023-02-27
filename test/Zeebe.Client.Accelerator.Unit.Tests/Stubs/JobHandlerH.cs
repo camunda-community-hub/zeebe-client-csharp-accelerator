@@ -7,7 +7,7 @@ using Zeebe.Client.Accelerator.Attributes;
 namespace Zeebe.Client.Accelerator.Unit.Tests.Stubs
 {
 
-    [FetchVariables("100", "101", "102", "103", "104")]
+    [FetchVariables("Var100", "var101", "Variable_102", "variable_103", "Different_thing_104")]
     public class JobHandlerH :IAsyncZeebeWorker<JobHState>
     {private readonly HandleJobDelegate handleJobDelegate;
 

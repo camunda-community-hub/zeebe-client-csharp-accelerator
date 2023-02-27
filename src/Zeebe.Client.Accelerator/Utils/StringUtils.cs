@@ -8,6 +8,11 @@ namespace Zeebe.Client.Accelerator.Utils
 {
     public class StringUtils
     {
+        public static string[] ToCamelCase(string[] strings)
+        {
+            return Array.ConvertAll<string, string>(strings, new Converter<string, string>(ToCamelCase));
+        }
+
         public static string ToCamelCase(string str)
         {
             var words = str.Split(new[] { "_", " " }, StringSplitOptions.RemoveEmptyEntries);
