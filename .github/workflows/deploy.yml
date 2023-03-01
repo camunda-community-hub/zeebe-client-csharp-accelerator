@@ -15,7 +15,7 @@ jobs:
     - name: Setup
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: '6.0.x'
+        dotnet-version: '6.0.405'
     - name: Verify commit exists in origin/main
       run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
@@ -27,7 +27,7 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release /p:Version=${VERSION} --no-build
     - name: Pack
-      run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --property:PackageOutputPath=.
+      run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --output .
     - name: Nuget Push nuget.org
       run: dotnet nuget push "zb-client-accelerator.${VERSION}.nupkg" -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
       env:
