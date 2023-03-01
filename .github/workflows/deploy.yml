@@ -27,7 +27,7 @@ jobs:
     - name: Test
       run: dotnet test --configuration Release /p:Version=${VERSION} --no-build
     - name: Pack
-      run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build /p:PublishDir=.
+      run: dotnet pack --configuration Release /p:Version=${VERSION} --no-build --property:PackageOutputPath=.
     - name: Nuget Push nuget.org
       run: dotnet nuget push "zb-client-accelerator.${VERSION}.nupkg" -k ${NUGET_TOKEN} -s https://api.nuget.org/v3/index.json
       env:
