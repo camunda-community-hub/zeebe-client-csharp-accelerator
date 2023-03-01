@@ -4,7 +4,7 @@ using Zeebe.Client.Accelerator.Attributes;
 namespace Zeebe_Client_Accelerator_Showcase.Worker
 {
     [JobType("accountService")]
-    [FetchVariables("applicantName")] // fetches only the variable 'applicantName' - not the 'businessKey'
+    [FetchVariables("ApplicantName")] // fetches only the variable 'applicantName' - not the 'businessKey'
     public class AccountServiceWorker : IAsyncZeebeWorker
     {
         private readonly ILogger<AccountServiceWorker> _logger;
@@ -22,7 +22,7 @@ namespace Zeebe_Client_Accelerator_Showcase.Worker
             AccountServiceHeaders headers = job.getCustomHeaders<AccountServiceHeaders>();
 
             // call the account service adapter
-            _logger.LogInformation("Do {action} Account for {applicantName}", headers.Action, variables.ApplicantName);
+            _logger.LogInformation("Do {Action} Account for {ApplicantName}", headers.Action, variables.ApplicantName);
 
             // done
             return Task.CompletedTask;

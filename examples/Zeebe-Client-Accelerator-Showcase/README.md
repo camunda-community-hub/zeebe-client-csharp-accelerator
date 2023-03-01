@@ -65,7 +65,7 @@ To tear down the whole environment run the following command
 docker-compose down -v
 ```
 
-In addition to the local environment setup with docker-compose, you should download the [Camunda Desktop Modeler](https://camunda.com/download/modeler/) to model BPMN diagrams for execution and directly deploy them to your local environment.
+In addition to the local environment setup with docker-compose, you should download the [Camunda Desktop Modeler](https://camunda.com/download/modeler/) to model BPMN diagrams for execution or open the showcases `process.bpmn` file.
 
 ## Show me the important parts
 
