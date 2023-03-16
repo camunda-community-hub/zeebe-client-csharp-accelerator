@@ -101,15 +101,15 @@ namespace Zeebe.Client.Accelerator
             workers.Clear();
         }
 
-        private Task HandleJob(IJobClient jobClient, IJob job, CancellationToken cancellationToken)
+        private async Task HandleJob(IJobClient jobClient, IJob job, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
-                return Task.FromCanceled(cancellationToken);
+                throw new TaskCanceledException();
 
             using (var scope = this.serviceScopeFactory.CreateScope())
             {
                 var bootstrapJobHandler = scope.ServiceProvider.GetRequiredService<IBootstrapJobHandler>();
-                return bootstrapJobHandler.HandleJob(jobClient, job, cancellationToken);
+                await bootstrapJobHandler.HandleJob(jobClient, job, cancellationToken);
             }
         }
     }
