@@ -103,8 +103,7 @@ namespace Zeebe.Client.Accelerator
 
         private async Task HandleJob(IJobClient jobClient, IJob job, CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested)
-                throw new TaskCanceledException();
+            cancellationToken.ThrowIfCancellationRequested();
 
             using (var scope = this.serviceScopeFactory.CreateScope())
             {
