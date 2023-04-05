@@ -25,6 +25,12 @@ namespace Zeebe.Client.Accelerator.Extensions
 
         private static IZeebeClientFinalBuildStep BuildFinalStep(this IZeebeClientTransportBuilder builder, ClientOptions options)
         {
+            if (options.Cloud == null && 
+                (Environment.GetEnvironmentVariable("ZEEBE_CLIENT_ID") != null || Environment.GetEnvironmentVariable("ZEEBE_CLIENT_SECRET") != null))
+            {
+                options.Cloud = new ClientOptions.CloudOptions();
+            }
+
             if(options.TransportEncryption == null && options.Cloud == null)
                 return builder.UsePlainText();
 
