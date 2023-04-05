@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using Zeebe.Client.Api.Builder;
 
 namespace Zeebe.Client.Accelerator.Options
@@ -11,7 +12,8 @@ namespace Zeebe.Client.Accelerator.Options
         public class ClientOptions 
         {
             public virtual string GatewayAddress { get; set; }
-            public virtual TransportEncryptionOptions TransportEncryption { get; set; }        
+            public virtual TransportEncryptionOptions TransportEncryption { get; set; }
+            public virtual CloudOptions Cloud { get; set; }
             public virtual long? KeepAliveInMilliSeconds { get; set; }
             public virtual TimeSpan? KeepAlive { get { return KeepAliveInMilliSeconds.HasValue ? TimeSpan.FromMilliseconds(KeepAliveInMilliSeconds.Value) : (TimeSpan?) null; } }
             public virtual Func<int, TimeSpan> RetrySleepDurationProvider { get; set; }
@@ -21,6 +23,14 @@ namespace Zeebe.Client.Accelerator.Options
                 public virtual string RootCertificatePath { get; set; }
                 public virtual string AccessToken { get; set; }
                 public virtual IAccessTokenSupplier AccessTokenSupplier { get; set; }
+            }
+
+            public class CloudOptions
+            {
+                public virtual string ClientId { get; set; }
+                public virtual string ClientSecret { get; set; }
+                public virtual string AuthorizationServerUrl { get; set; } = "https://login.cloud.camunda.io/oauth/token";
+                public virtual string TokenAudience { get; set; } = "zeebe.camunda.io";
             }
         }
 

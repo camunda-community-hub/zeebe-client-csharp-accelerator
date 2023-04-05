@@ -24,6 +24,13 @@ namespace Zeebe.Client.Accelerator.Options
                 yield return new ArgumentNullException(nameof(ZeebeClientAcceleratorOptions.Client));
                 yield break;
             }
+            if (options.Cloud != null)
+            {
+                if (String.IsNullOrWhiteSpace(options.Cloud.ClientId))
+                    yield return new ArgumentException($"'{nameof(options.Cloud)}{nameof(options.Cloud.ClientId)}' must not be empty.", $"{nameof(ZeebeClientAcceleratorOptions.Client)}.{nameof(options.Cloud)}.{nameof(options.Cloud.ClientId)}");
+                if (String.IsNullOrWhiteSpace(options.Cloud.ClientSecret))
+                    yield return new ArgumentException($"'{nameof(options.Cloud)}.{nameof(options.Cloud.ClientSecret)}' must not be empty.", $"{nameof(ZeebeClientAcceleratorOptions.Client)}.{nameof(options.Cloud)}.{nameof(options.Cloud.ClientSecret)}");
+            }
         }
 
         private static IEnumerable<Exception> ValidateWorkerOptions(WorkerOptions options)
