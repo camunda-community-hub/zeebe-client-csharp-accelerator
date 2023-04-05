@@ -15,7 +15,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
 {
     public class IntegrationTestHelper : IAsyncDisposable
     {
-        public const string LatestZeebeVersion = "8.1.9";
+        public const string LatestZeebeVersion = "8.2.0";
         public const int ZeebePort = 26500;
         private readonly ILogger<IntegrationTestHelper> logger;
         private readonly CancellationTokenSource cancellationTokenSource;
