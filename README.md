@@ -120,7 +120,7 @@ Further rules:
 
 #### Troubleshouting
 
-If you get DNS errors from the GRPC layer (e.g. "DNS resolution failed for service"), you might need to set the following environment variable:
+If you get DNS errors from the gRPC layer (e.g. "DNS resolution failed for service"), you might need to set the following environment variable:
 
 ```
 export GRPC_DNS_RESOLVER=native
