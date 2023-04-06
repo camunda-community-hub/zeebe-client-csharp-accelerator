@@ -84,6 +84,66 @@ The configuration will e.g. look as follows:
   },
 }
 ```
+The `GatewayAddress` attribute can be set as well via standard environment variable `ZEEBE_ADDRESS` (since 1.0.2).
+
+### Configuring Camunda Platform 8 SaaS Connection
+*Since 1.0.2*
+
+Connections to the Camunda SaaS can be easily configured. Upon creating a new Zeebe API Client in the Cloud Console select the "Env Vars" section for your credentials and memorize all `ZEEBE_*` environment variables. You will get something like the following:
+
+```
+export ZEEBE_ADDRESS='a1b2c3dd-12ab-3c4d-ab1b-ab1c23abcc12.bru-2.zeebe.camunda.io:443'
+export ZEEBE_CLIENT_ID='ABcDE~a0bCD1eFGH1aEF5G.6HI_abCd0'
+export ZEEBE_CLIENT_SECRET='ABCDeFgHi1J0KLMnO0PQrOstUVWXyZAbCdeFGh2IjkLmnO-pqrstUVw0xyzab.cd'
+export ZEEBE_AUTHORIZATION_SERVER_URL='https://login.cloud.camunda.io/oauth/token'
+export ZEEBE_TOKEN_AUDIENCE='zeebe.camunda.io'
+```
+You now have 2 options. You can either set exactly these `ZEEBE_*` environment variables and you are done. 
+Of course you can alternatively manage these settings in the `appsettings.json` file:
+
+```json
+{
+  "ZeebeConfiguration": {
+    "Client": {
+      "GatewayAddress": "a1b2c3dd-12ab-3c4d-ab1b-ab1c23abcc12.bru-2.zeebe.camunda.io:443",
+      "Cloud": {
+        "ClientId": "ABcDE~a0bCD1eFGH1aEF5G.6HI_abCd0",
+        "ClientSecret": "ABCDeFgHi1J0KLMnO0PQrOstUVWXyZAbCdeFGh2IjkLmnO-pqrstUVw0xyzab.cd",
+        "AuthorizationServerUrl": "https://login.cloud.camunda.io/oauth/token",
+        "TokenAudience": "zeebe.camunda.io"
+      }
+    }
+```
+Further rules:
+- Environment variables have precedence over `appsettings.json`. 
+- `AutorizationServerUrl` and `TokenAudience` have the shown values as default values. Thus they are optional settings.
+
+#### Troubleshouting
+
+If you get DNS errors from the GRPC layer (e.g. "DNS resolution failed for service"), you might need to set the following environment variable:
+
+```
+export GRPC_DNS_RESOLVER=native
+```
+
+Further documentation is available under [gRPC environment variables](https://chromium.googlesource.com/external/github.com/grpc/grpc/+/HEAD/doc/environment_variables.md).
+
+### Other Transport layer options
+
+The implementation is based on the [Zeebe C# Client](https://github.com/camunda-community-hub/zeebe-client-csharp) and therefore has some more options available:
+
+```
+{
+  "ZeebeConfiguration": {
+    "Client": {
+      "GatewayAddress": "my-zeebe-gateway:26500",
+      "KeepAliveInMilliSeconds": ...
+      "TransportEncryption": {
+        "RootCertificatePath": "...",
+        "AccessToken": "..."
+      }
+```
+Transport encryption settings can as well be provided using environment variables `ZEEBE_ROOT_CERTIFICATE_PATH`, `ZEEBE_ACCESS_TOKEN`.
 
 ### Deploy Processes
 

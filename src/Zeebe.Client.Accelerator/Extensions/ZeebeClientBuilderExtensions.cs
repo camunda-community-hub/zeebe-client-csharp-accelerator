@@ -31,6 +31,12 @@ namespace Zeebe.Client.Accelerator.Extensions
                 options.Cloud = new ClientOptions.CloudOptions();
             }
 
+            if (options.TransportEncryption == null &&
+                (Environment.GetEnvironmentVariable("ZEEBE_ROOT_CERTIFICATE_PATH") != null || Environment.GetEnvironmentVariable("ZEEBE_ACCESS_TOKEN") != null))
+            {
+                options.TransportEncryption = new ClientOptions.TransportEncryptionOptions();
+            }
+
             if(options.TransportEncryption == null && options.Cloud == null)
                 return builder.UsePlainText();
 

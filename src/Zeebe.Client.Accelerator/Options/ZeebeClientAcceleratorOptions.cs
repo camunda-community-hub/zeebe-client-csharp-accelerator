@@ -22,10 +22,18 @@ namespace Zeebe.Client.Accelerator.Options
             public virtual TimeSpan? KeepAlive { get { return KeepAliveInMilliSeconds.HasValue ? TimeSpan.FromMilliseconds(KeepAliveInMilliSeconds.Value) : (TimeSpan?) null; } }
             public virtual Func<int, TimeSpan> RetrySleepDurationProvider { get; set; }
 
-            public class TransportEncryptionOptions 
+            public class TransportEncryptionOptions
             {
-                public virtual string RootCertificatePath { get; set; }
-                public virtual string AccessToken { get; set; }
+                private string _rootCertificatePath;
+                public virtual string RootCertificatePath {
+                    get { return GetEnvironmentVariable("ZEEBE_ROOT_CERTIFICATE_PATH", _rootCertificatePath); }
+                    set { _rootCertificatePath = value; }
+                }
+                private string _accessToken;
+                public virtual string AccessToken {
+                    get { return GetEnvironmentVariable("ZEEBE_ACCESS_TOKEN", _accessToken); }
+                    set { _accessToken = value; }
+                }
                 public virtual IAccessTokenSupplier AccessTokenSupplier { get; set; }
             }
 
