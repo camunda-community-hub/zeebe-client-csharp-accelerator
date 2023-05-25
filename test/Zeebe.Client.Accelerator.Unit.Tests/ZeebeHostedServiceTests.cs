@@ -388,6 +388,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             mock.Setup(b => b.FetchVariables(It.IsAny<IList<string>>())).Returns(builder);
             mock.Setup(b => b.FetchVariables(It.IsAny<string[]>())).Returns(builder);
             mock.Setup(b => b.MaxJobsActive(It.IsAny<int>())).Returns(builder);
+            mock.Setup(b => b.HandlerThreads(It.IsAny<byte>())).Returns(builder);
             mock.Setup(b => b.Name(It.IsAny<string>())).Returns(builder);
             mock.Setup(b => b.PollingTimeout(It.IsAny<TimeSpan>())).Returns(builder);
             mock.Setup(b => b.PollInterval(It.IsAny<TimeSpan>())).Returns(builder);
@@ -438,6 +439,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
 
             mock.SetupGet(m => m.Name).Returns(Guid.NewGuid().ToString());
             mock.SetupGet(m => m.MaxJobsActive).Returns(random.Next(1, int.MaxValue));
+            mock.SetupGet(m => m.HandlerThreads).Returns(Convert.ToByte(random.Next(1, 255)));
             mock.SetupGet(m => m.PollingTimeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
             mock.SetupGet(m => m.PollInterval).Returns(TimeSpan.FromMilliseconds(random.Next()));
             mock.SetupGet(m => m.Timeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
@@ -456,6 +458,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
                 Guid.NewGuid().ToString(),
                 Guid.NewGuid().ToString(),
                 random.Next(1, int.MaxValue),
+                Convert.ToByte(random.Next(1, 255)),
                 TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue)),
                 TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue)),
                 TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue)),

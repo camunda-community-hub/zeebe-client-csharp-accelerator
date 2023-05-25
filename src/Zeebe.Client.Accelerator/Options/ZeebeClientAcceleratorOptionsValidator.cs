@@ -43,6 +43,8 @@ namespace Zeebe.Client.Accelerator.Options
 
             if (options.MaxJobsActive < 1)
                 yield return new ArgumentOutOfRangeException($"{nameof(ZeebeClientAcceleratorOptions.Worker)}.{nameof(options.MaxJobsActive)}");
+            if (options.HandlerThreads < 1)
+                yield return new ArgumentOutOfRangeException($"{nameof(ZeebeClientAcceleratorOptions.Worker)}.{nameof(options.HandlerThreads)}");
             if (options.Timeout.TotalMilliseconds < 1)
                 yield return new ArgumentOutOfRangeException($"{nameof(ZeebeClientAcceleratorOptions.Worker)}.{nameof(options.Timeout)}");
             if (options.PollInterval.TotalMilliseconds < 1)

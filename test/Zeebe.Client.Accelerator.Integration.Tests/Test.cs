@@ -9,6 +9,7 @@ using Zeebe.Client.Accelerator.Extensions;
 using Zeebe.Client.Accelerator.Integration.Tests.Handlers;
 using Zeebe.Client.Accelerator.Integration.Tests.Helpers;
 using Zeebe.Client.Accelerator.Abstractions;
+using System.Linq;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests
 {
@@ -122,6 +123,37 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             Assert.Equal(expected.DateTime, doneMessage.DateTime);
         }
 
+        [Fact]
+        public async Task UsesMultipleThreadsWhenConfigured()
+        {
+            jobs = new List<IJob>();
+            
+            var zeebeClient = this.helper.ZeebeClient;
+            var deployResponse = await zeebeClient.NewDeployCommand()
+                .AddResourceFile(GetResourceFile("thread-test.bpmn"))
+                .Send();
+            Assert.True(deployResponse.Key > 0);
+
+            var input = new List<int>();
+            for (int i = 0; i < 50; i++) input.Add(i);
+
+            var correlationId = Guid.NewGuid();
+            await zeebeClient.NewCreateProcessInstanceCommand()
+                .BpmnProcessId("MultiThreadTest")
+                .LatestVersion()
+                .State(new
+                {
+                    InputCollection = input,
+                    CorrelationId = correlationId
+                })
+                .Send();
+            WaitForHandlersToComplete(50, 5000);
+
+            var variables = zeebeClient.ReceiveMessage<MultiThreadVariables>("responseFor_" + correlationId, TimeSpan.FromSeconds(25));
+            Assert.True(variables.UsedThreads.Distinct().Count() >= 3); // not exact due to the underlying TPL implementation internals
+
+        }
+
         public async Task InitializeAsync()
         {
             await this.helper.InitializeAsync();
@@ -152,6 +184,11 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
         {
             public Guid Guid { get; set; }
             public DateTime DateTime { get; set; }
+        }
+
+        private class MultiThreadVariables
+        {
+            public List<int> UsedThreads { get; set; }
         }
     }
 }

@@ -548,6 +548,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
                 Guid.NewGuid().ToString(),
                 Guid.NewGuid().ToString(),
                 random.Next(1, int.MaxValue),
+                Convert.ToByte(random.Next(1, 255)),
                 TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue)),
                 TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue)),
                 TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue)),

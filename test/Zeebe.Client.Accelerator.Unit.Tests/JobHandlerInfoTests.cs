@@ -14,6 +14,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         private readonly string workerName;
         private readonly TimeSpan timeout;
         private readonly int maxJobsActive;
+        private readonly byte handlerThreads;
         private readonly TimeSpan pollingTimeout;
         private readonly TimeSpan pollInterval;
         private string[] fetchVariabeles;
@@ -47,15 +48,23 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [InlineData(-1)]
         public void ThrowsArgumentOutOfRangeExceptionWhenMaxJobsActiveIsSmallerOrEqualThen0(int maxJobsActive) 
         {
-            Assert.Throws<ArgumentOutOfRangeException>("maxJobsActive", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, maxJobsActive, this.timeout, this.pollInterval, this.pollingTimeout));
+            Assert.Throws<ArgumentOutOfRangeException>("maxJobsActive", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, maxJobsActive, this.handlerThreads, this.timeout, this.pollInterval, this.pollingTimeout));
         }
+
+        [Theory]
+        [InlineData(0)]
+        public void ThrowsArgumentOutOfRangeExceptionWhenHandlerThreadsActiveIs0(byte handlerThreads)
+        {
+            Assert.Throws<ArgumentOutOfRangeException>("handlerThreads", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, handlerThreads, this.timeout, this.pollInterval, this.pollingTimeout));
+        }
+
 
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
         public void ThrowsArgumentOutOfRangeExceptionWhenTimeoutIsSmallerOrEqualThen0(int timeout) 
         {
-            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, TimeSpan.FromMilliseconds(timeout), this.pollInterval, this.pollingTimeout));
+            Assert.Throws<ArgumentOutOfRangeException>("timeout", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.handlerThreads, TimeSpan.FromMilliseconds(timeout), this.pollInterval, this.pollingTimeout));
         }
 
         [Theory]
@@ -63,7 +72,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [InlineData(-1)]
         public void ThrowsArgumentOutOfRangeExceptionWhenPollIntervalIsSmallerOrEqualThen0(int pollInterval) 
         {
-            Assert.Throws<ArgumentOutOfRangeException>("pollInterval", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.timeout, TimeSpan.FromMilliseconds(pollInterval), this.pollingTimeout));
+            Assert.Throws<ArgumentOutOfRangeException>("pollInterval", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.handlerThreads, this.timeout, TimeSpan.FromMilliseconds(pollInterval), this.pollingTimeout));
         }
 
         [Theory]
@@ -71,7 +80,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [InlineData(-1)]
         public void ThrowsArgumentOutOfRangeExceptionWhenPollingTimeoutIsSmallerOrEqualThen0(int pollingTimeout) 
         {
-            Assert.Throws<ArgumentOutOfRangeException>("pollingTimeout", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.timeout, this.pollInterval, TimeSpan.FromMilliseconds(pollingTimeout)));
+            Assert.Throws<ArgumentOutOfRangeException>("pollingTimeout", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.handlerThreads, this.timeout, this.pollInterval, TimeSpan.FromMilliseconds(pollingTimeout)));
         }
 
         [Fact]
@@ -83,6 +92,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             Assert.Equal(this.jobType, actual.JobType);
             Assert.Equal(this.workerName, actual.WorkerName);
             Assert.Equal(this.maxJobsActive, actual.MaxJobsActive);
+            Assert.Equal(this.handlerThreads, actual.HandlerThreads);
             Assert.Equal(this.timeout, actual.Timeout);
             Assert.Equal(this.pollInterval, actual.PollInterval);
             Assert.Equal(this.pollingTimeout, actual.PollingTimeout);
@@ -109,6 +119,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             this.workerName = Guid.NewGuid().ToString();
             this.timeout = TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue));
             this.maxJobsActive = random.Next(1, int.MaxValue);
+            this.handlerThreads = Convert.ToByte(random.Next(1, 255));
             this.pollingTimeout = TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue));
             this.pollInterval = TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue));
             this.fetchVariabeles = new string[] { 
@@ -126,6 +137,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
                 this.jobType,
                 this.workerName,
                 this.maxJobsActive,
+                this.handlerThreads,
                 this.timeout,
                 this.pollInterval,
                 this.pollingTimeout,

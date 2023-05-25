@@ -65,6 +65,7 @@ namespace Zeebe.Client.Accelerator.Options
         public class WorkerOptions
         {
             public virtual int MaxJobsActive { get; set; }
+            public virtual byte HandlerThreads { get; set; } = 1;
             public virtual long TimeoutInMilliseconds { get; set; }
             public virtual TimeSpan Timeout { get { return TimeSpan.FromMilliseconds(TimeoutInMilliseconds); } }
             public virtual long PollIntervalInMilliseconds { get; set; }

@@ -7,6 +7,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Options
     public class WorkerOptionsTests 
     {
         private readonly int maxJobsActive;
+        private readonly byte handlerThreads;
         private readonly long timeout;
         private readonly long pollInterval;
         private readonly long pollingTimeout;
@@ -50,6 +51,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Options
             var random = new Random();
 
             this.maxJobsActive = random.Next(1, int.MaxValue);
+            this.handlerThreads = Convert.ToByte(random.Next(1, 255));
             this.timeout = (long)random.Next(1, int.MaxValue);
             this.pollInterval = (long)random.Next(1, int.MaxValue);
             this.pollingTimeout = (long)random.Next(1, int.MaxValue);
@@ -62,6 +64,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Options
             var options = new WorkerOptions
             {
                 MaxJobsActive = this.maxJobsActive,
+                HandlerThreads = this.handlerThreads,
                 TimeoutInMilliseconds = this.timeout,
                 PollingTimeoutInMilliseconds = this.pollingTimeout,
                 PollIntervalInMilliseconds = this.pollInterval,

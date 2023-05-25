@@ -169,6 +169,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Options
 
             mock.SetupGet(m => m.Name).Returns(Guid.NewGuid().ToString());
             mock.SetupGet(m => m.MaxJobsActive).Returns(random.Next(1, int.MaxValue));
+            mock.SetupGet(m => m.HandlerThreads).Returns(Convert.ToByte(random.Next(1, 255)));
             mock.SetupGet(m => m.PollingTimeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
             mock.SetupGet(m => m.PollInterval).Returns(TimeSpan.FromMilliseconds(random.Next()));
             mock.SetupGet(m => m.Timeout).Returns(TimeSpan.FromMilliseconds(random.Next()));

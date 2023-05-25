@@ -11,6 +11,7 @@ namespace Zeebe.Client.Accelerator.Abstractions
         string JobType { get; }
         string WorkerName { get; }
         int? MaxJobsActive { get; }
+        byte? HandlerThreads { get; }
         TimeSpan? Timeout { get; }
         TimeSpan? PollInterval { get; }
         TimeSpan? PollingTimeout { get; }

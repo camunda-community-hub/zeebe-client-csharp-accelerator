@@ -81,6 +81,7 @@ namespace Zeebe.Client.Accelerator
                 GetJobType(jobHandlerType), 
                 GetWorkerName(jobHandlerType), 
                 GetMaxJobsActive(jobHandlerType), 
+                GetHandlerThreads(jobHandlerType),
                 GetTimeout(jobHandlerType),
                 GetPollInterval(jobHandlerType), 
                 GetPollingTimeout(jobHandlerType),
@@ -122,6 +123,12 @@ namespace Zeebe.Client.Accelerator
         {
             var attr = jobType.GetCustomAttribute<MaxJobsActiveAttribute>();
             return attr?.MaxJobsActive;
+        }
+
+        private static byte? GetHandlerThreads(Type jobType)
+        {
+            var attr = jobType.GetCustomAttribute<HandlerThreadsAttribute>();
+            return attr?.HandlerThreads;
         }
 
         private static TimeSpan? GetTimeout(Type jobType)

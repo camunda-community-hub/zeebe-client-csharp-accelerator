@@ -12,7 +12,8 @@ namespace Zeebe.Client.Accelerator
             ServiceLifetime handlerServiceLifetime,
             string jobType, 
             string workerName, 
-            int? maxJobsActive = null, 
+            int? maxJobsActive = null,
+            byte? handlerThreads = null,
             TimeSpan? timeout = null, 
             TimeSpan? pollInterval = null, 
             TimeSpan? pollingTimeout = null, 
@@ -26,7 +27,9 @@ namespace Zeebe.Client.Accelerator
 
             if (maxJobsActive.HasValue && maxJobsActive.Value < 1) 
                 throw new ArgumentOutOfRangeException(nameof(maxJobsActive));
-            if(timeout.HasValue && timeout.Value.TotalMilliseconds < 1)
+            if (handlerThreads.HasValue && handlerThreads.Value < 1)
+                throw new ArgumentOutOfRangeException(nameof(handlerThreads));
+            if (timeout.HasValue && timeout.Value.TotalMilliseconds < 1)
                 throw new ArgumentOutOfRangeException(nameof(timeout));
             if(pollInterval.HasValue && pollInterval.Value.TotalMilliseconds < 1)
                 throw new ArgumentOutOfRangeException(nameof(pollInterval));
@@ -38,6 +41,7 @@ namespace Zeebe.Client.Accelerator
             this.JobType = jobType;
             this.WorkerName = workerName;
             this.MaxJobsActive = maxJobsActive;
+            this.HandlerThreads = handlerThreads;
             this.Timeout = timeout;
             this.PollInterval = pollInterval;
             this.PollingTimeout = pollingTimeout;
@@ -49,6 +53,7 @@ namespace Zeebe.Client.Accelerator
         public string JobType { get; }
         public string WorkerName { get; }
         public int? MaxJobsActive { get; }
+        public byte? HandlerThreads { get; }
         public TimeSpan? Timeout { get; }
         public TimeSpan? PollInterval { get; }
         public TimeSpan? PollingTimeout { get; }

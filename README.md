@@ -76,6 +76,7 @@ The configuration will e.g. look as follows:
     },
     "Worker": {
       "MaxJobsActive": 5,
+      "HandlerThreads": 3,
       "TimeoutInMilliseconds": 500,
       "PollIntervalInMilliseconds": 50,
       "PollingTimeoutInMilliseconds": 1000,

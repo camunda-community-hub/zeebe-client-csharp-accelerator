@@ -11,7 +11,6 @@ using Microsoft.Extensions.Options;
 using static Zeebe.Client.Accelerator.Options.ZeebeClientAcceleratorOptions;
 using Microsoft.Extensions.DependencyInjection;
 using Zeebe.Client.Api.Responses;
-using Newtonsoft.Json.Linq;
 using System.Linq;
 
 namespace Zeebe.Client.Accelerator
@@ -52,6 +51,7 @@ namespace Zeebe.Client.Accelerator
                     .PollingTimeout(jobHandlerInfo.PollingTimeout ?? zeebeWorkerOptions.PollingTimeout)
                     .PollInterval(jobHandlerInfo.PollInterval ?? zeebeWorkerOptions.PollInterval)
                     .Timeout(jobHandlerInfo.Timeout ?? zeebeWorkerOptions.Timeout)
+                    .HandlerThreads(jobHandlerInfo.HandlerThreads ?? zeebeWorkerOptions.HandlerThreads)
                     .Open();
 
                 if (jobHandlerInfo.FetchVariabeles.Length > 0)
