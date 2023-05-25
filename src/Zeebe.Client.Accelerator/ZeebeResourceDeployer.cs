@@ -23,17 +23,14 @@ namespace Zeebe.Client.Accelerator
 
         public class ZeebeResourceDeployerWithDirectory : ZeebeResourceDeployer
         {
-            readonly ILogger Logger = LoggerFactory.Create(config =>
-            {
-                config.AddConsole();
-            }).CreateLogger("ZeebeResourceDeployer");
-
+            readonly ILogger<ZeebeResourceDeployer> Logger;
             private string Directory;
             private List<string> Resources = new List<string>();
 
             public ZeebeResourceDeployerWithDirectory(IServiceProvider serviceProvider, string directory) : base(serviceProvider)
             {
                 this.Directory = directory;
+                this.Logger = serviceProvider.GetRequiredService<ILogger<ZeebeResourceDeployer>>();
             }
 
             public ZeebeResourceDeployerWithDirectory AddResource(string resource)
