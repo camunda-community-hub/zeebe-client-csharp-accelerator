@@ -6,22 +6,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Zeebe.Client.Accelerator.Unit.Tests.Stubs
 {
-    [ServiceLifetime(ServiceLifetime.Scoped)]
     [JobType("TestJobType")]
-    [MaxJobsActive(int.MaxValue - 1)]
-    [Timeout(int.MaxValue - 2)]
-    [PollingTimeout(int.MaxValue - 3)]
-    [PollInterval(int.MaxValue - 4)]
     [FetchVariables("1", "2", "3", "4", "5")]
     [WorkerName("TestWorkerName")]
-    public class JobHandlerA : IZeebeWorker
+    public class JobHandlerA : AbstractJobHandler, IZeebeWorker
     {
-        private readonly HandleJobDelegate handleJobDelegate;
 
-        public JobHandlerA(HandleJobDelegate handleJobDelegate)
-        {
-            this.handleJobDelegate = handleJobDelegate;
-        }
+        public JobHandlerA(HandleJobDelegate handleJobDelegate) : base(handleJobDelegate) { }
 
         public void HandleJob(ZeebeJob job, CancellationToken cancellationToken)
         {

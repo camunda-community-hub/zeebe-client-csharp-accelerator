@@ -99,10 +99,10 @@ namespace Zeebe.Client.Accelerator.Extensions
 
             foreach(var reference in jobHandlerProvider.JobHandlerInfoCollection)
             {
-                if (IsAlreadyRegistered(services, reference.Handler.DeclaringType))
+                if (IsAlreadyRegistered(services, reference.Handler.ReflectedType))
                     continue;
 
-                services.Add(new ServiceDescriptor(reference.Handler.DeclaringType, reference.Handler.DeclaringType, reference.HandlerServiceLifetime));
+                services.Add(new ServiceDescriptor(reference.Handler.ReflectedType, reference.Handler.ReflectedType, reference.HandlerServiceLifetime));
             }
 
             return services;
@@ -126,9 +126,9 @@ namespace Zeebe.Client.Accelerator.Extensions
                 });
         }
 
-        private static bool IsAlreadyRegistered(IServiceCollection services, Type declaringType)
+        private static bool IsAlreadyRegistered(IServiceCollection services, Type reflectedType)
         {
-            return services.Any(s => s.ServiceType == declaringType && s.ImplementationType == declaringType);
+            return services.Any(s => s.ServiceType == reflectedType && s.ImplementationType == reflectedType);
         }
 
     }

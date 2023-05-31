@@ -91,7 +91,7 @@ namespace Zeebe.Client.Accelerator
 
         private static ServiceLifetime GetServiceLifetime(MethodInfo handlerMethod)
         {
-            var handler = handlerMethod.DeclaringType;
+            var handler = handlerMethod.ReflectedType;
             var attr = handler.GetCustomAttribute<ServiceLifetimeAttribute>();
             if(attr == null)
                 return ServiceLifetime.Transient;

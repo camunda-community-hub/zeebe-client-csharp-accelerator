@@ -66,9 +66,9 @@ namespace Zeebe.Client.Accelerator
             if (jobHandlerInfo == null)
                 throw new ArgumentNullException(nameof(jobHandlerInfo));
 
-            var handlerInstance = serviceProvider.GetService(jobHandlerInfo.Handler.DeclaringType);
+            var handlerInstance = serviceProvider.GetService(jobHandlerInfo.Handler.ReflectedType);
             if (handlerInstance == null)
-                throw new InvalidOperationException($"There is no service of type {jobHandlerInfo.Handler.DeclaringType}.");
+                throw new InvalidOperationException($"There is no service of type {jobHandlerInfo.Handler.ReflectedType}.");
 
             var jobType = jobHandlerInfo.Handler.GetParameters()[0].ParameterType;
             var abstractJob = CreateAbstractJobInstance(job, jobType) ?? CreateGenericAbstractJobInstance(job, jobType);
@@ -78,7 +78,7 @@ namespace Zeebe.Client.Accelerator
 
             var response = jobHandlerInfo.Handler.Invoke(handlerInstance, new object[] { abstractJob, cancellationToken });
 
-            logger.LogDebug($"Job #{job.Key} ('{job.Type}') is handled by job handler '{jobHandlerInfo.Handler.DeclaringType.Name}'.");
+            logger.LogDebug($"Job #{job.Key} ('{job.Type}') is handled by job handler '{jobHandlerInfo.Handler.ReflectedType.Name}'.");
 
             if (response is Task task)
             {
