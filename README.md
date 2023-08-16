@@ -19,11 +19,9 @@ Extension for the C# Zeebe Client. Credits for the base work still belong to htt
 
 ## Requirements
 
-* net standard 2.0 or higher, which means
-    * .net core 2.1 or higher
-    * or .net framework 4.7.1 or higher
-* latest [C# Zeebe client release](https://www.nuget.org/packages/zb-client/)
-* latest [Zeebe release](https://github.com/zeebe-io/zeebe/releases/)
+* [.net 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+* [C# Zeebe client 2.1.0 release](https://www.nuget.org/packages/zb-client/)
+* [Zeebe 8.x release](https://github.com/zeebe-io/zeebe/releases/)
 
 ## How to use
 
