@@ -1,13 +1,12 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Zeebe.Client.Accelerator.Abstractions;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Zeebe.Client.Accelerator.Extensions;
 using static Zeebe.Client.Accelerator.Options.ZeebeClientAcceleratorOptions;
 
@@ -15,11 +14,11 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
 {
     public class IntegrationTestHelper : IAsyncDisposable
     {
-        public const string LatestZeebeVersion = "8.2.0";
+        public const string LatestZeebeVersion = "8.2.11";
         public const int ZeebePort = 26500;
         private readonly ILogger<IntegrationTestHelper> logger;
         private readonly CancellationTokenSource cancellationTokenSource;
-        private readonly TestcontainersContainer zeebeContainer;
+        private readonly IContainer zeebeContainer;
         private readonly IHost host;
         private readonly IZeebeClient zeebeClient;
 
@@ -28,7 +27,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
 
         public IntegrationTestHelper(string zeebeVersion, HandleJobDelegate handleJobDelegate)
         {
-            var loggerFactory = LoggerFactory.Create(builder => 
+            var loggerFactory = LoggerFactory.Create(builder =>
                 builder
                     .AddConsole()
                     .SetMinimumLevel(LogLevel.Trace));
@@ -36,9 +35,9 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
             this.logger = loggerFactory.CreateLogger<IntegrationTestHelper>();
 
             cancellationTokenSource = new CancellationTokenSource();
-            
+
             zeebeContainer = SetupZeebe(logger, zeebeVersion);
-            
+
             host = SetupHost(loggerFactory, IntegrationTestHelper.ZeebePort, handleJobDelegate);
 
             zeebeClient = (IZeebeClient)host.Services.GetService(typeof(IZeebeClient));
@@ -47,7 +46,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
         public IZeebeClient ZeebeClient { get { return zeebeClient; } }
 
         internal async Task InitializeAsync()
-        {            
+        {
             await this.zeebeContainer.StartAsync(this.cancellationTokenSource.Token);
             await host.StartAsync(cancellationTokenSource.Token).ConfigureAwait(false);
             await WaitUntilBrokerIsReady(this.zeebeClient, this.logger);
@@ -60,20 +59,18 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
 
             zeebeClient.Dispose();
 
-            await this.zeebeContainer.StopAsync();
-            await this.zeebeContainer.CleanUpAsync();
             await this.zeebeContainer.DisposeAsync();
         }
 
-        private static TestcontainersContainer SetupZeebe(ILogger logger, string version)
+        private static IContainer SetupZeebe(ILogger logger, string version)
         {
             TestcontainersSettings.Logger = logger;
-            
-            var container = new TestcontainersBuilder<TestcontainersContainer>()
+            var container = new ContainerBuilder()
                 .WithImage($"camunda/zeebe:{version}")
                 .WithName("zeebe-testcontainer")
                 .WithPortBinding(IntegrationTestHelper.ZeebePort)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(IntegrationTestHelper.ZeebePort))
+                .WithCleanUp(true)
                 .Build();
 
             return container;
@@ -85,14 +82,16 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
                 .CreateDefaultBuilder()
                     .ConfigureServices((hostContext, services) =>
                     {
-                        services            
+                        services
                             .AddSingleton(loggerFactory)
                             .BootstrapZeebe(
-                                options => { 
-                                    options.Client = new ClientOptions() {
+                                options =>
+                                {
+                                    options.Client = new ClientOptions()
+                                    {
                                         GatewayAddress = $"127.0.0.1:{zeebePort}"
                                     };
-                                    options.Worker = new WorkerOptions() 
+                                    options.Worker = new WorkerOptions()
                                     {
                                         MaxJobsActive = 1,
                                         TimeoutInMilliseconds = 10000,
@@ -102,11 +101,11 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
                                     };
                                 },
                                 typeof(IntegrationTestHelper).Assembly
-                            )                            
+                            )
                             .Add(new ServiceDescriptor(typeof(HandleJobDelegate), handleJobDelegate));
                     })
                 .Build();
-            
+
             return host;
         }
 
