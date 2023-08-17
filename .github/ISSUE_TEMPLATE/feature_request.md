@@ -3,7 +3,7 @@ name: Feature request
 about: Suggest an idea for this project
 title: I can use the client to
 labels: feature
-assignees: arjangeertsema
+assignees: VonDerBeck
 
 ---
 
