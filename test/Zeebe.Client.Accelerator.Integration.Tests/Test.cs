@@ -104,7 +104,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             Assert.True(this.jobs.Count == 2);
 
             var expected = OutputJobHandler.State;
-            var actual = jobs[1] as ZeebeJob<State>;
+            var actual = jobs[1] as ZeebeJob<InputState>;
 
             Assert.NotNull(actual);
             Assert.NotNull(actual.getVariables());
@@ -117,6 +117,8 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             Assert.Equal(expected.Int, state.Int);
             Assert.Equal(expected.String, state.String);
             Assert.Equal(expected.Double, state.Double);
+            Assert.Null(state.ToBeIgnored);
+            Assert.Equal(expected.MyJsonPropertyName, state.JsonPropertyNamedAttr);
 
             var doneMessage = zeebeClient.ReceiveMessage<DoneMessage>("responseFor_" + expectedGuid, TimeSpan.FromSeconds(5));
             Assert.Equal(expected.Guid, doneMessage.Guid);

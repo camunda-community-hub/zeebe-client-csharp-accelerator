@@ -1,10 +1,11 @@
 using System.Threading;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Accelerator.Abstractions;
+using System.Text.Json.Serialization;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
 {
-    public class InputJobHandler : IZeebeWorker<State>
+    public class InputJobHandler : IZeebeWorker<InputState>
     {
         private readonly HandleJobDelegate handleJobDelegate;
 
@@ -13,10 +14,15 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
             this.handleJobDelegate = handleJobDelegate;
         }
 
-        public void HandleJob(ZeebeJob<State> job, CancellationToken cancellationToken)
+        public void HandleJob(ZeebeJob<InputState> job, CancellationToken cancellationToken)
         {  
             handleJobDelegate(job, cancellationToken);
         }
+    }
+
+    public class InputState : State
+    {
+        public string JsonPropertyNamedAttr { get; set; }
     }
 
 }

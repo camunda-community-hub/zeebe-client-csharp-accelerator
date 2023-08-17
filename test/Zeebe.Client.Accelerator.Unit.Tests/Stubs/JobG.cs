@@ -1,6 +1,7 @@
 using System;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Accelerator.Abstractions;
+using System.Text.Json.Serialization;
 
 namespace Zeebe.Client.Accelerator.Unit.Tests.Stubs
 {
@@ -11,7 +12,12 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Stubs
         public int Int { get; set; }
         public DateTime DateTime { get; set; }
         public string String { get; set; }
+
+        [JsonPropertyName("MY_double")]
         public double Double { get; set; }
+
+        [JsonIgnore]
+        public string ToBeIgnored { get; set; }
 
         public override bool Equals(object obj)
         {

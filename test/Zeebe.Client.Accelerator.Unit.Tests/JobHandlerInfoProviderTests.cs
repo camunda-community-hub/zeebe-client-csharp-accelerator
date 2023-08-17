@@ -78,12 +78,13 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [Fact]
         public void FetchVariablesPropertyIsSetCorrectlyWhenGenericStateIsUsed() 
         {
-            var expected = new string[] { "guid", "bool", "int", "dateTime", "string", "double" };
+            var expected = new string[] { "guid", "bool", "int", "dateTime", "string", "MY_double" };
             var handlers = Handlers();
 
             var actual = handlers.Select(h => h.FetchVariabeles);
             Assert.Contains(new string[0], actual);
             Assert.Contains(expected, actual);
+            Assert.DoesNotContain(new string[]{ "double", "toBeIgnored" }, actual);
         }
 
         [Fact]

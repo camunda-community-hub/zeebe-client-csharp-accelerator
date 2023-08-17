@@ -7,6 +7,7 @@ using Zeebe.Client.Accelerator.Attributes;
 using Microsoft.Extensions.DependencyInjection;
 using System.Text.RegularExpressions;
 using Zeebe.Client.Accelerator.Utils;
+using System.Text.Json.Serialization;
 
 namespace Zeebe.Client.Accelerator
 {
@@ -169,9 +170,19 @@ namespace Zeebe.Client.Accelerator
                 return null;
 
             return jobStateType.GetProperties()
-                .Where(p => p.CanWrite)
-                .Select(p => StringUtils.ToCamelCase(p.Name))
+                .Where(p => p.CanWrite && (p.GetCustomAttribute<JsonIgnoreAttribute>() == null))
+                .Select(p => GetAttributeName(p))
                 .ToArray();                
+        }
+
+        private static string GetAttributeName(PropertyInfo p)
+        {
+            var jsonPropertyName = p.GetCustomAttribute<JsonPropertyNameAttribute>();
+            if (jsonPropertyName != null && jsonPropertyName.Name != null)
+            {
+                return jsonPropertyName.Name;
+            }
+            return StringUtils.ToCamelCase(p.Name);
         }
 
         private static bool IsZeebeWorker(Type t)
