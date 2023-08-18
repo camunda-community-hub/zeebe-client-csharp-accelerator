@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <Authors>Gunnar von der Beck</Authors>
     <Description>
 This project is an extension of the zb-client (https://www.nuget.org/packages/zb-client/). 
@@ -31,9 +31,9 @@ So this is our version of a good Bootstrap Extension for the C# Zeebe Client. Cr
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />    
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />    
-    <PackageReference Include="zb-client" Version="1.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
+    <PackageReference Include="zb-client" Version="2.1.0" />
   </ItemGroup>
 
   <ItemGroup>
