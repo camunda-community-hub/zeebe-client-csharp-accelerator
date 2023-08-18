@@ -23,6 +23,8 @@ Extension for the C# Zeebe Client. Credits for the base work still belong to htt
 * [C# Zeebe client 2.1.0 release](https://www.nuget.org/packages/zb-client/)
 * [Zeebe 8.x release](https://github.com/zeebe-io/zeebe/releases/)
 
+For older .net versions please use the `1.x.x` release of this extension.
+
 ## How to use
 
 The Zeebe C# client bootstrap extension is available via nuget (https://www.nuget.org/packages/zb-client-accelerator/).
@@ -331,7 +333,7 @@ The one time job handler will be destroyed after `ReceiveMessage` returns.
 ## Hints
 
 1. By default the workers are added to de DI container with a `Transient` service lifetime. This can be overriden by adding the `ServiceLifetimeAttribute` to the worker, see [attributes] for more information.
-1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. Serialization / Deserialization always uses CamelCase as naming policy!
+1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. Serialization / Deserialization always uses CamelCase as naming policy! `JsonPropertyName` and `JsonIgnore` attributes are supported, so that you still have the option to customize your attribute naming.
 1. The default job type of a worker is the class name of the worker. This can be overriden by adding the `JobTypeAttribute` to the worker, e.g. `[JobType("myJobName")]`.
 
 ## How to build
