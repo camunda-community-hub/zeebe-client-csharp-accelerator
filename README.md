@@ -19,13 +19,13 @@ Extension for the C# Zeebe Client. Credits for the base work still belong to htt
 
 ## Requirements
 
-Since version 2.0.0
+Since version 2.0.0:
 
 * [.NET 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 * [Zeebe C# client 2.1.0 release](https://www.nuget.org/packages/zb-client/)
 * [Zeebe 8.x release](https://github.com/zeebe-io/zeebe/releases/)
 
-For older .NET versions please use the `1.x.x` release of this extension based on Zeebe C# client 1.3.0.
+For older .NET versions please use the 1.x.x release of this extension based on Zeebe C# client 1.3.0 release.
 
 ## How to use
 
@@ -301,8 +301,9 @@ A handled job has three outcomes:
 1. Any other unexpected exception will automatically result in a `FailCommand` beeing send to the broker including message details and reducing the number of retries;
 
 ### Custom attribute naming
+*Since 1.1.0*
 
-The extension uses CamelCase as default naming policy. In order to customize serialization and deserialization the standard `JsonPropertyName`and `JsonIgnore` attributes are at your hand:
+This extension uses CamelCase as default naming policy. In order to customize serialization and deserialization the standard `JsonPropertyName`and `JsonIgnore` attributes are fully supported:
 
 ```csharp
 public class MyJobVariables
