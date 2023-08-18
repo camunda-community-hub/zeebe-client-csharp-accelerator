@@ -19,11 +19,13 @@ Extension for the C# Zeebe Client. Credits for the base work still belong to htt
 
 ## Requirements
 
-* [.net 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
-* [C# Zeebe client 2.1.0 release](https://www.nuget.org/packages/zb-client/)
+Since version 2.0.0
+
+* [.NET 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+* [Zeebe C# client 2.1.0 release](https://www.nuget.org/packages/zb-client/)
 * [Zeebe 8.x release](https://github.com/zeebe-io/zeebe/releases/)
 
-For older .net versions please use the `1.x.x` release of this extension.
+For older .NET versions please use the `1.x.x` release of this extension based on Zeebe C# client 1.3.0.
 
 ## How to use
 
@@ -297,6 +299,21 @@ A handled job has three outcomes:
 1. The job has been handled without exceptions: this will automaticly result in a `JobCompletedCommand` beeing send to the broker. The optional `TResponse` is automaticly serialized and added to the `JobCompletedCommand`.
 1. A `BpmnErrorException` has been thrown while handling the job: this will automaticly result in a `ThrowErrorCommand` beeing send to the broker triggering Error Boundary Events in the process.
 1. Any other unexpected exception will automatically result in a `FailCommand` beeing send to the broker including message details and reducing the number of retries;
+
+### Custom attribute naming
+
+The extension uses CamelCase as default naming policy. In order to customize serialization and deserialization the standard `JsonPropertyName`and `JsonIgnore` attributes are at your hand:
+
+```csharp
+public class MyJobVariables
+{
+    [JsonPropertyName("MY_AmountName")]
+    public long Amount { get; set; }
+
+    [JsonIgnore]
+    public string ToBeIgnored { get; set; }
+}
+```
 
 ### Dynamic message receiver
 
