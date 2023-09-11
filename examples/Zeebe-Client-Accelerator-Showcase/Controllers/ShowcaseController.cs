@@ -36,7 +36,7 @@ namespace Zeebe_Client_Accelerator_Showcase.Controllers
         ///
         /// </remarks>
         [HttpPost("/application")]
-        public string? SubmitApplication([FromBody] ApplicationRequest applicationRequest)
+        public async Task<string?> SubmitApplicationAsync([FromBody] ApplicationRequest applicationRequest)
         {
             var variables = new ProcessVariables()
             {
@@ -44,7 +44,7 @@ namespace Zeebe_Client_Accelerator_Showcase.Controllers
                 BusinessKey = "A-" + DateTime.Today.DayOfYear + "." + new Random().Next(0, 9999)
             };
 
-            _zeebeClient.NewCreateProcessInstanceCommand()
+            await _zeebeClient.NewCreateProcessInstanceCommand()
                 .BpmnProcessId(ProcessConstants.PROCESS_DEFINITION_KEY)
                 .LatestVersion()
                 .Variables(_variablesSerializer.Serialize(variables))
