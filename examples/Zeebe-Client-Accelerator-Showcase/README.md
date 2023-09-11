@@ -107,7 +107,7 @@ The process is startet using the REST API and can be found in `ShowccaseControll
         BusinessKey = "A-" + DateTime.Today.DayOfYear + "." + new Random().Next(0, 9999)
     };
 
-    _zeebeClient.NewCreateProcessInstanceCommand()
+    await _zeebeClient.NewCreateProcessInstanceCommand()
         .BpmnProcessId(ProcessConstants.PROCESS_DEFINITION_KEY)
         .LatestVersion()
         .Variables(_variablesSerializer.Serialize(variables))
