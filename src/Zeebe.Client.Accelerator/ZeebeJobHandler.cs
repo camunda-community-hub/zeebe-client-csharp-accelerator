@@ -39,8 +39,11 @@ namespace Zeebe.Client.Accelerator
 
             try
             {
-                var response = await HandleJob(job, jobHandlerInfo, cancellationToken);
-                await CompleteJob(jobClient, job, response, cancellationToken);
+                var response = await HandleJob(jobClient, job, jobHandlerInfo, cancellationToken);
+                if (jobHandlerInfo.AutoComplete)
+                {
+                    await CompleteJob(jobClient, job, response, cancellationToken);
+                } 
             }
             catch (BpmnErrorException ex)
             {
@@ -61,7 +64,7 @@ namespace Zeebe.Client.Accelerator
             }
         }
 
-        private async Task<object> HandleJob(IJob job, IJobHandlerInfo jobHandlerInfo, CancellationToken cancellationToken)
+        private async Task<object> HandleJob(IJobClient jobClient, IJob job, IJobHandlerInfo jobHandlerInfo, CancellationToken cancellationToken)
         {
             if (jobHandlerInfo == null)
                 throw new ArgumentNullException(nameof(jobHandlerInfo));
@@ -71,7 +74,7 @@ namespace Zeebe.Client.Accelerator
                 throw new InvalidOperationException($"There is no service of type {jobHandlerInfo.Handler.ReflectedType}.");
 
             var jobType = jobHandlerInfo.Handler.GetParameters()[0].ParameterType;
-            var abstractJob = CreateAbstractJobInstance(job, jobType) ?? CreateGenericAbstractJobInstance(job, jobType);
+            var abstractJob = CreateAbstractJobInstance(jobClient, job, jobType) ?? CreateGenericAbstractJobInstance(job, jobType);
 
             if (abstractJob == null)
                 throw new Exception($"Type {jobType.FullName} could not be constructed.");
@@ -124,7 +127,7 @@ namespace Zeebe.Client.Accelerator
                 .Send(this.zeebeWorkerOptions.RetryTimeout, cancellationToken);
         }
 
-        private object CreateAbstractJobInstance(IJob job, Type jobType)
+        private object CreateAbstractJobInstance(IJobClient jobClient, IJob job, Type jobType)
         {
             if (!jobType.IsSubclassOf(typeof(AbstractJob)))
                 throw new Exception($"Type {jobType.FullName} is not a subclass of {typeof(AbstractJob).FullName}.");
@@ -134,11 +137,11 @@ namespace Zeebe.Client.Accelerator
 
             if (typeof(ZeebeJob).IsAssignableFrom(jobType))
             {
-                var constructor = jobType.GetConstructor(new Type[] { typeof(IJob), typeof(IZeebeVariablesDeserializer) });
+                var constructor = jobType.GetConstructor(new Type[] { typeof(IJobClient), typeof(IJob), typeof(IZeebeVariablesDeserializer) });
                 if (constructor == null)
                     throw new Exception($"Type {jobType.FullName} does not have a constructor with two parameters of type {typeof(IJob).FullName},{typeof(IZeebeVariablesDeserializer).FullName}.");
 
-                return constructor.Invoke(new object[] { job, deserializer });
+                return constructor.Invoke(new object[] { jobClient, job, deserializer });
             }
             else
             {

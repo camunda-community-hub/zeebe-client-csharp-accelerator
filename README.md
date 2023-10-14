@@ -316,6 +316,25 @@ public class MyJobVariables
 }
 ```
 
+### Manual job completion
+*Since 2.1.0*
+
+For use cases where autocompletion is not to be used, the `[AutoComplete(false)]` attribute is at your disposal:
+
+```csharp
+[AutoComplete(false)]
+public class ManualJobHandler : IAsyncZeebeWorker
+{
+    public async Task HandleJob(ZeebeJob job, CancellationToken cancellationToken)
+    {
+        // do something ...
+
+        // complete job manually
+        await job.GetClient().NewCompleteJobCommand(job.Key).Send(token: cancellationToken);
+    }
+}
+```
+
 ### Dynamic message receiver
 
 See [Example for synchronous responses from processes](https://github.com/camunda-community-hub/camunda-8-examples/tree/main/synchronous-response-springboot) for a description of the scenario.

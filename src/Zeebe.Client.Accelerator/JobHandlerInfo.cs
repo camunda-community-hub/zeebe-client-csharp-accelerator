@@ -10,14 +10,15 @@ namespace Zeebe.Client.Accelerator
         public JobHandlerInfo(
             MethodInfo handler,
             ServiceLifetime handlerServiceLifetime,
-            string jobType, 
-            string workerName, 
+            string jobType,
+            string workerName,
             int? maxJobsActive = null,
             byte? handlerThreads = null,
-            TimeSpan? timeout = null, 
-            TimeSpan? pollInterval = null, 
-            TimeSpan? pollingTimeout = null, 
-            string[] fetchVariabeles = null)
+            TimeSpan? timeout = null,
+            TimeSpan? pollInterval = null,
+            TimeSpan? pollingTimeout = null,
+            string[] fetchVariabeles = null,
+            bool? autoComplete = null)
         {
             if (string.IsNullOrWhiteSpace(jobType))
                 throw new ArgumentException($"'{nameof(jobType)}' cannot be null or whitespace.", nameof(jobType));
@@ -25,15 +26,15 @@ namespace Zeebe.Client.Accelerator
             if (string.IsNullOrWhiteSpace(workerName))
                 throw new ArgumentException($"'{nameof(workerName)}' cannot be null or whitespace.", nameof(workerName));
 
-            if (maxJobsActive.HasValue && maxJobsActive.Value < 1) 
+            if (maxJobsActive.HasValue && maxJobsActive.Value < 1)
                 throw new ArgumentOutOfRangeException(nameof(maxJobsActive));
             if (handlerThreads.HasValue && handlerThreads.Value < 1)
                 throw new ArgumentOutOfRangeException(nameof(handlerThreads));
             if (timeout.HasValue && timeout.Value.TotalMilliseconds < 1)
                 throw new ArgumentOutOfRangeException(nameof(timeout));
-            if(pollInterval.HasValue && pollInterval.Value.TotalMilliseconds < 1)
+            if (pollInterval.HasValue && pollInterval.Value.TotalMilliseconds < 1)
                 throw new ArgumentOutOfRangeException(nameof(pollInterval));
-            if(pollingTimeout.HasValue && pollingTimeout.Value.TotalMilliseconds < 1)
+            if (pollingTimeout.HasValue && pollingTimeout.Value.TotalMilliseconds < 1)
                 throw new ArgumentOutOfRangeException(nameof(pollingTimeout));
 
             this.HandlerServiceLifetime = handlerServiceLifetime;
@@ -46,6 +47,7 @@ namespace Zeebe.Client.Accelerator
             this.PollInterval = pollInterval;
             this.PollingTimeout = pollingTimeout;
             this.FetchVariabeles = fetchVariabeles ?? (new string[0]);
+            this.AutoComplete = autoComplete ?? true;
         }
 
         public MethodInfo Handler { get; }
@@ -58,5 +60,6 @@ namespace Zeebe.Client.Accelerator
         public TimeSpan? PollInterval { get; }
         public TimeSpan? PollingTimeout { get; }
         public string[] FetchVariabeles { get; }
+        public bool AutoComplete { get; }
     }
 }

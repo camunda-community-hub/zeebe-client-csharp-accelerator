@@ -4,6 +4,7 @@ using Moq;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Accelerator.Unit.Tests.Stubs;
 using Zeebe.Client.Accelerator.Abstractions;
+using Zeebe.Client.Api.Worker;
 
 namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
 {
@@ -12,7 +13,15 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
         [Fact]
         public void ThrowsArgumentNullExceptionWhenJobIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("job", () => new ZeebeJob(null, new ZeebeVariablesDeserializer()));
+            Assert.Throws<ArgumentNullException>("job", () => new ZeebeJob(null, null, new ZeebeVariablesDeserializer()));
+        }
+
+        [Fact]
+        public void ProvidesAccessToJobClient()
+        {
+            var jobClientMock = new Mock<IJobClient>();
+            var job = new ZeebeJob(jobClientMock.Object, new Mock<IJob>().Object, new ZeebeVariablesDeserializer());
+            Assert.Equal(jobClientMock.Object, job.GetClient());
         }
 
         [Fact]
@@ -49,7 +58,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
             mock.SetupGet(j => j.Variables).Returns(variables);
             mock.SetupGet(j => j.CustomHeaders).Returns(customHeaders);
 
-            var job = new ZeebeJob(mock.Object, new ZeebeVariablesDeserializer());
+            var job = new ZeebeJob(null, mock.Object, new ZeebeVariablesDeserializer());
             Assert.Equal(key, job.Key);
             Assert.Equal(type, job.Type);
             Assert.Equal(processInstanceKey, job.ProcessInstanceKey);
@@ -64,7 +73,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Abstractions
             Assert.Equal(variables, job.Variables);
             Assert.Equal(customHeaders, job.CustomHeaders);
 
-            var genericJob = new ZeebeJob<JobGState>(mock.Object, new ZeebeVariablesDeserializer());
+            var genericJob = new ZeebeJob<JobGState>(null, mock.Object, new ZeebeVariablesDeserializer());
             Assert.Equal(key, genericJob.Key);
             Assert.Equal(type, genericJob.Type);
             Assert.Equal(processInstanceKey, genericJob.ProcessInstanceKey);

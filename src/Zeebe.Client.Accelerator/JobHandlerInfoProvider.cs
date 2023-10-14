@@ -86,7 +86,8 @@ namespace Zeebe.Client.Accelerator
                 GetTimeout(jobHandlerType),
                 GetPollInterval(jobHandlerType), 
                 GetPollingTimeout(jobHandlerType),
-                GetFetchVariables(jobType, jobHandlerType)
+                GetFetchVariables(jobType, jobHandlerType),
+                GetAutoComplete(jobHandlerType)
             );
         }
 
@@ -160,6 +161,16 @@ namespace Zeebe.Client.Accelerator
             if(fetchVariables != null)
                 return fetchVariables;
                 
+            return null;
+        }
+
+        private static bool? GetAutoComplete(Type jobHandlerType)
+        {
+            var attr = jobHandlerType.GetCustomAttribute<AutoCompleteAttribute>();
+            if (attr != null)
+            {
+                return attr.AutoComplete;
+            }
             return null;
         }
 

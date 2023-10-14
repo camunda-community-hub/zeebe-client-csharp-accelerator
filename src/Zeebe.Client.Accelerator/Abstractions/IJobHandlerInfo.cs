@@ -16,5 +16,6 @@ namespace Zeebe.Client.Accelerator.Abstractions
         TimeSpan? PollInterval { get; }
         TimeSpan? PollingTimeout { get; }
         string[] FetchVariabeles { get; }
+        bool AutoComplete { get; }
     }
 }

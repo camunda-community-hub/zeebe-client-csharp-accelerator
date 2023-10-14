@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_16innre" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.16.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.2.0">
+  <bpmn:collaboration id="Process_UserTaskTest">
+    <bpmn:participant id="Participant_1" name="Simple proces" processRef="UserTaskTest" />
+  </bpmn:collaboration>
+  <bpmn:process id="UserTaskTest" isExecutable="true">
+    <bpmn:startEvent id="StartEvent" name="Start">
+      <bpmn:outgoing>Flow_1b03ijq</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1b03ijq" sourceRef="StartEvent" targetRef="Activity_HandleTask" />
+    <bpmn:sequenceFlow id="Flow_1yt4smo" sourceRef="Activity_HandleTask" targetRef="Event_Acknowledge" />
+    <bpmn:userTask id="Activity_HandleTask" name="Handle task">
+      <bpmn:extensionElements>
+        <zeebe:assignmentDefinition assignee="zeebeCSharpClient" candidateGroups="manager,teamLead" candidateUsers="ruth,esther" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1b03ijq</bpmn:incoming>
+      <bpmn:outgoing>Flow_1yt4smo</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0om2bjt" sourceRef="Event_Acknowledge" targetRef="EndEvent" />
+    <bpmn:intermediateThrowEvent id="Event_Acknowledge" name="Acknowledge&#10;Completion">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="=&#34;responseFor_&#34; + correlationId" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1yt4smo</bpmn:incoming>
+      <bpmn:outgoing>Flow_0om2bjt</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0ye1pws" />
+    </bpmn:intermediateThrowEvent>
+    <bpmn:endEvent id="EndEvent" name="End">
+      <bpmn:incoming>Flow_0om2bjt</bpmn:incoming>
+    </bpmn:endEvent>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_UserTaskTest">
+      <bpmndi:BPMNShape id="Participant_0fl1xof_di" bpmnElement="Participant_1" isHorizontal="true">
+        <dc:Bounds x="160" y="52" width="570" height="250" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent">
+        <dc:Bounds x="259" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="265" y="202" width="24" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1ypajsh_di" bpmnElement="Activity_HandleTask">
+        <dc:Bounds x="350" y="137" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1gvhr0m_di" bpmnElement="Event_Acknowledge">
+        <dc:Bounds x="512" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="498" y="202" width="65" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0ya9i0s_di" bpmnElement="EndEvent">
+        <dc:Bounds x="612" y="159" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="620" y="202" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1b03ijq_di" bpmnElement="Flow_1b03ijq">
+        <di:waypoint x="295" y="177" />
+        <di:waypoint x="350" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1yt4smo_di" bpmnElement="Flow_1yt4smo">
+        <di:waypoint x="450" y="177" />
+        <di:waypoint x="512" y="177" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0om2bjt_di" bpmnElement="Flow_0om2bjt">
+        <di:waypoint x="548" y="177" />
+        <di:waypoint x="612" y="177" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

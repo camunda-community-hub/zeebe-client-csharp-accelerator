@@ -10,17 +10,23 @@ using Zeebe.Client.Accelerator.Integration.Tests.Handlers;
 using Zeebe.Client.Accelerator.Integration.Tests.Helpers;
 using Zeebe.Client.Accelerator.Abstractions;
 using System.Linq;
+using Xunit.Abstractions;
+using System.Text.Json.Serialization;
+using System.Text.Json;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests
 {
     public class Test : IAsyncLifetime
     {
+        private ITestOutputHelper _testOutputHelper;
+
         private List<IJob> jobs;
 
         private readonly IntegrationTestHelper helper;
 
-        public Test()
+        public Test(ITestOutputHelper testOutputHelper)
         {
+            this._testOutputHelper = testOutputHelper;
             this.helper = new IntegrationTestHelper((job, cancellationToken) => this.jobs.Add(job));
         }
 
@@ -156,6 +162,50 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
 
         }
 
+        [Fact]
+        public async Task DisabledAutoCompletionWorksCorrectlyWhenConfigured()
+        {
+            jobs = new List<IJob>();
+
+            var zeebeClient = this.helper.ZeebeClient;
+
+            var deployResponse = await zeebeClient.NewDeployCommand()
+                .AddResourceFile(GetResourceFile("usertask-test.bpmn"))
+                .Send();
+
+            Assert.True(deployResponse.Key > 0);
+
+            var processInstance = await zeebeClient.NewCreateProcessInstanceCommand()
+                .BpmnProcessId("UserTaskTest")
+                .LatestVersion()
+                .Send();
+
+            Assert.NotNull(processInstance);
+
+            WaitForHandlersToComplete(1, 1500);
+            Assert.True(this.jobs.Count == 1);
+            ZeebeJob zeebeJob = (ZeebeJob) this.jobs.First();
+
+            // _testOutputHelper.WriteLine(zeebeJob.CustomHeaders);
+            // => WTF! The list of candidateGroups / candidateUsers is not an array, but an array embedded in a string!
+
+            var userTaskHeaders = zeebeJob.getCustomHeaders<UserTaskHeaders>();
+            Assert.Equal("zeebeCSharpClient", userTaskHeaders.Assignee);
+            Assert.Contains("manager", userTaskHeaders.GetCandidateGroups());
+            Assert.Contains("esther", userTaskHeaders.GetCandidateUsers());
+
+            var correlationId = Guid.NewGuid();
+            await zeebeJob.GetClient().NewCompleteJobCommand(zeebeJob.Key)
+                .State(new
+                {
+                    CorrelationId = correlationId
+                }).Send();
+
+            var variables = zeebeClient.ReceiveMessage<AcknowledgeUserTaskVariables>("responseFor_" + correlationId, TimeSpan.FromSeconds(25));
+            Assert.Equal(correlationId, variables.CorrelationId);
+
+        }
+
         public async Task InitializeAsync()
         {
             await this.helper.InitializeAsync();
@@ -191,6 +241,33 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
         private class MultiThreadVariables
         {
             public List<int> UsedThreads { get; set; }
+        }
+
+        private class UserTaskHeaders
+        {
+            [JsonPropertyName("io.camunda.zeebe:assignee")]
+            public String Assignee { get; set; }
+            [JsonPropertyName("io.camunda.zeebe:candidateGroups")]
+            public String CandidateGroups { get; set; }
+            [JsonPropertyName("io.camunda.zeebe:candidateUsers")]
+            public String CandidateUsers { get; set; }
+
+            public List<String> GetCandidateGroups()
+            {
+                if (CandidateGroups == null) { return new List<String>(); }
+                return JsonSerializer.Deserialize<List<String>>(CandidateGroups);
+            }
+            public List<String> GetCandidateUsers()
+            {
+                if (CandidateUsers == null) { return new List<String>(); }
+                return JsonSerializer.Deserialize<List<String>>(CandidateUsers);
+            }
+
+        }
+
+        private class AcknowledgeUserTaskVariables
+        {
+            public Guid CorrelationId { get; set; }
         }
     }
 }
