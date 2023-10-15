@@ -15,7 +15,7 @@ jobs:
     - name: Setup
       uses: actions/setup-dotnet@v3.2.0
       with:
-        dotnet-version: 6.x
+        dotnet-version: 7.x
     - name: Verify commit exists in origin/main
       run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
