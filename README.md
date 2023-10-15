@@ -19,7 +19,7 @@ Extension for the C# Zeebe Client. Credits for the base work still belong to htt
 
 ## Requirements
 
-Since version 2.1.0:
+Since version 2.1.1:
 
 * [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) / [.NET 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 * [Zeebe C# client 2.2.0 release](https://www.nuget.org/packages/zb-client/)
