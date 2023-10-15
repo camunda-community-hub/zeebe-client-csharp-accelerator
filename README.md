@@ -19,10 +19,10 @@ Extension for the C# Zeebe Client. Credits for the base work still belong to htt
 
 ## Requirements
 
-Since version 2.0.0:
+Since version 2.1.0:
 
-* [.NET 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
-* [Zeebe C# client 2.1.0 release](https://www.nuget.org/packages/zb-client/)
+* [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) / [.NET 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+* [Zeebe C# client 2.2.0 release](https://www.nuget.org/packages/zb-client/)
 * [Zeebe 8.x release](https://github.com/zeebe-io/zeebe/releases/)
 
 For older .NET versions please use the 1.x.x release of this extension based on Zeebe C# client 1.3.0 release.
@@ -334,6 +334,9 @@ public class ManualJobHandler : IAsyncZeebeWorker
     }
 }
 ```
+
+Please be aware, that uncatched exceptions still lead to sending fail commands (or error commands in case of `BpmnErrorException`).
+It's the responsability of the worker implementation to catch and handle all exceptions if a different behaviour is intended.
 
 ### Dynamic message receiver
 
