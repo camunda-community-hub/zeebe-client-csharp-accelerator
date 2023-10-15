@@ -21,7 +21,7 @@ Extension for the C# Zeebe Client. Credits for the base work still belong to htt
 
 Since version 2.1.1:
 
-* [.NET 6](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) / [.NET 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
+* [.NET 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0)
 * [Zeebe C# client 2.2.0 release](https://www.nuget.org/packages/zb-client/)
 * [Zeebe 8.x release](https://github.com/zeebe-io/zeebe/releases/)
 
