@@ -336,7 +336,7 @@ public class ManualJobHandler : IAsyncZeebeWorker
 ```
 
 Please be aware, that uncatched exceptions still lead to sending fail commands (or error commands in case of `BpmnErrorException`).
-It's the responsability of the worker implementation to catch and handle all exceptions if a different behaviour is intended.
+It's the responsibility of the worker implementation to catch and handle all exceptions if a different behaviour is intended.
 
 ### Dynamic message receiver
 
