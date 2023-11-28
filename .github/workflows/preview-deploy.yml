@@ -11,7 +11,7 @@ jobs:
     - name: Pull zeebe
       run: docker pull camunda/zeebe:8.3.0
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
     - name: Setup
       uses: actions/setup-dotnet@v3.2.0
       with:
