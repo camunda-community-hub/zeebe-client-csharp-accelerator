@@ -33,14 +33,14 @@ So this is our version of a good Bootstrap Extension for the C# Zeebe Client. Cr
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
-    <PackageReference Include="zb-client" Version="2.4.0" />
+    <PackageReference Include="zb-client" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
 	<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="6.0.0" />
 	<PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
 	<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="6.0.0" />
-	<PackageReference Include="zb-client" Version="2.4.0" />
+	<PackageReference Include="zb-client" Version="2.5.0" />
   </ItemGroup>
 
   <ItemGroup>
