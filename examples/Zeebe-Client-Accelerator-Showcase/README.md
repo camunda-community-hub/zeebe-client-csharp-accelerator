@@ -20,7 +20,7 @@ The application includes a REST API for starting the process.
 
 ### Prerequisites
 
-* .NET 7.0
+* .NET 8.0
 * Docker
 * A running Zeebe engine (see below for using docker-compose)
 
