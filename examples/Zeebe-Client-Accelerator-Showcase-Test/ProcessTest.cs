@@ -45,6 +45,7 @@ namespace Zeebe_Client_Accelerator_Showcase_Test
             // Then
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var processInstanceKey = (await response.Content.ReadFromJsonAsync<ApplicationResponse>()).ProcessInstanceKey;
+            _bpmAssert.WaitUntilProcessInstanceHasStarted(processInstanceKey);
 
             // wait for user task and complete
             _bpmAssert.WaitUntilProcessInstanceHasReachedElement(processInstanceKey, "Task_AppoveUser");
@@ -58,7 +59,8 @@ namespace Zeebe_Client_Accelerator_Showcase_Test
 
             // await user account creation and end of process
             _bpmAssert.WaitUntilProcessInstanceHasCompletedElement(processInstanceKey, "Activity_CreateUserAccount");
-            _bpmAssert.WaitUntilProcessInstanceHasCompletedElement(processInstanceKey, "EndEvent_ApplicationApproved");
+            _bpmAssert.WaitUntilProcessInstanceHasEnded(processInstanceKey);
+            _bpmAssert.AssertThatProcessInstanceHasCompletedElement(processInstanceKey, "EndEvent_ApplicationApproved");
         }
     }
 }

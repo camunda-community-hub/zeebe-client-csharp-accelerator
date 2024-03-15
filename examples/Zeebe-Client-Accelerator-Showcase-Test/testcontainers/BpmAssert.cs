@@ -17,6 +17,9 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
         public volatile List<ProcessInstanceRecord> processInstanceRecords = new();
         private readonly ILogger<BpmAssert>? _logger = null;
 
+        private static int WAIT_SECONDS = 7;
+        private static int POLL_MILLIS = 500;
+
         public BpmAssert(ZeebeRedis zeebeRedis, ILoggerFactory? loggerFactory = null)
         {
             _logger = loggerFactory?.CreateLogger<BpmAssert>();
@@ -34,12 +37,14 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
 
         private void ReceiveProcessInstanceRecord(ProcessInstanceRecord record)
         {
-            if (record.Metadata.RecordType.Equals(RecordMetadata.Types.RecordType.Event)) {
-                processInstanceRecords.Add(record);
-            }
+            processInstanceRecords.Add(record);
+            _logger?.LogTrace("{}", record);
         }
 
-        public bool AssertThatProcessInstanceHasReachedElement(long processInstanceKey, String elementId)
+        // ----------------------------------------------------------------------------------------------
+        // Assertions below
+
+        private bool CheckThatProcessInstanceHasReachedElement(long processInstanceKey, String elementId)
         {
             return processInstanceRecords.Exists(pi =>
                 pi.ProcessInstanceKey.Equals(processInstanceKey) &&
@@ -49,12 +54,19 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
             );
         }
 
-        public void WaitUntilProcessInstanceHasReachedElement(long processInstanceKey, String elementId)
+        public void AssertThatProcessInstanceHasReachedElement(long processInstanceKey, String elementId)
         {
-            Wait().AtMost(10, SECONDS).PollInterval(1, SECONDS).Until(() => AssertThatProcessInstanceHasReachedElement(processInstanceKey, elementId));
+            Assert.True(CheckThatProcessInstanceHasReachedElement(processInstanceKey, elementId));
         }
 
-        public bool AssertThatProcessInstanceHasCompletedElement(long processInstanceKey, String elementId)
+        public void WaitUntilProcessInstanceHasReachedElement(long processInstanceKey, String elementId)
+        {
+            Wait().AtMost(WAIT_SECONDS, SECONDS).PollInterval(POLL_MILLIS, MILLIS).Until(() => CheckThatProcessInstanceHasReachedElement(processInstanceKey, elementId));
+        }
+
+        // --------------------
+
+        private bool CheckThatProcessInstanceHasCompletedElement(long processInstanceKey, String elementId)
         {
             return processInstanceRecords.Exists(pi =>
                 pi.ProcessInstanceKey.Equals(processInstanceKey) &&
@@ -63,9 +75,56 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
             );
         }
 
+        public void AssertThatProcessInstanceHasCompletedElement(long processInstanceKey, String elementId)
+        {
+            Assert.True(CheckThatProcessInstanceHasCompletedElement(processInstanceKey, elementId));
+        }
+
         public void WaitUntilProcessInstanceHasCompletedElement(long processInstanceKey, String elementId)
         {
-            Wait().AtMost(10, SECONDS).PollInterval(1, SECONDS).Until(() => AssertThatProcessInstanceHasCompletedElement(processInstanceKey, elementId));
+            Wait().AtMost(WAIT_SECONDS, SECONDS).PollInterval(POLL_MILLIS, MILLIS).Until(() => CheckThatProcessInstanceHasCompletedElement(processInstanceKey, elementId));
+        }
+
+        // --------------------
+
+        private bool CheckThatProcessInstanceHasStarted(long processInstanceKey)
+        {
+            return processInstanceRecords.Exists(pi =>
+                pi.ProcessInstanceKey.Equals(processInstanceKey) &&
+                pi.BpmnElementType.Equals("PROCESS") &&
+                pi.Metadata.Intent.Equals("ELEMENT_ACTIVATED")
+            );
+        }
+
+        public void AssertThatProcessInstanceHasStarted(long processInstanceKey)
+        {
+            Assert.True(CheckThatProcessInstanceHasStarted(processInstanceKey));
+        }
+
+        public void WaitUntilProcessInstanceHasStarted(long processInstanceKey)
+        {
+            Wait().AtMost(WAIT_SECONDS, SECONDS).PollInterval(POLL_MILLIS, MILLIS).Until(() => CheckThatProcessInstanceHasStarted(processInstanceKey));
+        }
+
+        // --------------------
+
+        private bool CheckThatProcessInstanceHasEnded(long processInstanceKey)
+        {
+            return processInstanceRecords.Exists(pi =>
+                pi.ProcessInstanceKey.Equals(processInstanceKey) &&
+                pi.BpmnElementType.Equals("PROCESS") &&
+                pi.Metadata.Intent.Equals("ELEMENT_COMPLETED")
+            );
+        }
+
+        public void AssertThatProcessInstanceHasEnded(long processInstanceKey)
+        {
+            Assert.True(CheckThatProcessInstanceHasEnded(processInstanceKey));
+        }
+
+        public void WaitUntilProcessInstanceHasEnded(long processInstanceKey)
+        {
+            Wait().AtMost(WAIT_SECONDS, SECONDS).PollInterval(POLL_MILLIS, MILLIS).Until(() => CheckThatProcessInstanceHasEnded(processInstanceKey));
         }
     }
 }
