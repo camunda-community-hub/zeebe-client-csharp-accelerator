@@ -177,11 +177,11 @@ public async Task TestHappyPathAsync()
     // Then
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     var processInstanceKey = (await response.Content.ReadFromJsonAsync<ApplicationResponse>()).ProcessInstanceKey;
+    _bpmAssert.WaitUntilProcessInstanceHasStarted(processInstanceKey);
 
-    // wait for user task
+    // wait for user task and complete
     _bpmAssert.WaitUntilProcessInstanceHasReachedElement(processInstanceKey, "Task_AppoveUser");
 
-    // complete user task
     var humanTask = await _zeebeClient.NewActivateJobsCommand().JobType("io.camunda.zeebe:userTask")
         .MaxJobsToActivate(1).WorkerName("Xunit").Timeout(TimeSpan.FromMinutes(5)).Send();
     var job = humanTask.Jobs.First();
@@ -191,7 +191,8 @@ public async Task TestHappyPathAsync()
 
     // await user account creation and end of process
     _bpmAssert.WaitUntilProcessInstanceHasCompletedElement(processInstanceKey, "Activity_CreateUserAccount");
-    _bpmAssert.WaitUntilProcessInstanceHasCompletedElement(processInstanceKey, "EndEvent_ApplicationApproved");
+    _bpmAssert.WaitUntilProcessInstanceHasEnded(processInstanceKey);
+    _bpmAssert.AssertThatProcessInstanceHasCompletedElement(processInstanceKey, "EndEvent_ApplicationApproved");
 }
 ```
 
