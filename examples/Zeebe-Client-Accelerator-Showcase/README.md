@@ -154,11 +154,51 @@ The corresponding worker code can be found in `AccountServiceWorker` and is quit
         public string Action { get; set; }
     }
 ```
+## Testing
+
+Thanks to [Testcontainers](https://testcontainers.com/) and the [Zeebe Redis Exporter](https://github.com/camunda-community-hub/zeebe-redis-exporter/tree/main/connector-csharp) we're not only able to start our process in a test scenario but also receive events from the Zeebe engine.
+With that we're able to listen to process instance events and include assertions for our process in an integration test.
+See `Zeebe-Client-Accelerator-Showcase-Test` for a starting point.
+
+```csharp
+[Fact]
+public async Task TestHappyPathAsync()
+{
+    // Given
+    var client = _factory.CreateClient();
+    var request = new ApplicationRequest()
+    {
+        ApplicantName = "John Doe"
+    };
+
+    // When
+    var response = await client.PostAsJsonAsync("/application", request);
+
+    // Then
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    var processInstanceKey = (await response.Content.ReadFromJsonAsync<ApplicationResponse>()).ProcessInstanceKey;
+
+    // wait for user task
+    _bpmAssert.WaitUntilProcessInstanceHasReachedElement(processInstanceKey, "Task_AppoveUser");
+
+    // complete user task
+    var humanTask = await _zeebeClient.NewActivateJobsCommand().JobType("io.camunda.zeebe:userTask")
+        .MaxJobsToActivate(1).WorkerName("Xunit").Timeout(TimeSpan.FromMinutes(5)).Send();
+    var job = humanTask.Jobs.First();
+    Assert.Equal(processInstanceKey, job.ProcessInstanceKey);
+    Assert.Equal("Task_AppoveUser", job.ElementId);
+    await _zeebeClient.NewCompleteJobCommand(job.Key).Variables("{\"approved\": true}").Send();
+
+    // await user account creation and end of process
+    _bpmAssert.WaitUntilProcessInstanceHasCompletedElement(processInstanceKey, "Activity_CreateUserAccount");
+    _bpmAssert.WaitUntilProcessInstanceHasCompletedElement(processInstanceKey, "EndEvent_ApplicationApproved");
+}
+```
 
 ## Links
 
 * [Zeebe Workflow Engine](https://github.com/camunda/zeebe)
-* [Zeebe C# client](https://github.com/camunda-community-hub/zeebe-client-csharp)
+* [Zeebe C# Client](https://github.com/camunda-community-hub/zeebe-client-csharp)
 * [Bootstrap Accelerator for the C# Zeebe client](https://github.com/VonDerBeck/zeebe-client-csharp-accelerator)
 * [Camunda 8 - Documentation](https://docs.camunda.io)
 * [Camunda 8 - Getting Started Guide](https://github.com/camunda/camunda-platform-get-started)

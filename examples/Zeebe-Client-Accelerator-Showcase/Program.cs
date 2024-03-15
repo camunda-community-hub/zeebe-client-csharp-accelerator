@@ -50,3 +50,5 @@ app.CreateZeebeDeployment()
     .Deploy();
 
 app.Run();
+
+public partial class Program { }

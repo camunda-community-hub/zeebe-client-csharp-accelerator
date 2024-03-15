@@ -36,7 +36,7 @@ namespace Zeebe_Client_Accelerator_Showcase.Controllers
         ///
         /// </remarks>
         [HttpPost("/application")]
-        public async Task<string?> SubmitApplicationAsync([FromBody] ApplicationRequest applicationRequest)
+        public async Task<ApplicationResponse> SubmitApplicationAsync([FromBody] ApplicationRequest applicationRequest)
         {
             var variables = new ProcessVariables()
             {
@@ -44,13 +44,17 @@ namespace Zeebe_Client_Accelerator_Showcase.Controllers
                 BusinessKey = "A-" + DateTime.Today.DayOfYear + "." + new Random().Next(0, 9999)
             };
 
-            await _zeebeClient.NewCreateProcessInstanceCommand()
+            var pi = await _zeebeClient.NewCreateProcessInstanceCommand()
                 .BpmnProcessId(ProcessConstants.PROCESS_DEFINITION_KEY)
                 .LatestVersion()
                 .Variables(_variablesSerializer.Serialize(variables))
                 .Send();
 
-            return variables.BusinessKey;
+            return new ApplicationResponse()
+            {
+                BusinessKey = variables.BusinessKey,
+                ProcessInstanceKey = pi.ProcessInstanceKey
+            };
         }
 
     }
@@ -61,5 +65,11 @@ namespace Zeebe_Client_Accelerator_Showcase.Controllers
         /// The name of the new applicant.
         /// </summary>
         [Required] public string ApplicantName { get; set; }
+    }
+
+    public class ApplicationResponse
+    { 
+        public long ProcessInstanceKey { get; set; }
+        public string BusinessKey { get; set; }
     }
 }
