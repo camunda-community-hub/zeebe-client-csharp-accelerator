@@ -97,7 +97,7 @@ namespace Zeebe.Client.Accelerator
         }
         public void StopInternal()
         {
-            workers.ForEach(w => w.Dispose());
+            workers.ToList().ForEach(w => w.Dispose());
             workers.Clear();
         }
 
