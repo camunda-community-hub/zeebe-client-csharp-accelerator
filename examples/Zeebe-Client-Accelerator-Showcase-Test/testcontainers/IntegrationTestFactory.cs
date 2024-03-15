@@ -11,11 +11,15 @@ using Io.Zeebe.Redis.Connect.Csharp.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using MartinCostello.Logging.XUnit;
+using Xunit.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
 {
-    public class IntegrationTestFactory<TProgram> : WebApplicationFactory<TProgram> where TProgram : class
+    public sealed class IntegrationTestFactory<TProgram> : WebApplicationFactory<TProgram>, ITestOutputHelperAccessor where TProgram : class 
     {
+        public ITestOutputHelper? OutputHelper { get; set; }
 
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -38,6 +42,7 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
                .AddSingleton<BpmAssert>()
                .AddHostedService(p => p.GetRequiredService<BpmAssert>());
             })
+            .ConfigureLogging(p => p.AddXUnit(this))
             .UseEnvironment("Development")
             ;
         }

@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Net.Http.Json;
+using Xunit.Abstractions;
 using Zeebe.Client;
 using Zeebe_Client_Accelerator_Showcase.Controllers;
 using Zeebe_Client_Accelerator_Showcase_Test.testcontainers;
@@ -20,8 +21,9 @@ namespace Zeebe_Client_Accelerator_Showcase_Test
         private readonly BpmAssert _bpmAssert;
         private readonly IZeebeClient _zeebeClient;
 
-        public ProcessTest(IntegrationTestFactory<Program> factory)
+        public ProcessTest(IntegrationTestFactory<Program> factory, ITestOutputHelper outputHelper)
         {
+            factory.OutputHelper = outputHelper;
             _factory = factory;
             _bpmAssert = factory.Services.GetRequiredService<BpmAssert>();
             _zeebeClient = factory.Services.GetRequiredService<IZeebeClient>();
