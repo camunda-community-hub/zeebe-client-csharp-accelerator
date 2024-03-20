@@ -198,6 +198,8 @@ namespace Zeebe.Client.Accelerator
 
         private static bool IsZeebeWorker(Type t)
         {
+            if (t.IsAbstract) return false;
+            
             var interfaces = t.GetInterfaces();
             return
                 interfaces.Contains(typeof(IZeebeWorker)) ||
