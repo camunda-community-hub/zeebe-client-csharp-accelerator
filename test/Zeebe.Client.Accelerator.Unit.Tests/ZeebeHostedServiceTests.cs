@@ -268,6 +268,12 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
                         .Where(m => m.Name.Equals(nameof(JobHandlerH.HandleJob)))
                         .First()
                ),
+               CreateJobHandlerInfo(
+                    typeof(JobHandlerI)
+                        .GetMethods()
+                        .Where(m => m.Name.Equals(nameof(JobHandlerI.HandleJob)))
+                        .First()
+               ),
             };
 
             this.handleJobDelegateMock = new Mock<HandleJobDelegate>();

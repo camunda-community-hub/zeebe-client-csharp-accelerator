@@ -268,6 +268,41 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             Assert.Equal(expected, job.getVariables());
         }
 
+        [Fact]
+        public async Task ImplementationOfAbstractJobHandlerBaseIsCalledCorrectly()
+        {
+            var random = new Random();
+
+            var jobVariables = new ExtendedJobHState()
+            {
+                Guid = Guid.NewGuid(),
+                ExtraAttr = "Hello Impl"
+            };
+            var expectedSerializedVariables = new ZeebeVariablesSerializer().Serialize(jobVariables);
+            deserializerMock.Setup(m => m.Deserialize<ExtendedJobHState>(expectedSerializedVariables))
+                .Returns(jobVariables);
+
+            PrepareAsyncJobHandlersFor<JobHandlerI, ExtendedJobHState>();
+            var expectedHandler = jobHandlerInfoCollection.First();
+            var expectedKey = random.Next();
+
+            var jobMock = new Mock<IJob>();
+            jobMock.SetupGet(m => m.Type).Returns(expectedHandler.JobType);
+            jobMock.SetupGet(m => m.Key).Returns(expectedKey);
+            jobMock.SetupGet(m => m.Variables).Returns(expectedSerializedVariables);
+
+            JobHandlerI.guids.Clear();
+
+            var handler = Create();
+            await handler.HandleJob(jobClientMock.Object, jobMock.Object, cancellationToken);
+
+            this.jobClientMock.Verify(c => c.NewCompleteJobCommand(expectedKey), Times.Once);
+            this.jobClientMock.Verify(c => c.NewThrowErrorCommand(expectedKey), Times.Never);
+            this.jobClientMock.Verify(c => c.NewFailCommand(expectedKey), Times.Never);
+
+            Assert.Single(JobHandlerI.guids);
+            Assert.Equal(jobVariables.Guid, JobHandlerI.guids.First());
+        }
 
         [Fact]        
         public async Task RetryTimeOutIsUsedWhenJobIsCompleted() 
@@ -382,6 +417,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             mock.Setup(m => m.GetService(typeof(JobHandlerF))).Returns(new JobHandlerF(handleJobDelegateMock.Object));
             mock.Setup(m => m.GetService(typeof(JobHandlerG))).Returns(new JobHandlerG(handleJobDelegateMock.Object));
             mock.Setup(m => m.GetService(typeof(JobHandlerH))).Returns(new JobHandlerH(handleJobDelegateMock.Object));
+            mock.Setup(m => m.GetService(typeof(JobHandlerI))).Returns(new JobHandlerI());
 
             return mock;
         }
