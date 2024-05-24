@@ -148,6 +148,24 @@ The implementation is based on the [Zeebe C# Client](https://github.com/camunda-
 ```
 Transport encryption settings can as well be provided using environment variables `ZEEBE_ROOT_CERTIFICATE_PATH`, `ZEEBE_ACCESS_TOKEN`.
 
+### Providing your own AccessTokenSupplier
+
+*Since 2.1.8*
+
+You are able to provide your own `IAccessTokenSupplier` implementation - e.g. using [Duende.AccessTokenManagement](https://github.com/DuendeSoftware/Duende.AccessTokenManagement) - simply by registering your implementation in DI before bootstrapping this extension:
+
+```csharp
+// Register custom AccessTokenSupplier
+builder.Services.AddSingleton<IAccessTokenSupplier, MyCustomTokenSupplier>();
+
+// Bootstrap Zeebe Integration
+builder.Services.BootstrapZeebe(
+    builder.Configuration.GetSection("ZeebeConfiguration"),
+    typeof(Program).Assembly);
+```
+
+For more detailed info on this topic see the following [zeebe-client-csharp/discussions](https://github.com/camunda-community-hub/zeebe-client-csharp/discussions/666)
+
 ### Deploy Processes
 
 If we want to deploy some processes right before the final startup of our application we create a deployment using the extension for `IHost` or `IServiceProvider` as follows:
