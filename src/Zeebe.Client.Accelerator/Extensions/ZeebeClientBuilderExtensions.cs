@@ -7,11 +7,11 @@ namespace Zeebe.Client.Accelerator.Extensions
 {
      public static class ZeebeClientBuilderExtensions 
      {
-         public static IZeebeClient Build(this IZeebeClientBuilder builder, ClientOptions options)
+         public static IZeebeClient Build(this IZeebeClientBuilder builder, ClientOptions options, IAccessTokenSupplier tokenSupplier = null)
          {
              return builder
                 .BuildTransportBuilder(options)
-                .BuildFinalStep(options)
+                .BuildFinalStep(options, tokenSupplier)
                 .BuildClient(options);
          }
 
@@ -23,7 +23,7 @@ namespace Zeebe.Client.Accelerator.Extensions
             return builder.UseGatewayAddress(options.GatewayAddress);
         }
 
-        private static IZeebeClientFinalBuildStep BuildFinalStep(this IZeebeClientTransportBuilder builder, ClientOptions options)
+        private static IZeebeClientFinalBuildStep BuildFinalStep(this IZeebeClientTransportBuilder builder, ClientOptions options, IAccessTokenSupplier tokenSupplier = null)
         {
             if (options.Cloud == null && 
                 (Environment.GetEnvironmentVariable("ZEEBE_CLIENT_ID") != null || Environment.GetEnvironmentVariable("ZEEBE_CLIENT_SECRET") != null))
@@ -41,20 +41,26 @@ namespace Zeebe.Client.Accelerator.Extensions
                 return builder.UsePlainText();
 
             IZeebeSecureClientBuilder clientBuilder = null;
-            
+
             if (options.Cloud != null)
             {
                 clientBuilder = builder.UseTransportEncryption();
-                var tokenSupplier = CamundaCloudTokenProvider.Builder().UseAuthServer(options.Cloud.AuthorizationServerUrl)
-                    .UseClientId(options.Cloud.ClientId).UseClientSecret(options.Cloud.ClientSecret).UseAudience(options.Cloud.TokenAudience)
-                    .Build();
+
+                if (tokenSupplier == null)
+                {
+                    // The CamundaCloudTokenProvider maintains a local token cache, using a local file as a means to persist the token...
+                    tokenSupplier = CamundaCloudTokenProvider.Builder().UseAuthServer(options.Cloud.AuthorizationServerUrl)
+                        .UseClientId(options.Cloud.ClientId).UseClientSecret(options.Cloud.ClientSecret).UseAudience(options.Cloud.TokenAudience)
+                        .Build();
+                }
+
                 clientBuilder.UseAccessTokenSupplier(tokenSupplier);
-                // The CamundaCloudTokenProvider maintains a local token cache, using a local file as a means to persist the token...
                 // -> try to get token early in order to prevent errors when writing credential file in parallel upon startup
                 try { tokenSupplier.GetAccessTokenForRequestAsync().Wait(); } catch (Exception) { /* NOOP */ }
+
                 return clientBuilder;
             }
-            
+
             if (!String.IsNullOrEmpty(options.TransportEncryption.RootCertificatePath))
                 clientBuilder = builder.UseTransportEncryption(options.TransportEncryption.RootCertificatePath);
             else

@@ -110,19 +110,20 @@ namespace Zeebe.Client.Accelerator.Extensions
 
         private static IServiceCollection AddZeebeClient(this IServiceCollection services)
         {
-            return services                
+            return services
                 .AddZeebeBuilders()
                 .AddScoped(sp => {
                     var options = sp.GetRequiredService<IOptions<ZeebeClientAcceleratorOptions>>();
                     var builder = sp.GetRequiredService<IZeebeClientBuilder>();
+                    var tokenSupplier = sp.GetService<IAccessTokenSupplier>();
                     var loggerFactory = sp.GetService<ILoggerFactory>();
                     StateBuilderExtensions.Configure(sp.GetRequiredService<IZeebeVariablesSerializer>());
 
                     if(loggerFactory != null)
                         builder = builder.UseLoggerFactory(loggerFactory);
-                        
+
                     return builder
-                        .Build(options.Value.Client);                        
+                        .Build(options.Value.Client, tokenSupplier);
                 });
         }
 
