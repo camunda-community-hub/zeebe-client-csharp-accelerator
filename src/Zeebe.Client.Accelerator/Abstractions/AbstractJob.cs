@@ -45,6 +45,8 @@ namespace Zeebe.Client.Accelerator.Abstractions
         public string Variables => job.Variables;
 
         public string CustomHeaders => job.CustomHeaders;
+
+        public string TenantId => job.TenantId;
     }
 
 }
