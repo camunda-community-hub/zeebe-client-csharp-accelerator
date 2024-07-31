@@ -44,10 +44,10 @@ namespace Zeebe.Client.Accelerator
             public async void Deploy()
                 => await DeployAsync();
 
-            public async void Deploy(Action callback)
+            public async void DeployAndContinueWith(Action callback)
                 => await DeployAsync().ContinueWith(t => callback());
 
-            public async void Deploy(Func<Task> asyncCallback)
+            public async void DeployAndContinueWith(Func<Task> asyncCallback)
                 => await DeployAsync().ContinueWith(async t => await asyncCallback());
 
             public async Task DeployAsync()

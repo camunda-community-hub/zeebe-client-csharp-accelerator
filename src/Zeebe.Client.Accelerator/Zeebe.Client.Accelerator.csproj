@@ -26,7 +26,7 @@ So this is our version of a good Bootstrap Extension for the C# Zeebe Client. Cr
     <PackageIcon>zeebe-logo.png</PackageIcon>
     <Company>Accso - Accelerated Solutions GmbH</Company>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.1.6</Version>
+    <Version>2.1.10</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0|AnyCPU'">

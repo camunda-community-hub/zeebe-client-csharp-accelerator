@@ -185,6 +185,8 @@ app.CreateZeebeDeployment()
 app.Run();
 ```
 
+The alternative `DeployAndContinueWith(...)` method offers the ability to register callbacks that are executed after successful deployment.
+
 ### Zeebe Workers
 
 A Zeebe Worker is an implementation of `IZeebeWorker`, `IAsyncZeebeWorker`, `IZeebeWorkerWithResult` or `IAsyncZeebeWorkerWithResult`. Zeebe Workers are automatically added to the DI container, therefore you can use dependency injection inside.  The default worker configuration can be overwritten with `AbstractWorkerAttribute` implementations, see [attributes] for more information.
