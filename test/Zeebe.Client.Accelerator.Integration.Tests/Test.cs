@@ -143,7 +143,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             Assert.True(deployResponse.Key > 0);
 
             var input = new List<int>();
-            for (int i = 0; i < 60; i++) input.Add(i);
+            for (int i = 0; i < 120; i++) input.Add(i);
 
             var correlationId = Guid.NewGuid();
             await zeebeClient.NewCreateProcessInstanceCommand()
@@ -155,10 +155,11 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
                     CorrelationId = correlationId
                 })
                 .Send();
-            WaitForHandlersToComplete(60, 6000);
+            WaitForHandlersToComplete(120, 10000);
 
             var variables = zeebeClient.ReceiveMessage<MultiThreadVariables>("responseFor_" + correlationId, TimeSpan.FromSeconds(25));
-            Assert.True(variables.UsedThreads.Distinct().Count() >= 3); // not exact due to the underlying TPL implementation internals
+            _testOutputHelper.WriteLine("NumThreads: " + variables.UsedThreads.Distinct().Count());
+            Assert.True(variables.UsedThreads.Distinct().Count() >= 8); // not exact due to the underlying TPL implementation internals
 
         }
 

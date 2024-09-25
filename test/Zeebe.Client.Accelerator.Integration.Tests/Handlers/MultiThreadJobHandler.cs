@@ -7,8 +7,8 @@ using Zeebe.Client.Accelerator.Attributes;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
 {
-    [MaxJobsActive(60)]
-    [HandlerThreads(3)]
+    [MaxJobsActive(120)]
+    [HandlerThreads(8)]
     public class MultiThreadJobHandler : IAsyncZeebeWorkerWithResult<Output>
     {
        
