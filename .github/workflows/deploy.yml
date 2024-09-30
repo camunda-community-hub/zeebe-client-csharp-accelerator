@@ -9,7 +9,7 @@ jobs:
     timeout-minutes: 5
     steps:
     - name: Pull zeebe
-      run: docker pull camunda/zeebe:8.4.0
+      run: docker pull camunda/zeebe:8.5.7
     - name: Checkout
       uses: actions/checkout@v4
     - name: Setup
