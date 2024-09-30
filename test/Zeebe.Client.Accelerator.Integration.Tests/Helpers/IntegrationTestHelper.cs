@@ -1,5 +1,4 @@
 using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Configurations;
 using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -64,13 +63,13 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
 
         private static IContainer SetupZeebe(ILogger logger, string version)
         {
-            TestcontainersSettings.Logger = logger;
             var container = new ContainerBuilder()
                 .WithImage($"camunda/zeebe:{version}")
                 .WithName("zeebe-testcontainer")
                 .WithPortBinding(IntegrationTestHelper.ZeebePort)
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(IntegrationTestHelper.ZeebePort))
                 .WithCleanUp(true)
+                .WithLogger(logger)
                 .Build();
 
             return container;
