@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Zeebe.Client.Accelerator.Abstractions
 {
     public interface IJobHandlerInfo
-    { 
+    {
         MethodInfo Handler { get; }
         ServiceLifetime HandlerServiceLifetime { get; }
         string JobType { get; }
@@ -17,5 +17,6 @@ namespace Zeebe.Client.Accelerator.Abstractions
         TimeSpan? PollingTimeout { get; }
         string[] FetchVariabeles { get; }
         bool AutoComplete { get; }
+        public string[] TenantIds { get; }
     }
 }

@@ -174,7 +174,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests.Options
             mock.SetupGet(m => m.PollInterval).Returns(TimeSpan.FromMilliseconds(random.Next()));
             mock.SetupGet(m => m.Timeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
             mock.SetupGet(m => m.RetryTimeout).Returns(TimeSpan.FromMilliseconds(random.Next()));
-
+            mock.SetupGet(m => m.TenantIds).Returns(new string[] { Guid.NewGuid().ToString() });
             return mock;
         }
 

@@ -4,17 +4,17 @@ using Zeebe.Client.Api.Builder;
 
 namespace Zeebe.Client.Accelerator.Options
 {
-    public class ZeebeClientAcceleratorOptions 
+    public class ZeebeClientAcceleratorOptions
     {
         public virtual ClientOptions Client { get; set; } = new ClientOptions();
         public virtual WorkerOptions Worker { get; set; }
 
-        public class ClientOptions 
+        public class ClientOptions
         {
             private string _gatewayAddress;
             public virtual string GatewayAddress { 
                 get { return GetEnvironmentVariable("ZEEBE_ADDRESS", _gatewayAddress); }
-                set { _gatewayAddress = value; } 
+                set { _gatewayAddress = value; }
             }
             public virtual TransportEncryptionOptions TransportEncryption { get; set; }
             public virtual CloudOptions Cloud { get; set; }
@@ -41,8 +41,8 @@ namespace Zeebe.Client.Accelerator.Options
             {
                 private string _clientId;
                 public virtual string ClientId {
-                    get { return GetEnvironmentVariable("ZEEBE_CLIENT_ID", _clientId); } 
-                    set { _clientId = value; } 
+                    get { return GetEnvironmentVariable("ZEEBE_CLIENT_ID", _clientId); }
+                    set { _clientId = value; }
                 }
                 private string _clientSecret;
                 public virtual string ClientSecret {
@@ -51,13 +51,13 @@ namespace Zeebe.Client.Accelerator.Options
                 }
                 private string _authorizationServerUrl = "https://login.cloud.camunda.io/oauth/token";
                 public virtual string AuthorizationServerUrl {
-                    get { return GetEnvironmentVariable("ZEEBE_AUTHORIZATION_SERVER_URL", _authorizationServerUrl); } 
-                    set { _authorizationServerUrl = value; } 
+                    get { return GetEnvironmentVariable("ZEEBE_AUTHORIZATION_SERVER_URL", _authorizationServerUrl); }
+                    set { _authorizationServerUrl = value; }
                 }
                 private string _tokenAudience = "zeebe.camunda.io";
                 public virtual string TokenAudience {
                     get { return GetEnvironmentVariable("ZEEBE_TOKEN_AUDIENCE", _tokenAudience); }
-                    set { _tokenAudience = value; } 
+                    set { _tokenAudience = value; }
                 }
             }
         }
@@ -75,6 +75,7 @@ namespace Zeebe.Client.Accelerator.Options
             public virtual long RetryTimeoutInMilliseconds { get; set; }
             public virtual TimeSpan RetryTimeout { get { return TimeSpan.FromMilliseconds(RetryTimeoutInMilliseconds); } }
             public virtual string Name { get; set; }
+            public virtual string[] TenantIds { get; set; } = Array.Empty<string>();
         }
 
         public static string GetEnvironmentVariable(string name, string defaultValue)

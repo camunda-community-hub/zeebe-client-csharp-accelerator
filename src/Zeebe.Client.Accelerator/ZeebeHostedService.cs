@@ -47,6 +47,7 @@ namespace Zeebe.Client.Accelerator
                     .Handler((jobClient, job) => HandleJob(jobClient, job, cancellationTokenSource.Token))
                     .FetchVariables(jobHandlerInfo.FetchVariabeles)
                     .MaxJobsActive(jobHandlerInfo.MaxJobsActive ?? zeebeWorkerOptions.MaxJobsActive)
+                    .TenantIds(jobHandlerInfo.TenantIds.Length > 0 ? jobHandlerInfo.TenantIds : zeebeWorkerOptions.TenantIds)
                     .Name(zeebeWorkerOptions.Name ?? jobHandlerInfo.WorkerName)
                     .PollingTimeout(jobHandlerInfo.PollingTimeout ?? zeebeWorkerOptions.PollingTimeout)
                     .PollInterval(jobHandlerInfo.PollInterval ?? zeebeWorkerOptions.PollInterval)

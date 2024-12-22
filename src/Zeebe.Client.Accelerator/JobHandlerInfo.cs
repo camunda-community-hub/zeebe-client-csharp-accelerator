@@ -18,7 +18,8 @@ namespace Zeebe.Client.Accelerator
             TimeSpan? pollInterval = null,
             TimeSpan? pollingTimeout = null,
             string[] fetchVariabeles = null,
-            bool? autoComplete = null)
+            bool? autoComplete = null,
+            string[] tenantIds = null)
         {
             if (string.IsNullOrWhiteSpace(jobType))
                 throw new ArgumentException($"'{nameof(jobType)}' cannot be null or whitespace.", nameof(jobType));
@@ -48,6 +49,7 @@ namespace Zeebe.Client.Accelerator
             this.PollingTimeout = pollingTimeout;
             this.FetchVariabeles = fetchVariabeles ?? (new string[0]);
             this.AutoComplete = autoComplete ?? true;
+            this.TenantIds = tenantIds ?? Array.Empty<string>();
         }
 
         public MethodInfo Handler { get; }
@@ -61,5 +63,6 @@ namespace Zeebe.Client.Accelerator
         public TimeSpan? PollingTimeout { get; }
         public string[] FetchVariabeles { get; }
         public bool AutoComplete { get; }
+        public string[] TenantIds { get; }
     }
 }
