@@ -27,7 +27,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [Fact]
         public void AllJobHandlersAreFoundWhenCreated() {
             var actual = Handlers();
-            var expected = 9;
+            var expected = 10;
 
             Assert.Equal(expected, actual.Count());
         }
@@ -147,6 +147,17 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             var actual = handlers.Select(h => h.PollingTimeout);
             Assert.Contains(null, actual);
             Assert.Contains(TimeSpan.FromMilliseconds(int.MaxValue - 3), actual);
+        }
+
+        [Fact]
+        public void TenantIdsPropertyIsSetCorrectlyWhenCreated()
+        {
+            var expected = new string[] { "tenant1", "tenant2"};
+            var handlers = Handlers();
+
+            var actual = handlers.Select(h => h.TenantIds);
+            Assert.Contains(new string[0], actual);
+            Assert.Contains(expected, actual);
         }
 
         private JobHandlerInfoProvider Create()

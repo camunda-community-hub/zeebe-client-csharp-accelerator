@@ -101,7 +101,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
                 this.jobWorkerBuilderStep3Mock.Verify(s => s.Timeout(info.Timeout.Value), Times.Once);
                 this.jobWorkerBuilderStep3Mock.Verify(s => s.PollInterval(info.PollInterval.Value), Times.Once);
                 this.jobWorkerBuilderStep3Mock.Verify(s => s.PollingTimeout(info.PollingTimeout.Value), Times.Once);                
-                this.jobWorkerBuilderStep3Mock.Verify(s => s.FetchVariables(info.FetchVariabeles), Times.Once);
+                this.jobWorkerBuilderStep3Mock.Verify(s => s.FetchVariables(info.FetchVariabeles), Times.Once); 
             });
         }
 
@@ -127,6 +127,8 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             this.jobWorkerBuilderStep3Mock.Verify(s => s.Timeout(expected.Timeout), Times.Once);
             this.jobWorkerBuilderStep3Mock.Verify(s => s.PollInterval(expected.PollInterval), Times.Once);
             this.jobWorkerBuilderStep3Mock.Verify(s => s.PollingTimeout(expected.PollingTimeout), Times.Once);
+            this.jobWorkerBuilderStep3Mock.Verify(s => s.TenantIds(expected.TenantIds), Times.Once);
+
         }
 
         [Fact]
@@ -393,6 +395,8 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
 
             mock.Setup(b => b.FetchVariables(It.IsAny<IList<string>>())).Returns(builder);
             mock.Setup(b => b.FetchVariables(It.IsAny<string[]>())).Returns(builder);
+            mock.Setup(b => b.TenantIds(It.IsAny<IList<string>>())).Returns(builder);
+            mock.Setup(b => b.TenantIds(It.IsAny<string[]>())).Returns(builder);
             mock.Setup(b => b.MaxJobsActive(It.IsAny<int>())).Returns(builder);
             mock.Setup(b => b.HandlerThreads(It.IsAny<byte>())).Returns(builder);
             mock.Setup(b => b.Name(It.IsAny<string>())).Returns(builder);
@@ -444,6 +448,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             var random = new Random();
 
             mock.SetupGet(m => m.Name).Returns(Guid.NewGuid().ToString());
+            mock.SetupGet(m => m.TenantIds).Returns(new string[] { Guid.NewGuid().ToString() });
             mock.SetupGet(m => m.MaxJobsActive).Returns(random.Next(1, int.MaxValue));
             mock.SetupGet(m => m.HandlerThreads).Returns(Convert.ToByte(random.Next(1, 255)));
             mock.SetupGet(m => m.PollingTimeout).Returns(TimeSpan.FromMilliseconds(random.Next()));

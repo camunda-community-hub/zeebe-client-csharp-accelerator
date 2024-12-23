@@ -77,18 +77,30 @@ namespace Zeebe.Client.Accelerator
 
             return new JobHandlerInfo
             (
-                jobHandlerMethod, 
+                jobHandlerMethod,
                 GetServiceLifetime(jobHandlerMethod),
-                GetJobType(jobHandlerType), 
-                GetWorkerName(jobHandlerType), 
-                GetMaxJobsActive(jobHandlerType), 
+                GetJobType(jobHandlerType),
+                GetWorkerName(jobHandlerType),
+                GetMaxJobsActive(jobHandlerType),
                 GetHandlerThreads(jobHandlerType),
                 GetTimeout(jobHandlerType),
-                GetPollInterval(jobHandlerType), 
+                GetPollInterval(jobHandlerType),
                 GetPollingTimeout(jobHandlerType),
                 GetFetchVariables(jobType, jobHandlerType),
-                GetAutoComplete(jobHandlerType)
+                GetAutoComplete(jobHandlerType),
+                GetTenantIds(jobHandlerType)
             );
+        }
+
+        private static string[] GetTenantIds(Type jobHandlerType)
+        {
+            var attr = jobHandlerType.GetCustomAttribute<TenantIdsAttribute>();
+            if (attr != null)
+            {
+                return attr.TenantIds;
+            }
+
+            return Array.Empty<string>();
         }
 
         private static ServiceLifetime GetServiceLifetime(MethodInfo handlerMethod)
@@ -160,7 +172,7 @@ namespace Zeebe.Client.Accelerator
             var fetchVariables = GetFetchVariablesFromJobState(jobType);
             if(fetchVariables != null)
                 return fetchVariables;
-                
+
             return null;
         }
 
@@ -183,7 +195,7 @@ namespace Zeebe.Client.Accelerator
             return jobStateType.GetProperties()
                 .Where(p => p.CanWrite && (p.GetCustomAttribute<JsonIgnoreAttribute>() == null))
                 .Select(p => GetAttributeName(p))
-                .ToArray();                
+                .ToArray();
         }
 
         private static string GetAttributeName(PropertyInfo p)
@@ -199,7 +211,7 @@ namespace Zeebe.Client.Accelerator
         private static bool IsZeebeWorker(Type t)
         {
             if (t.IsAbstract) return false;
-            
+
             var interfaces = t.GetInterfaces();
             return
                 interfaces.Contains(typeof(IZeebeWorker)) ||
@@ -214,16 +226,16 @@ namespace Zeebe.Client.Accelerator
                 .Select(p => p.ParameterType)
                 .ToList();
 
-            return jobHandlerMethods.Any(h => 
+            return jobHandlerMethods.Any(h =>
                 h.Name.Equals(method.Name) &&
                 h.GetParameters().Select(p => p.ParameterType).SequenceEqual(methodParameters) &&
                 h.ReturnParameter.ParameterType.Equals(method.ReturnParameter.ParameterType)
             );
         }
-        
+
         private static bool IsZeebeWorkerInterface(Type i)
         {
-            return 
+            return
                 i.Equals(typeof(IZeebeWorker)) ||
                 i.Equals(typeof(IAsyncZeebeWorker)) ||
                 i.IsGenericType && GENERIC_HANDLER_TYPES.Any(h => i.GetGenericTypeDefinition().Equals(h));
