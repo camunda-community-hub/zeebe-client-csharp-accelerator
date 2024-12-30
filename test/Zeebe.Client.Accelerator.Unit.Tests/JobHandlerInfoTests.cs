@@ -18,9 +18,10 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         private readonly TimeSpan pollingTimeout;
         private readonly TimeSpan pollInterval;
         private string[] fetchVariabeles;
+        private string[] tenantIds;
 
         [Fact]
-        public void ThrowsArgumenNullExceptionWhenHandlerIsNull() 
+        public void ThrowsArgumenNullExceptionWhenHandlerIsNull()
         {
             Assert.Throws<ArgumentNullException>("handler", () => new JobHandlerInfo(null, this.handlerServiceLifetime, this.jobType, this.workerName));
         }
@@ -46,7 +47,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
-        public void ThrowsArgumentOutOfRangeExceptionWhenMaxJobsActiveIsSmallerOrEqualThen0(int maxJobsActive) 
+        public void ThrowsArgumentOutOfRangeExceptionWhenMaxJobsActiveIsSmallerOrEqualThen0(int maxJobsActive)
         {
             Assert.Throws<ArgumentOutOfRangeException>("maxJobsActive", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, maxJobsActive, this.handlerThreads, this.timeout, this.pollInterval, this.pollingTimeout));
         }
@@ -62,7 +63,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
-        public void ThrowsArgumentOutOfRangeExceptionWhenTimeoutIsSmallerOrEqualThen0(int timeout) 
+        public void ThrowsArgumentOutOfRangeExceptionWhenTimeoutIsSmallerOrEqualThen0(int timeout)
         {
             Assert.Throws<ArgumentOutOfRangeException>("timeout", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.handlerThreads, TimeSpan.FromMilliseconds(timeout), this.pollInterval, this.pollingTimeout));
         }
@@ -70,7 +71,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
-        public void ThrowsArgumentOutOfRangeExceptionWhenPollIntervalIsSmallerOrEqualThen0(int pollInterval) 
+        public void ThrowsArgumentOutOfRangeExceptionWhenPollIntervalIsSmallerOrEqualThen0(int pollInterval)
         {
             Assert.Throws<ArgumentOutOfRangeException>("pollInterval", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.handlerThreads, this.timeout, TimeSpan.FromMilliseconds(pollInterval), this.pollingTimeout));
         }
@@ -78,14 +79,14 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
-        public void ThrowsArgumentOutOfRangeExceptionWhenPollingTimeoutIsSmallerOrEqualThen0(int pollingTimeout) 
+        public void ThrowsArgumentOutOfRangeExceptionWhenPollingTimeoutIsSmallerOrEqualThen0(int pollingTimeout)
         {
             Assert.Throws<ArgumentOutOfRangeException>("pollingTimeout", () => new JobHandlerInfo(this.handler, this.handlerServiceLifetime, this.jobType, this.workerName, this.maxJobsActive, this.handlerThreads, this.timeout, this.pollInterval, TimeSpan.FromMilliseconds(pollingTimeout)));
         }
 
         [Fact]
         public void AllPropertiesAreSetWhenCreated()
-        {   
+        {
             var actual = Create();
             Assert.NotNull(actual);
             Assert.Equal(this.handler, actual.Handler);
@@ -97,6 +98,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             Assert.Equal(this.pollInterval, actual.PollInterval);
             Assert.Equal(this.pollingTimeout, actual.PollingTimeout);
             Assert.Equal(this.fetchVariabeles, actual.FetchVariabeles);
+            Assert.Equal(this.tenantIds, actual.TenantIds);
         }
 
         [Fact]
@@ -105,6 +107,14 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             this.fetchVariabeles = null;
             var actual = Create();
             Assert.Equal(new string[0], actual.FetchVariabeles);
+        }
+
+        [Fact]
+        public void EmptyStringArrayIsCreatedWhenTenantIdsIsNull()
+        {
+            this.tenantIds = null;
+            var actual = Create();
+            Assert.Equal(new string[0], actual.TenantIds);
         }
 
         public JobHandlerInfoTests()
@@ -122,13 +132,18 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             this.handlerThreads = Convert.ToByte(random.Next(1, 255));
             this.pollingTimeout = TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue));
             this.pollInterval = TimeSpan.FromMilliseconds(random.Next(1, int.MaxValue));
-            this.fetchVariabeles = new string[] { 
-                Guid.NewGuid().ToString(), 
-                Guid.NewGuid().ToString() 
+            this.fetchVariabeles = new string[] {
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString()
+            };
+
+            this.tenantIds = new string[] {
+                Guid.NewGuid().ToString(),
+                Guid.NewGuid().ToString()
             };
         }
 
-        private JobHandlerInfo Create() 
+        private JobHandlerInfo Create()
         {
             return new JobHandlerInfo
             (
@@ -141,8 +156,9 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
                 this.timeout,
                 this.pollInterval,
                 this.pollingTimeout,
-                this.fetchVariabeles
-            );
-        }     
+                this.fetchVariabeles,
+                tenantIds: this.tenantIds
+             );
+        }
     }
 }
