@@ -358,6 +358,22 @@ public class ManualJobHandler : IAsyncZeebeWorker
 Please be aware, that uncatched exceptions still lead to sending fail commands (or error commands in case of `BpmnErrorException`).
 It's the responsibility of the worker implementation to catch and handle all exceptions if a different behaviour is intended.
 
+### Multi-tenancy
+*Since 2.1.12*
+
+Multi-tenancy in the context of Camunda 8 refers to the ability of Camunda 8 to serve multiple distinct tenants or clients within a single installation.
+Hence you can configure a job worker to pick up jobs belonging to one or more tenants:
+
+```csharp
+[TenantIds("myTenant", "myOtherTenant")]
+public class TenantSpecificJobHandler : IAsyncZeebeWorker
+{
+   ...
+}
+```
+
+Alternatively you can set default tenants using the `TenantIds` attribute in the `Worker` section of your *ZeebeConfiguration*.
+
 ### Dynamic message receiver
 
 See [Example for synchronous responses from processes](https://github.com/camunda-community-hub/camunda-8-examples/tree/main/synchronous-response-springboot) for a description of the scenario.
