@@ -13,9 +13,11 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Setup
-      uses: actions/setup-dotnet@v4.2.0
+      uses: actions/setup-dotnet@v4.3.0
       with:
-        dotnet-version: 8.x
+        dotnet-version: |
+          7.x
+          8.x
     - name: Set VERSION variable from tag
       run: echo "VERSION=${GITHUB_REF/refs\/tags\/}" >> $GITHUB_ENV
     - name: Pack
