@@ -39,7 +39,8 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
 
             host = SetupHost(loggerFactory, IntegrationTestHelper.ZeebePort, handleJobDelegate);
 
-            zeebeClient = (IZeebeClient)host.Services.GetService(typeof(IZeebeClient));
+            var scope = host.Services.CreateScope();
+            zeebeClient = (IZeebeClient)scope.ServiceProvider.GetService(typeof(IZeebeClient));
         }
 
         public IZeebeClient ZeebeClient { get { return zeebeClient; } }

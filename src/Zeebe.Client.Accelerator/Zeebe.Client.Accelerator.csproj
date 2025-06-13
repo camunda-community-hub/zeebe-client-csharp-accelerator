@@ -64,5 +64,9 @@ So this is our version of a good Bootstrap Extension for the C# Zeebe Client. Cr
     <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.1" />
+  </ItemGroup>
+
   
 </Project>
