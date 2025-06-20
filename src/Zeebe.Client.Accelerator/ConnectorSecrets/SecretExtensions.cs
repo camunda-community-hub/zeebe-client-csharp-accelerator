@@ -11,7 +11,7 @@ public static class SecretExtensions
             IConfiguration zeebeConfigSection)
         {
             services.AddOptions<SecretOptions>()
-                .Bind(zeebeConfigSection);
+                .Bind(zeebeConfigSection.GetSection(SecretOptions.Section));
             services.AddSingleton<SecretProviderAggregator>();
             services.AddSingleton<ISecretHandler,SecretHandler>();
             

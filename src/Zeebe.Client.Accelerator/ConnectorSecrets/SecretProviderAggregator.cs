@@ -35,8 +35,8 @@ public class SecretProviderAggregator
         {
             try
             {
-                string value = await provider.GetSecretAsync(key);
-                if (value != null)
+                var value = await provider.GetSecretAsync(key);
+                if (!string.IsNullOrWhiteSpace(value))
                 {
                     return value;
                 }

@@ -20,6 +20,11 @@ public class EnvironmentVariablesSecretProvider : ISecretProvider
 
     public async Task<string> GetSecretAsync(string key)
     {
+        if (string.IsNullOrEmpty(key))
+        {
+            _logger.LogWarning("Empty key provided to Environment Variables secret provider");
+            return null;
+        }
         string fullKey = string.IsNullOrEmpty(_options.Prefix) ? key : $"{_options.Prefix}{key}";
         string value = Environment.GetEnvironmentVariable(fullKey);
             

@@ -5,5 +5,5 @@ namespace Zeebe.Client.Accelerator.ConnectorSecrets;
 public class SecretOptions
 {
     public const string Section = "ConnectorSecrets";
-    public List<string> Providers { get; set; } = new List<string>() { "EnvironmentVariablesSecretProvider" };
+    public List<string> Providers { get; set; } = new();
 }
