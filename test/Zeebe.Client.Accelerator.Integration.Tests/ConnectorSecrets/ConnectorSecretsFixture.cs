@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Azure.Core;
@@ -46,9 +47,6 @@ public class ConnectorSecretsFixture : IAsyncLifetime
         // Setup the environment for testing with Lowkey Vault
         Environment.SetEnvironmentVariable("IDENTITY_ENDPOINT", $"{IdentityUri}/metadata/identity/oauth2/token");
         Environment.SetEnvironmentVariable("IDENTITY_HEADER", "header");
-
-        // Configure services
-        ConfigureServices();
     }
 
     public async Task DisposeAsync()
@@ -62,6 +60,7 @@ public class ConnectorSecretsFixture : IAsyncLifetime
     public async Task SeedAzureSecret(string key, string value)
     {
         var options = new SecretClientOptions();
+        options.DisableChallengeResourceVerification = true;
         DisableSslValidation(options);
 
         var client = new SecretClient(
@@ -71,7 +70,7 @@ public class ConnectorSecretsFixture : IAsyncLifetime
 
         await client.SetSecretAsync(key, value);
     }
-    
+
     public async Task SeedEnvironmentVariableSecret(string key, string value)
     {
         var envKey = $"TEST_{key}";
@@ -80,22 +79,25 @@ public class ConnectorSecretsFixture : IAsyncLifetime
         await Task.CompletedTask;
     }
 
-    private void ConfigureServices()
+    public void ConfigureServices(Dictionary<string, string> configuration = null)
     {
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string>
+        var providerConfig = new Dictionary<string, string>
+        {
+            ["Zeebe:ConnectorSecrets:AzureKeyVault:VaultUri"] = VaultUri,
+            ["Zeebe:ConnectorSecrets:EnvironmentVariables:Prefix"] = "TEST_"
+        };
+        var mergedConfiguration = new ConfigurationBuilder()
+            .AddInMemoryCollection(providerConfig.Concat(configuration ?? new Dictionary<string, string>
             {
                 ["Zeebe:ConnectorSecrets:Providers:0"] = "AzureKeyVaultSecretProvider",
-                ["Zeebe:ConnectorSecrets:AzureKeyVault:VaultUri"] = VaultUri,
                 ["Zeebe:ConnectorSecrets:Providers:1"] = "EnvironmentVariablesSecretProvider",
-                ["Zeebe:ConnectorSecrets:EnvironmentVariables:Prefix"] = "TEST_"
-            })
+            }).ToDictionary(kvp => kvp.Key, kvp => kvp.Value))
             .Build();
 
         var services = new ServiceCollection();
         services.AddLogging(builder => builder.AddConsole());
-        services.AddConnectorSecrets(configuration.GetSection("Zeebe"));
-        services.AddEnvironmentSecretProvider(configuration.GetSection("Zeebe"));
+        services.AddConnectorSecrets(mergedConfiguration.GetSection("Zeebe"));
+        services.AddEnvironmentSecretProvider(mergedConfiguration.GetSection("Zeebe"));
         services.AddSingleton<ISecretProvider>(sp =>
         {
             var options = Microsoft.Extensions.Options.Options.Create(
@@ -103,6 +105,7 @@ public class ConnectorSecretsFixture : IAsyncLifetime
             var logger = sp.GetRequiredService<ILogger<AzureKeyVaultSecretProvider>>();
 
             var secretClientOptions = new SecretClientOptions();
+            secretClientOptions.DisableChallengeResourceVerification = true;
             DisableSslValidation(secretClientOptions);
             return new AzureKeyVaultSecretProvider(options, logger, secretClientOptions);
         });
