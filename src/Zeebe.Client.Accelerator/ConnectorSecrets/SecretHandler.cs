@@ -17,13 +17,13 @@ public class SecretHandler : ISecretHandler
 
     public async Task<string> ReplaceSecretsAsync(string input)
     {
-        return await SecretUtil.ReplaceSecretsAsync(input, async name =>
+        return await SecretUtil.ReplaceSecretsAsync(input, async key =>
         {
-            var secret = await _secretProviderAggregator.GetSecretAsync(name);
+            var secret = await _secretProviderAggregator.GetSecretAsync(key);
             if (secret == null)
             {
-                _logger.LogWarning("Secret with name '{SecretName}' is not available", name);
-                throw new ConnectorInputException($"Secret with name '{name}' is not available");
+                _logger.LogWarning("Secret with key '{SecretKey}' is not available", key);
+                throw new ConnectorInputException($"Secret with key '{key}' is not available");
             }
             return secret;
         });

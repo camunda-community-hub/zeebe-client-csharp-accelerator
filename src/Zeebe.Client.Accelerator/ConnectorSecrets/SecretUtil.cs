@@ -8,11 +8,11 @@ namespace Zeebe.Client.Accelerator.ConnectorSecrets;
 public static class SecretUtil
 {
     private static readonly Regex SecretPatternSecrets =
-        new(@"secrets\.(?<secret>([a-zA-Z0-9]+[\/._-])*[a-zA-Z0-9]+)", RegexOptions.Compiled);
+        new("secrets\\.(?<secret>([a-zA-Z0-9]+[\\/._-])*[a-zA-Z0-9]+)", RegexOptions.Compiled);
 
     private static readonly Regex SecretPatternParentheses =
-        new(@"\{\{\s*secrets\.(?<secret>\S+?)\s*\}\}", RegexOptions.Compiled);
-
+        new("\\{\\{\\s*secrets\\.(?<secret>\\S+?\\s*)}}", RegexOptions.Compiled);
+    
     public static async Task<string> ReplaceSecretsAsync(string input, Func<string, Task<string>> secretReplacer)
     {
         if (input == null)
@@ -29,14 +29,14 @@ public static class SecretUtil
         Func<string, Task<string>> secretReplacer)
     {
         return await ReplaceTokensAsync(input, SecretPatternParentheses,
-            async match => await ResolveSecretValueAsync(secretReplacer, match));
-    }
+             match =>  ResolveSecretValueAsync(secretReplacer, match));
+    }   
 
     private static async Task<string> ReplaceSecretsWithoutParenthesesAsync(string input,
         Func<string, Task<string>> secretReplacer)
     {
         return await ReplaceTokensAsync(input, SecretPatternSecrets,
-            async match => await ResolveSecretValueAsync(secretReplacer, match));
+             match =>  ResolveSecretValueAsync(secretReplacer, match));
     }
 
     private static async Task<string> ResolveSecretValueAsync(Func<string, Task<string>> secretReplacer, Match match)
@@ -47,27 +47,30 @@ public static class SecretUtil
             var result = await secretReplacer(secretName);
             return result ?? match.Value;
         }
-
-        return match.Value;
+        return null;
     }
-
-    private static async Task<string> ReplaceTokensAsync(string original, Regex pattern,
-        Func<Match, Task<string>> converter)
+    
+    private static async Task<string> ReplaceTokensAsync(string input, Regex pattern,
+    Func<Match, Task<string>> converter)
     {
-        var matches = pattern.Matches(original).Cast<Match>().ToList();
-        var result = original;
-
-        // Process matches in reverse order to maintain string positions
-        for (var i = matches.Count - 1; i >= 0; i--)
+        var matches = pattern.Matches(input);
+        if (matches.Count == 0)
         {
-            var match = matches[i];
-            var replacement = await converter(match);
-            if (replacement != null)
-            {
-                result = result.Substring(0, match.Index) + replacement + result.Substring(match.Index + match.Length);
-            }
+            return input;
         }
 
-        return result;
+        var sb = new System.Text.StringBuilder();
+        int lastIndex = 0;
+
+        foreach (Match match in matches)
+        {
+            sb.Append(input, lastIndex, match.Index - lastIndex);
+            var replacedValue = await converter(match);
+            sb.Append(replacedValue);
+            lastIndex = match.Index + match.Length;
+        }
+
+        sb.Append(input, lastIndex, input.Length - lastIndex);
+        return sb.ToString();
     }
 }

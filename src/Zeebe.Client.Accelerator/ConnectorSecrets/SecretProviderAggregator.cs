@@ -23,8 +23,8 @@ public class SecretProviderAggregator
         var orderedProviders = providers?.ToList() ?? new List<ISecretProvider>();
         if (!orderedProviders.Any())
         {
-            _logger.LogWarning("No secret providers registered. Please ensure at least one provider is configured.");
-            return;
+            var errorMessage = "No secret providers registered. Please ensure at least one provider is configured.";
+            _logger.LogError(errorMessage);
         }
         _providers = orderedProviders.OrderBy(p => _secretOptions.Providers.IndexOf(p.GetType().Name)).ToList();
     }
