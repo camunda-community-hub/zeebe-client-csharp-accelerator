@@ -22,8 +22,7 @@ public class SecretHandler : ISecretHandler
             var secret = await _secretProviderAggregator.GetSecretAsync(key);
             if (secret == null)
             {
-                _logger.LogWarning("Secret with key '{SecretKey}' is not available", key);
-                throw new ConnectorInputException($"Secret with key '{key}' is not available");
+                _logger.LogError("Secret with key '{SecretKey}' is not available", key);
             }
             return secret;
         });

@@ -77,15 +77,17 @@ public class SecretHandlerTests : IClassFixture<ConnectorSecretsFixture>
     }
     
     [Fact]
-    public async Task ReplaceSecretsAsync_WithMissingSecret_ThrowsException()
+    public async Task ReplaceSecretsAsync_WithMissingSecret_ReturnsInput()
     {
         // Arrange
         var secretKey = $"SECRET-{Guid.NewGuid():N}";
+        
+        // Act
+        var result = await _sut.ReplaceSecretsAsync($"The value is {{{{secrets.{secretKey}}}}}");
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<ConnectorInputException>(() =>
-            _sut.ReplaceSecretsAsync($"The value is {{{{secrets.{secretKey}}}}}"));
-        Assert.Contains(secretKey, exception.Message);
+       
+        Assert.Equal($"The value is {{{{secrets.{secretKey}}}}}", result);
     }
     
     [Fact]

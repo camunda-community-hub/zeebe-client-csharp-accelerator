@@ -9,7 +9,7 @@ namespace Zeebe.Client.Accelerator.ConnectorSecrets;
 
 public class SecretProviderAggregator
 {
-    private readonly IList<ISecretProvider> _providers;
+    private readonly IList<ISecretProvider> _orderedProviders = new List<ISecretProvider>();
     private readonly ILogger<SecretProviderAggregator> _logger;
     private readonly SecretOptions _secretOptions;
 
@@ -20,18 +20,20 @@ public class SecretProviderAggregator
     {
         _logger = logger;
         _secretOptions = options.Value;
-        var orderedProviders = providers?.ToList() ?? new List<ISecretProvider>();
-        if (!orderedProviders.Any())
+        if (providers != null && !providers.Any())
         {
             var errorMessage = "No secret providers registered. Please ensure at least one provider is configured.";
-            _logger.LogError(errorMessage);
+            _logger.LogWarning(errorMessage);
         }
-        _providers = orderedProviders.OrderBy(p => _secretOptions.Providers.IndexOf(p.GetType().Name)).ToList();
+        if (_secretOptions != null)
+        {
+            _orderedProviders = providers.OrderBy(p => _secretOptions.Providers.IndexOf(p.GetType().Name)).ToList(); 
+        }
     }
 
     public async Task<string> GetSecretAsync(string key)
     {
-        foreach (var provider in _providers)
+        foreach (var provider in _orderedProviders)
         {
             try
             {
