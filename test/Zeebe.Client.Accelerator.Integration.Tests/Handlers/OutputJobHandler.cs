@@ -52,5 +52,8 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
     {
         [JsonPropertyName("jsonPropertyNamedAttr")]
         public string MyJsonPropertyName { get; set; }
+        
+        [JsonPropertyName("jsonPropertyNamedAttrWithSecret")]
+        public string MyJsonPropertyNameWithSecret { get; set; }
     }
 }

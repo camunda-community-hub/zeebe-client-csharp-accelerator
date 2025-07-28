@@ -16,6 +16,7 @@ using Zeebe.Client.Api.Commands;
 using static Zeebe.Client.Accelerator.Options.ZeebeClientAcceleratorOptions;
 using Zeebe.Client.Accelerator.Options;
 using Microsoft.Extensions.Options;
+using Zeebe.Client.Accelerator.ConnectorSecrets;
 
 namespace Zeebe.Client.Accelerator.Unit.Tests
 {
@@ -42,56 +43,63 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
         private readonly Mock<ZeebeClientAcceleratorOptions> zeebeClientBootstrapOptionsMock;
         private readonly Mock<IOptions<ZeebeClientAcceleratorOptions>> optionsMock;
         private readonly Mock<ILogger<ZeebeJobHandler>> loggerMock;
+        private readonly Mock<ISecretHandler> secretHandlerMock;
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenServiceProviderIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("serviceProvider", () => new ZeebeJobHandler(null, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("serviceProvider", () => new ZeebeJobHandler(null, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, this.optionsMock.Object, this.loggerMock.Object, this.secretHandlerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenJobHandlerInfoProviderIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("jobHandlerInfoProvider", () => new ZeebeJobHandler(this.serviceProviderMock.Object, null, this.serializerMock.Object, this.deserializerMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("jobHandlerInfoProvider", () => new ZeebeJobHandler(this.serviceProviderMock.Object, null, this.serializerMock.Object, this.deserializerMock.Object, this.optionsMock.Object, this.loggerMock.Object, this.secretHandlerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenSerializerIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("serializer", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, null, this.deserializerMock.Object, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("serializer", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, null, this.deserializerMock.Object, this.optionsMock.Object, this.loggerMock.Object, this.secretHandlerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenDeserializerIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("deserializer", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, null, this.optionsMock.Object, this.loggerMock.Object));
+            Assert.Throws<ArgumentNullException>("deserializer", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, null, this.optionsMock.Object, this.loggerMock.Object, this.secretHandlerMock.Object));
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenOptionsIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("options", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, null, this.loggerMock.Object));            
+            Assert.Throws<ArgumentNullException>("options", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, null, this.loggerMock.Object, this.secretHandlerMock.Object));            
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenOptionsValueIsNull() 
         {
             this.optionsMock.SetupGet(m => m.Value).Returns((ZeebeClientAcceleratorOptions)null);
-            Assert.Throws<ArgumentNullException>("options", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, null, this.loggerMock.Object));            
+            Assert.Throws<ArgumentNullException>("options", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, null, this.loggerMock.Object, this.secretHandlerMock.Object));            
         }
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenOptionsValueWorkerIsNull() 
         {
             this.zeebeClientBootstrapOptionsMock.SetupGet(m => m.Worker).Returns((WorkerOptions)null);
-            Assert.Throws<ArgumentNullException>("options", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, null, this.loggerMock.Object));            
+            Assert.Throws<ArgumentNullException>("options", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, null, this.loggerMock.Object, this.secretHandlerMock.Object));            
         }
 
 
         [Fact]
         public void ThrowsArgumentNullExceptionWhenLoggerIsNull() 
         {
-            Assert.Throws<ArgumentNullException>("logger", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, this.optionsMock.Object, null));
+            Assert.Throws<ArgumentNullException>("logger", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, this.optionsMock.Object, null, this.secretHandlerMock.Object));
+        }
+        
+        [Fact]
+        public void ThrowsArgumentNullExceptionWhenSecretHandlerIsNull() 
+        {
+            Assert.Throws<ArgumentNullException>("logger", () => new ZeebeJobHandler(this.serviceProviderMock.Object, this.jobHandlerInfoProviderMock.Object, this.serializerMock.Object, this.deserializerMock.Object, this.optionsMock.Object, null, null));
         }
 
         [Fact]
@@ -256,6 +264,8 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             jobMock.SetupGet(m => m.Type).Returns(expectedHandler.JobType);
             jobMock.SetupGet(m => m.Key).Returns(expectedKey);
             jobMock.SetupGet(m => m.Variables).Returns(expectedSerializedVariables);
+            secretHandlerMock.Setup(s => s.ReplaceSecretsAsync(It.IsAny<string>()))
+                .ReturnsAsync(expectedSerializedVariables);
 
             var handler = Create();
 
@@ -290,6 +300,8 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             jobMock.SetupGet(m => m.Type).Returns(expectedHandler.JobType);
             jobMock.SetupGet(m => m.Key).Returns(expectedKey);
             jobMock.SetupGet(m => m.Variables).Returns(expectedSerializedVariables);
+            secretHandlerMock.Setup(s => s.ReplaceSecretsAsync(It.IsAny<string>()))
+                .ReturnsAsync(expectedSerializedVariables);
 
             JobHandlerI.guids.Clear();
 
@@ -391,6 +403,7 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
             this.optionsMock = CreateOptionsMock(this.zeebeClientBootstrapOptionsMock);
             
             this.loggerMock = new Mock<ILogger<ZeebeJobHandler>>();
+            this.secretHandlerMock = new Mock<ISecretHandler>();
         }
 
         private ZeebeJobHandler Create() 
@@ -401,7 +414,8 @@ namespace Zeebe.Client.Accelerator.Unit.Tests
                 this.serializerMock.Object,
                 this.deserializerMock.Object,
                 this.optionsMock.Object,
-                this.loggerMock.Object
+                this.loggerMock.Object,
+                this.secretHandlerMock.Object
             );
         }
 

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using Zeebe.Client.Api.Responses;
 using Zeebe.Client.Api.Worker;
 using Zeebe.Client.Accelerator.Abstractions;
+using Zeebe.Client.Accelerator.ConnectorSecrets;
 using Zeebe.Client.Accelerator.Options;
 
 namespace Zeebe.Client.Accelerator
@@ -20,8 +21,9 @@ namespace Zeebe.Client.Accelerator
         private readonly IZeebeVariablesDeserializer deserializer;
         private readonly ZeebeClientAcceleratorOptions.WorkerOptions zeebeWorkerOptions;
         private readonly ILogger<ZeebeJobHandler> logger;
+        private readonly ISecretHandler secretHandler;
 
-        public ZeebeJobHandler(IServiceProvider serviceProvider, IJobHandlerInfoProvider jobHandlerInfoProvider, IZeebeVariablesSerializer serializer, IZeebeVariablesDeserializer deserializer, IOptions<ZeebeClientAcceleratorOptions> options, ILogger<ZeebeJobHandler> logger)
+        public ZeebeJobHandler(IServiceProvider serviceProvider, IJobHandlerInfoProvider jobHandlerInfoProvider, IZeebeVariablesSerializer serializer, IZeebeVariablesDeserializer deserializer, IOptions<ZeebeClientAcceleratorOptions> options, ILogger<ZeebeJobHandler> logger, ISecretHandler secretHandler)
         {            
             this.serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             this.jobHandlerInfoProvider = jobHandlerInfoProvider ?? throw new ArgumentNullException(nameof(jobHandlerInfoProvider));
@@ -29,6 +31,7 @@ namespace Zeebe.Client.Accelerator
             this.deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
             this.zeebeWorkerOptions = options?.Value?.Worker ?? throw new ArgumentNullException(nameof(options), $"{nameof(IOptions<ZeebeClientAcceleratorOptions>)}.Value.{nameof(ZeebeClientAcceleratorOptions.Worker)} is null.");
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.secretHandler = secretHandler ?? throw new ArgumentNullException(nameof(secretHandler));
         }
 
         public async Task HandleJob(IJobClient jobClient, IJob job, CancellationToken cancellationToken)
@@ -137,11 +140,11 @@ namespace Zeebe.Client.Accelerator
 
             if (typeof(ZeebeJob).IsAssignableFrom(jobType))
             {
-                var constructor = jobType.GetConstructor(new Type[] { typeof(IJobClient), typeof(IJob), typeof(IZeebeVariablesDeserializer) });
+                var constructor = jobType.GetConstructor(new Type[] { typeof(IJobClient), typeof(IJob), typeof(IZeebeVariablesDeserializer), typeof(ISecretHandler) });
                 if (constructor == null)
                     throw new Exception($"Type {jobType.FullName} does not have a constructor with two parameters of type {typeof(IJob).FullName},{typeof(IZeebeVariablesDeserializer).FullName}.");
 
-                return constructor.Invoke(new object[] { jobClient, job, deserializer });
+                return constructor.Invoke(new object[] { jobClient, job, deserializer, secretHandler });
             }
             else
             {

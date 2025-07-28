@@ -15,7 +15,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
         }
 
         public void HandleJob(ZeebeJob<InputState> job, CancellationToken cancellationToken)
-        {  
+        {
             handleJobDelegate(job, cancellationToken);
         }
     }
@@ -23,6 +23,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Handlers
     public class InputState : State
     {
         public string JsonPropertyNamedAttr { get; set; }
+        public string JsonPropertyNamedAttrWithSecret { get; set; }
     }
 
 }

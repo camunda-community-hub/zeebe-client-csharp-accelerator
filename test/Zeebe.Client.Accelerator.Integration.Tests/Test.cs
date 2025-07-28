@@ -130,6 +130,66 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             Assert.Equal(expected.Guid, doneMessage.Guid);
             Assert.Equal(expected.DateTime, doneMessage.DateTime);
         }
+        
+        [Fact]
+        public async Task InAndOutputVariablesAreCorrectlySerializedWithSecretsWhenProcesHasStarted()
+        {
+            var expectedGuid = Guid.NewGuid();
+            var secretKey = $"SECRET-{Guid.NewGuid():N}";
+            var testValue = $"test-value-{Guid.NewGuid():N}";   
+            var envKey = $"TEST_{secretKey}";
+            Environment.SetEnvironmentVariable(envKey, testValue);
+            var inputWithSecret = $"This is a secret : {{{{secrets.{secretKey}}}}}";
+            var expectedValueWithReplacedSecret = $"This is a secret : {testValue}";
+            OutputJobHandler.State.MyJsonPropertyNameWithSecret = inputWithSecret;
+
+            jobs = new List<IJob>();
+
+            var zeebeClient = this.helper.ZeebeClient;
+
+            var deployResponse = await zeebeClient.NewDeployCommand()
+                .AddResourceFile(GetResourceFile("variables-test.bpmn"))
+                .Send();
+
+            Assert.True(deployResponse.Key > 0);
+
+            var processInstance = await zeebeClient.NewCreateProcessInstanceCommand()
+                .BpmnProcessId("VariablesTest")
+                .LatestVersion()
+                .State(new {
+                    Guid = expectedGuid
+                })
+                .Send();
+
+            Assert.NotNull(processInstance);
+
+            WaitForHandlersToComplete(2, 10000);
+
+            Assert.True(this.jobs.Count == 2);
+
+            var expected = OutputJobHandler.State;
+            
+            var actual = jobs[1] as ZeebeJob<InputState>;
+
+            Assert.NotNull(actual);
+            Assert.NotNull(actual.getVariables());
+            var state = actual.getVariables();
+
+            Assert.Equal(expected.Bool, state.Bool);
+            Assert.Equal(expected.Int, state.Int);
+            Assert.Equal(expected.Guid, expectedGuid);
+            Assert.Equal(expected.DateTime, state.DateTime);
+            Assert.Equal(expected.Int, state.Int);
+            Assert.Equal(expected.String, state.String);
+            Assert.Equal(expected.Double, state.Double);
+            Assert.Null(state.ToBeIgnored);
+            Assert.Equal(expected.MyJsonPropertyName, state.JsonPropertyNamedAttr);
+            Assert.Equal(expectedValueWithReplacedSecret, state.JsonPropertyNamedAttrWithSecret);
+
+            var doneMessage = zeebeClient.ReceiveMessage<DoneMessage>("responseFor_" + expectedGuid, TimeSpan.FromSeconds(5));
+            Assert.Equal(expected.Guid, doneMessage.Guid);
+            Assert.Equal(expected.DateTime, doneMessage.DateTime);
+        }
 
         // [Fact] behaves differently on pipeline - hence this has been deactivated
         public async Task UsesMultipleThreadsWhenConfigured()

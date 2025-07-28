@@ -4,8 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Zeebe.Client.Accelerator.ConnectorSecrets;
+using Zeebe.Client.Accelerator.ConnectorSecrets.Providers.EnvironmentVariables;
 using Zeebe.Client.Accelerator.Extensions;
 using static Zeebe.Client.Accelerator.Options.ZeebeClientAcceleratorOptions;
 
@@ -39,7 +43,8 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
 
             host = SetupHost(loggerFactory, IntegrationTestHelper.ZeebePort, handleJobDelegate);
 
-            zeebeClient = (IZeebeClient)host.Services.GetService(typeof(IZeebeClient));
+            var scope = host.Services.CreateScope();
+            zeebeClient = (IZeebeClient)scope.ServiceProvider.GetService(typeof(IZeebeClient));
         }
 
         public IZeebeClient ZeebeClient { get { return zeebeClient; } }
@@ -102,6 +107,18 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
                                 typeof(IntegrationTestHelper).Assembly
                             )
                             .Add(new ServiceDescriptor(typeof(HandleJobDelegate), handleJobDelegate));
+                        
+                        var configuration = new ConfigurationBuilder()
+                            .AddInMemoryCollection(new Dictionary<string, string>
+                            {
+                                ["Zeebe:ConnectorSecrets:Providers:0"] = "EnvironmentVariablesSecretProvider",
+                                ["Zeebe:ConnectorSecrets:EnvironmentVariables:Prefix"] = "TEST_"
+                              
+                            })
+                            .Build();
+                        
+                        services.AddConnectorSecrets(configuration.GetSection("Zeebe"));
+                        services.AddEnvironmentSecretProvider(configuration.GetSection("Zeebe"));
                     })
                 .Build();
 
