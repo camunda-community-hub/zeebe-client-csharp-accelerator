@@ -22,20 +22,18 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
 
         private List<IJob> jobs;
 
-        private readonly IntegrationTestHelper helper;
-
         public Test(ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
-            this.helper = new IntegrationTestHelper((job, cancellationToken) => this.jobs.Add(job));
         }
 
         [Fact]
         public async Task JobHandlerIsExecutedWhenProcesHasStarted()
         {   
             jobs = new List<IJob>();
-
-            var zeebeClient = this.helper.ZeebeClient;            
+            await using var integrationTestHelper = new IntegrationTestHelper((job, cancellationToken) => this.jobs.Add(job));
+            await integrationTestHelper.InitializeAsync();
+            var zeebeClient = integrationTestHelper.ZeebeClient;            
 
             var deployResponse = await zeebeClient.NewDeployCommand()
                 .AddResourceFile(GetResourceFile("simple-test.bpmn"))
@@ -60,7 +58,9 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
         {            
             jobs = new List<IJob>();
             
-            var zeebeClient = this.helper.ZeebeClient;            
+            await using var integrationTestHelper = new IntegrationTestHelper((job, cancellationToken) => this.jobs.Add(job));
+            await integrationTestHelper.InitializeAsync();
+            var zeebeClient = integrationTestHelper.ZeebeClient;                  
 
             var deployResponse = await zeebeClient.NewDeployCommand()
                 .AddResourceFile(GetResourceFile("exception-test.bpmn"))
@@ -87,7 +87,9 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
 
             jobs = new List<IJob>();
 
-            var zeebeClient = this.helper.ZeebeClient;
+            await using var integrationTestHelper = new IntegrationTestHelper((job, cancellationToken) => this.jobs.Add(job));
+            await integrationTestHelper.InitializeAsync();
+            var zeebeClient = integrationTestHelper.ZeebeClient;       
 
             var deployResponse = await zeebeClient.NewDeployCommand()
                 .AddResourceFile(GetResourceFile("variables-test.bpmn"))
@@ -131,12 +133,79 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             Assert.Equal(expected.DateTime, doneMessage.DateTime);
         }
 
+        [Fact]
+        public async Task InAndOutputVariablesAreCorrectlySerializedWithSecretsWhenProcesHasStarted()
+        {
+            var expectedGuid = Guid.NewGuid();
+            var secretKey = $"SECRET-{Guid.NewGuid():N}";
+            var testValue = $"test-value-{Guid.NewGuid():N}";
+            var envKey = $"TEST_{secretKey}";
+            Environment.SetEnvironmentVariable(envKey, testValue);
+            var inputWithSecret = $"This is a secret : {{{{secrets.{secretKey}}}}}";
+            var expectedValueWithReplacedSecret = $"This is a secret : {testValue}";
+            OutputJobHandler.State.MyJsonPropertyNameWithSecret = inputWithSecret;
+
+            jobs = new List<IJob>();
+            await using var integrationTestHelper =
+                new IntegrationTestHelper((job, cancellationToken) => this.jobs.Add(job), includeSecretProvider: true);
+            await integrationTestHelper.InitializeAsync();
+            var zeebeClient = integrationTestHelper.ZeebeClient;
+
+            var deployResponse = await zeebeClient.NewDeployCommand()
+                .AddResourceFile(GetResourceFile("variables-test.bpmn"))
+                .Send();
+
+
+
+            var processInstance = await zeebeClient.NewCreateProcessInstanceCommand()
+                .BpmnProcessId("VariablesTest")
+                .LatestVersion()
+                .State(new
+                {
+                    Guid = expectedGuid
+                })
+                .Send();
+
+            Assert.True(deployResponse.Key > 0);
+            Assert.NotNull(processInstance);
+
+            WaitForHandlersToComplete(2, 10000);
+
+            Assert.True(this.jobs.Count == 2);
+
+            var expected = OutputJobHandler.State;
+
+            var actual = jobs[1] as ZeebeJob<InputState>;
+
+            Assert.NotNull(actual);
+            Assert.NotNull(actual.getVariables());
+            var state = actual.getVariables();
+
+            Assert.Equal(expected.Bool, state.Bool);
+            Assert.Equal(expected.Int, state.Int);
+            Assert.Equal(expected.Guid, expectedGuid);
+            Assert.Equal(expected.DateTime, state.DateTime);
+            Assert.Equal(expected.Int, state.Int);
+            Assert.Equal(expected.String, state.String);
+            Assert.Equal(expected.Double, state.Double);
+            Assert.Null(state.ToBeIgnored);
+            Assert.Equal(expected.MyJsonPropertyName, state.JsonPropertyNamedAttr);
+            Assert.Equal(expectedValueWithReplacedSecret, state.JsonPropertyNamedAttrWithSecret);
+
+            var doneMessage =
+                zeebeClient.ReceiveMessage<DoneMessage>("responseFor_" + expectedGuid, TimeSpan.FromSeconds(5));
+            Assert.Equal(expected.Guid, doneMessage.Guid);
+            Assert.Equal(expected.DateTime, doneMessage.DateTime);
+        }
+
         // [Fact] behaves differently on pipeline - hence this has been deactivated
         public async Task UsesMultipleThreadsWhenConfigured()
         {
             jobs = new List<IJob>();
             
-            var zeebeClient = this.helper.ZeebeClient;
+            await using var integrationTestHelper = new IntegrationTestHelper((job, cancellationToken) => this.jobs.Add(job));
+            await integrationTestHelper.InitializeAsync();
+            var zeebeClient = integrationTestHelper.ZeebeClient;        
             var deployResponse = await zeebeClient.NewDeployCommand()
                 .AddResourceFile(GetResourceFile("thread-test.bpmn"))
                 .Send();
@@ -168,7 +237,9 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
         {
             jobs = new List<IJob>();
 
-            var zeebeClient = this.helper.ZeebeClient;
+            await using var integrationTestHelper = new IntegrationTestHelper((job, cancellationToken) => this.jobs.Add(job));
+            await integrationTestHelper.InitializeAsync();
+            var zeebeClient = integrationTestHelper.ZeebeClient;        
 
             var deployResponse = await zeebeClient.NewDeployCommand()
                 .AddResourceFile(GetResourceFile("usertask-test.bpmn"))
@@ -207,14 +278,14 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
 
         }
 
-        public async Task InitializeAsync()
+        public Task InitializeAsync()
         {
-            await this.helper.InitializeAsync();
+            return Task.CompletedTask;
         }
 
-        async Task IAsyncLifetime.DisposeAsync()
+        Task IAsyncLifetime.DisposeAsync()
         {
-            await this.helper.DisposeAsync();
+            return Task.CompletedTask;
         }
 
         private string GetResourceFile(string bpmn)

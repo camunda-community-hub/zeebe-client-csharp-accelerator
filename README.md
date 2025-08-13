@@ -422,3 +422,158 @@ Run `dotnet test Zeebe.Client.Accelerator.sln`
 
 [examples]:  https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/examples
 [attributes]: https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/src/Zeebe.Client.Accelerator/Attributes
+
+## Connector Secrets
+
+*Since 2.2.0*
+
+The Connector Secrets functionality provides a secure way to handle sensitive information in your Zeebe workers by replacing secret placeholders with actual values from various secret providers.
+More info in the official documentation of the feature : https://docs.camunda.io/docs/components/connectors/use-connectors/#using-secrets.
+The out-of-the-box included providers are Environment Variables and Azure Key Vault, with possibility to add additional custom providers.
+
+### Overview
+
+Connector Secrets allows you to use placeholder patterns in your process variables, configuration strings, or any text that will be processed by your workers. These placeholders are automatically replaced with actual secret values at runtime.
+
+**Supported Secret Patterns:**
+
+- `{{ secrets.mySecretKey }}` - Bracketed pattern
+
+### Quick Start
+
+To enable Connector Secrets, register the functionality during service configuration:
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+// Bootstrap Zeebe Integration with Connector Secrets
+builder.Services.BootstrapZeebe(
+    builder.Configuration.GetSection("ZeebeConfiguration"),
+    typeof(Program).Assembly);
+
+// Register secret providers
+builder.Services.AddEnvironmentSecretProvider(
+    builder.Configuration.GetSection("ZeebeConfiguration"));
+
+services.AddAzureKeyVaultSecretProvider(
+    builder.Configuration.GetSection("ZeebeConfiguration"));
+
+```
+
+### Configuration
+
+Add the Connector Secrets configuration to your `appsettings.json`.
+You can register multiple secret providers. The system will try each provider in order until a secret is found (in this case using both Environment Variables and Azure Key Vault):
+
+```json
+{
+  "ZeebeConfiguration": {
+    "Client": {
+      "GatewayAddress": "127.0.0.1:26500"
+    },
+    "ConnectorSecrets": {
+      "Providers": ["EnvironmentVariablesSecretProvider", "AzureKeyVaultSecretProvider"], //Evaluation order of providers
+      "EnvironmentVariables": {
+        "Prefix": "MY_APP_"
+      },
+      "AzureKeyVault": {
+        "VaultUri": "https://your-keyvault.vault.azure.net/"
+      }
+    }
+  }
+}
+```
+
+### Secret Providers
+
+#### Environment Variables Provider
+
+The Environment Variables provider retrieves secrets from environment variables.
+
+**Registration:**
+```csharp
+builder.Services.AddEnvironmentSecretProvider(
+    builder.Configuration.GetSection("ZeebeConfiguration"));
+```
+
+**Configuration:**
+```json
+{
+  "ZeebeConfiguration": {
+    "ConnectorSecrets": {
+      "Providers": ["EnvironmentVariablesSecretProvider"],
+      "EnvironmentVariables": {
+        "Prefix": "MY_APP_"
+      }
+    }
+  }
+}
+```
+
+**Example:**
+- Secret placeholder: `{{secrets.DATABASE_PASSWORD}}`
+- Environment variable: `MY_APP_DATABASE_PASSWORD`
+- The provider will look for `{Prefix}DATABASE_PASSWORD`
+
+#### Azure Key Vault Provider
+
+The Azure Key Vault provider retrieves secrets from Azure Key Vault.
+
+**Registration:**
+```csharp
+builder.Services.AddAzureKeyVaultSecretProvider(
+    builder.Configuration.GetSection("ZeebeConfiguration"));
+```
+
+**Configuration:**
+```json
+{
+  "ZeebeConfiguration": {
+    "ConnectorSecrets": {
+      "Providers": ["AzureKeyVaultSecretProvider"],
+      "AzureKeyVault": {
+        "VaultUri": "https://your-keyvault.vault.azure.net/"
+      }
+    }
+  }
+}
+```
+
+**Prerequisites:**
+- Ensure your application has proper authentication configured for Azure Key Vault
+- Use Azure.Identity for authentication (DefaultAzureCredential, ManagedIdentity, etc.)
+
+#### Custom Secret Provider
+
+You can implement your own secret provider by implementing the `ISecretProvider` interface:
+
+```csharp
+public class CustomSecretProvider : ISecretProvider
+{
+    public async Task<string> GetSecretAsync(string key)
+    {
+        // Your custom logic to retrieve secrets
+        // Return null if the secret is not found
+        return await MyCustomSecretStore.GetSecretAsync(key);
+    }
+}
+
+// Register your custom provider
+builder.Services.AddSecretProvider<CustomSecretProvider>(
+    builder.Configuration.GetSection("ZeebeConfiguration"),
+    (secretsSection, services) => {
+        // Configure any dependencies for your provider
+        services.Configure<MyCustomProviderOptions>(
+            secretsSection.GetSection("MyCustomProvider"));
+        return services;
+    });
+```
+
+### Error Handling
+
+When a secret placeholder cannot be resolved:
+
+1. **Missing Secret**: If a secret is not found in any provider, a `ConnectorInputException` is thrown
+2. **Invalid Pattern**: Invalid secret patterns are left unchanged
+3. **Provider Errors**: Provider-specific errors are logged and the next provider is tried
+
