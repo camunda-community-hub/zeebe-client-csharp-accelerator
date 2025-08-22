@@ -406,23 +406,6 @@ bool messageReceived = _zeebeClient.ReceiveMessage("received_" + number, TimeSpa
 
 The one time job handler will be destroyed after `ReceiveMessage` returns.
 
-## Hints
-
-1. By default the workers are added to de DI container with a `Transient` service lifetime. This can be overriden by adding the `ServiceLifetimeAttribute` to the worker, see [attributes] for more information.
-1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. Serialization / Deserialization always uses CamelCase as naming policy! `JsonPropertyName` and `JsonIgnore` attributes are supported, so that you still have the option to customize your attribute naming.
-1. The default job type of a worker is the class name of the worker. This can be overriden by adding the `JobTypeAttribute` to the worker, e.g. `[JobType("myJobName")]`.
-
-## How to build
-
-Run `dotnet build Zeebe.Client.Accelerator.sln`
-
-## How to test
-
-Run `dotnet test Zeebe.Client.Accelerator.sln`
-
-[examples]:  https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/examples
-[attributes]: https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/src/Zeebe.Client.Accelerator/Attributes
-
 ## Connector Secrets
 
 *Since 2.2.0*
@@ -577,3 +560,19 @@ When a secret placeholder cannot be resolved:
 2. **Invalid Pattern**: Invalid secret patterns are left unchanged
 3. **Provider Errors**: Provider-specific errors are logged and the next provider is tried
 
+## Hints
+
+1. By default the workers are added to de DI container with a `Transient` service lifetime. This can be overriden by adding the `ServiceLifetimeAttribute` to the worker, see [attributes] for more information.
+1. By default the `ZeebeVariablesSerializer` is registered as the implementation for `IZeebeVariablesSerializer` which uses `System.Text.Json.JsonSerializer`. Serialization / Deserialization always uses CamelCase as naming policy! `JsonPropertyName` and `JsonIgnore` attributes are supported, so that you still have the option to customize your attribute naming.
+1. The default job type of a worker is the class name of the worker. This can be overriden by adding the `JobTypeAttribute` to the worker, e.g. `[JobType("myJobName")]`.
+
+## How to build
+
+Run `dotnet build Zeebe.Client.Accelerator.sln`
+
+## How to test
+
+Run `dotnet test Zeebe.Client.Accelerator.sln`
+
+[examples]:  https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/examples
+[attributes]: https://github.com/VonDerBeck/zeebe-client-csharp-accelerator/tree/main/src/Zeebe.Client.Accelerator/Attributes
