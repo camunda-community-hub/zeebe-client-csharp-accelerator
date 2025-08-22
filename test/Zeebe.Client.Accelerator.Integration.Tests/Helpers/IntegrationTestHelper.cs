@@ -4,8 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+using Zeebe.Client.Accelerator.ConnectorSecrets;
+using Zeebe.Client.Accelerator.ConnectorSecrets.Providers.EnvironmentVariables;
 using Zeebe.Client.Accelerator.Extensions;
 using static Zeebe.Client.Accelerator.Options.ZeebeClientAcceleratorOptions;
 
@@ -21,10 +25,10 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
         private readonly IHost host;
         private readonly IZeebeClient zeebeClient;
 
-        public IntegrationTestHelper(HandleJobDelegate handleJobDelegate)
-            : this(LatestZeebeVersion, handleJobDelegate) { }
+        public IntegrationTestHelper(HandleJobDelegate handleJobDelegate, bool includeSecretProvider = false)
+            : this(LatestZeebeVersion, handleJobDelegate, includeSecretProvider) { }
 
-        public IntegrationTestHelper(string zeebeVersion, HandleJobDelegate handleJobDelegate)
+        public IntegrationTestHelper(string zeebeVersion, HandleJobDelegate handleJobDelegate, bool includeSecretProvider)
         {
             var loggerFactory = LoggerFactory.Create(builder =>
                 builder
@@ -37,9 +41,10 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
 
             zeebeContainer = SetupZeebe(logger, zeebeVersion);
 
-            host = SetupHost(loggerFactory, IntegrationTestHelper.ZeebePort, handleJobDelegate);
+            host = SetupHost(loggerFactory, IntegrationTestHelper.ZeebePort, handleJobDelegate, includeSecretProvider);
 
-            zeebeClient = (IZeebeClient)host.Services.GetService(typeof(IZeebeClient));
+            var scope = host.Services.CreateScope();
+            zeebeClient = (IZeebeClient)scope.ServiceProvider.GetService(typeof(IZeebeClient));
         }
 
         public IZeebeClient ZeebeClient { get { return zeebeClient; } }
@@ -75,7 +80,8 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
             return container;
         }
 
-        private static IHost SetupHost(ILoggerFactory loggerFactory, int zeebePort, HandleJobDelegate handleJobDelegate)
+        private static IHost SetupHost(ILoggerFactory loggerFactory, int zeebePort, HandleJobDelegate handleJobDelegate,
+            bool includeSecretProvider)
         {
             var host = Host
                 .CreateDefaultBuilder()
@@ -99,9 +105,32 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
                                         RetryTimeoutInMilliseconds = 1000
                                     };
                                 },
+                                secretOptions =>
+                                {
+                                    if (includeSecretProvider)
+                                    {
+                                        secretOptions.Providers = new List<string>()
+                                        {
+                                            "EnvironmentVariablesSecretProvider"
+                                        };  
+                                    }
+                                },
                                 typeof(IntegrationTestHelper).Assembly
                             )
                             .Add(new ServiceDescriptor(typeof(HandleJobDelegate), handleJobDelegate));
+
+                        if (includeSecretProvider)
+                        {
+                            var configuration = new ConfigurationBuilder()
+                                .AddInMemoryCollection(new Dictionary<string, string>
+                                {
+                                    ["Zeebe:ConnectorSecrets:EnvironmentVariables:Prefix"] = "TEST_"
+                                })
+                                .Build();
+
+                            services.AddEnvironmentSecretProvider(configuration.GetSection("Zeebe"));
+                        }
+
                     })
                 .Build();
 

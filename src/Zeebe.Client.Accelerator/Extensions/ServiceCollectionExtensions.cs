@@ -8,6 +8,7 @@ using Zeebe.Client.Api.Builder;
 using Microsoft.Extensions.Options;
 using Zeebe.Client.Accelerator.Options;
 using System.Reflection;
+using Zeebe.Client.Accelerator.ConnectorSecrets;
 
 namespace Zeebe.Client.Accelerator.Extensions
 {
@@ -27,14 +28,16 @@ namespace Zeebe.Client.Accelerator.Extensions
 
             services
                 .BootstrapZeebe(assemblies)
+                .AddConnectorSecrets(namedConfigurationSection)
                 .AddOptions<ZeebeClientAcceleratorOptions>()
                 .Bind(namedConfigurationSection)
                 .Validate(ValidateZeebeClientBootstrapOptions);
+                
 
             return services;
         }
 
-        public static IServiceCollection BootstrapZeebe(this IServiceCollection services, Action<ZeebeClientAcceleratorOptions> configureOptions, params Assembly[] assemblies) 
+        public static IServiceCollection BootstrapZeebe(this IServiceCollection services, Action<ZeebeClientAcceleratorOptions> configureOptions, Action<SecretOptions> configureSecretOptions, params Assembly[] assemblies) 
         {
             if (configureOptions is null)
             {
@@ -43,6 +46,7 @@ namespace Zeebe.Client.Accelerator.Extensions
 
             services
                 .BootstrapZeebe(assemblies)
+                .AddConnectorSecrets(configureSecretOptions)
                 .AddOptions<ZeebeClientAcceleratorOptions>()
                 .Configure(configureOptions)
                 .Validate(ValidateZeebeClientBootstrapOptions);
@@ -64,6 +68,7 @@ namespace Zeebe.Client.Accelerator.Extensions
 
             services
                 .BootstrapZeebe(assemblies)
+                .AddConnectorSecrets(namedConfigurationSection)
                 .AddOptions<ZeebeClientAcceleratorOptions>()
                 .Bind(namedConfigurationSection)
                 .PostConfigure(postConfigureOptions)
