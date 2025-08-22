@@ -18,6 +18,7 @@ jobs:
         dotnet-version: |
           7.x
           8.x
+          9.x
     - name: Verify commit exists in origin/main
       run: |
         git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*

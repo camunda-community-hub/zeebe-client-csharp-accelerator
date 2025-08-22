@@ -18,6 +18,7 @@ jobs:
         dotnet-version: |
           7.x
           8.x
+          9.x
     - name: Set VERSION variable from tag
       run: echo "VERSION=${GITHUB_REF/refs\/tags\/}" >> $GITHUB_ENV
     - name: Pack
