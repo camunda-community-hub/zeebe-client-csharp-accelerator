@@ -61,7 +61,7 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
 
         public void WaitUntilProcessInstanceHasReachedElement(long processInstanceKey, String elementId)
         {
-            Wait().AtMost(WAIT_SECONDS, SECONDS).PollInterval(POLL_MILLIS, MILLIS).Until(() => CheckThatProcessInstanceHasReachedElement(processInstanceKey, elementId));
+            Wait().AtMost(WAIT_SECONDS, Seconds).PollInterval(POLL_MILLIS, Millis).Until(() => CheckThatProcessInstanceHasReachedElement(processInstanceKey, elementId));
         }
 
         // --------------------
@@ -82,7 +82,7 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
 
         public void WaitUntilProcessInstanceHasCompletedElement(long processInstanceKey, String elementId)
         {
-            Wait().AtMost(WAIT_SECONDS, SECONDS).PollInterval(POLL_MILLIS, MILLIS).Until(() => CheckThatProcessInstanceHasCompletedElement(processInstanceKey, elementId));
+            Wait().AtMost(WAIT_SECONDS, Seconds).PollInterval(POLL_MILLIS, Millis).Until(() => CheckThatProcessInstanceHasCompletedElement(processInstanceKey, elementId));
         }
 
         // --------------------
@@ -103,7 +103,7 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
 
         public void WaitUntilProcessInstanceHasStarted(long processInstanceKey)
         {
-            Wait().AtMost(WAIT_SECONDS, SECONDS).PollInterval(POLL_MILLIS, MILLIS).Until(() => CheckThatProcessInstanceHasStarted(processInstanceKey));
+            Wait().AtMost(WAIT_SECONDS, Seconds).PollInterval(POLL_MILLIS, Millis).Until(() => CheckThatProcessInstanceHasStarted(processInstanceKey));
         }
 
         // --------------------
@@ -124,7 +124,7 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
 
         public void WaitUntilProcessInstanceHasEnded(long processInstanceKey)
         {
-            Wait().AtMost(WAIT_SECONDS, SECONDS).PollInterval(POLL_MILLIS, MILLIS).Until(() => CheckThatProcessInstanceHasEnded(processInstanceKey));
+            Wait().AtMost(WAIT_SECONDS, Seconds).PollInterval(POLL_MILLIS, Millis).Until(() => CheckThatProcessInstanceHasEnded(processInstanceKey));
         }
     }
 }
