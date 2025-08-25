@@ -1,11 +1,11 @@
 ﻿![Compatible with: Camunda Platform 8](https://img.shields.io/badge/Compatible%20with-Camunda%20Platform%208-0072Ce)
-![.NET 7.0](https://img.shields.io/badge/.NET-7.0-orange.svg)
+![.NET 9.0](https://img.shields.io/badge/.NET-9.0-orange.svg)
 
 # Showcase for Camunda Platform 8 using the Bootstrap Accelerator for the C# Zeebe client
 
 Camunda 8 .NET Showcase - Accelerated C# process automation development
 
-This repository contains a showcase for **Camunda Platform 8** using .NET 7.0, the Bootstrap Accelerator for the C# Zeebe client
+This repository contains a showcase for **Camunda Platform 8** using .NET 9.0, the Bootstrap Accelerator for the C# Zeebe client
 and a [docker-compose.yaml](docker-compose.yaml) file for local development.
 
 ## What it does
@@ -20,7 +20,7 @@ The application includes a REST API for starting the process.
 
 ### Prerequisites
 
-* .NET 8.0
+* .NET 9.0
 * Docker
 * A running Zeebe engine (see below for using docker-compose)
 
