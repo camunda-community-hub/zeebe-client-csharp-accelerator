@@ -39,9 +39,13 @@ namespace Zeebe_Client_Accelerator_Showcase_Test
                 .WithName("zeebe-testcontainer")
                 .WithNetwork(_network)
                 .WithPortBinding(26500)
+                .WithEnvironment("CAMUNDA_DATA_SECONDARYSTORAGE_TYPE", "none")
+                .WithEnvironment("CAMUNDA_SECURITY_AUTHORIZATIONS_ENABLED", "false")
+                .WithEnvironment("CAMUNDA_SECURITY_AUTHENTICATION_UNPROTECTEDAPI", "true")
                 .WithEnvironment("ZEEBE_REDIS_REMOTE_ADDRESS", "redis://redis")
                 .WithEnvironment("ZEEBE_REDIS_ENABLED_VALUE_TYPES", "PROCESS_INSTANCE")
                 .WithEnvironment("ZEEBE_REDIS_ENABLED_RECORD_TYPES", "EVENT")
+
                 .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(26500))
                 .WithCleanUp(true)
                 .DependsOn(_redisContainer)
