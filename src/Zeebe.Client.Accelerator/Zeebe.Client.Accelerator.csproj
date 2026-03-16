@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0;net10.0</TargetFrameworks>
     <Authors>Gunnar von der Beck</Authors>
     <Description>
 This project is an extension of the zb-client (https://www.nuget.org/packages/zb-client/). 
@@ -26,7 +26,7 @@ So this is our version of a good Bootstrap Extension for the C# Zeebe Client. Cr
     <PackageIcon>zeebe-logo.png</PackageIcon>
     <Company>Accso - Accelerated Solutions GmbH</Company>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>2.1.10</Version>
+    <Version>2.2.1-rc1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0|AnyCPU'">
@@ -37,6 +37,14 @@ So this is our version of a good Bootstrap Extension for the C# Zeebe Client. Cr
     <WarningLevel>7</WarningLevel>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.5" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.5" />
+    <PackageReference Include="zb-client" Version="2.10.0" />
+  </ItemGroup>
+	
   <ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.14" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.14" />
@@ -53,14 +61,6 @@ So this is our version of a good Bootstrap Extension for the C# Zeebe Client. Cr
     <PackageReference Include="zb-client" Version="2.10.0" />
   </ItemGroup>
 	
-  <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-    <PackageReference Include="zb-client" Version="2.10.0" />
-  </ItemGroup>
-
   <ItemGroup>
     <None Include="..\..\zeebe-logo.png" Pack="true" PackagePath="" />
     <None Include="..\..\README.md" Pack="true" PackagePath="" />

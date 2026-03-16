@@ -17,7 +17,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
 {
     public class IntegrationTestHelper : IAsyncDisposable
     {
-        public const string LatestZeebeVersion = "8.7.10";
+        public const string LatestZeebeVersion = "8.8.16";
         public const int ZeebePort = 26500;
         private readonly ILogger<IntegrationTestHelper> logger;
         private readonly CancellationTokenSource cancellationTokenSource;
@@ -52,8 +52,8 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
         internal async Task InitializeAsync()
         {
             await this.zeebeContainer.StartAsync(this.cancellationTokenSource.Token);
-            await host.StartAsync(cancellationTokenSource.Token).ConfigureAwait(false);
             await WaitUntilBrokerIsReady(this.zeebeClient, this.logger);
+            await host.StartAsync(cancellationTokenSource.Token).ConfigureAwait(false);
         }
 
         public async ValueTask DisposeAsync()
@@ -72,7 +72,10 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
                 .WithImage($"camunda/zeebe:{version}")
                 .WithName("zeebe-testcontainer")
                 .WithPortBinding(IntegrationTestHelper.ZeebePort)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(IntegrationTestHelper.ZeebePort))
+                .WithEnvironment("CAMUNDA_DATA_SECONDARYSTORAGE_TYPE", "none")
+                .WithEnvironment("CAMUNDA_SECURITY_AUTHORIZATIONS_ENABLED", "false")
+                .WithEnvironment("CAMUNDA_SECURITY_AUTHENTICATION_UNPROTECTEDAPI", "true")
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(IntegrationTestHelper.ZeebePort))
                 .WithCleanUp(true)
                 .WithLogger(logger)
                 .Build();
@@ -94,7 +97,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
                                 {
                                     options.Client = new ClientOptions()
                                     {
-                                        GatewayAddress = $"127.0.0.1:{zeebePort}"
+                                        GatewayAddress = $"127.0.0.1:{zeebePort}",
                                     };
                                     options.Worker = new WorkerOptions()
                                     {
@@ -156,6 +159,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
                 logger.LogInformation("Zeebe not ready, retrying.");
             }
             while (!ready);
+            logger.LogInformation("Zeebe ready.");
         }
     }
 }

@@ -34,7 +34,7 @@ public class ConnectorSecretsFixture : IAsyncLifetime
             .WithName("lowkey-vault-testcontainer")
             .WithPortBinding(8443, false)
             .WithPortBinding(8080, true)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(8443))
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(8443))
             .WithCleanUp(true)
             .Build();
 
