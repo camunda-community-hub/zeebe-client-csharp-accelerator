@@ -25,7 +25,7 @@ Since version 2.2.1:
 * [Zeebe C# client 2.10.0 release](https://www.nuget.org/packages/zb-client/)
 * [Zeebe 8.x release](https://github.com/zeebe-io/zeebe/releases/)
 
-For .NET 7 please use the 2.2.0 release of this extension based on Zeeb C# client 2.9.0 release.<br>
+For .NET 7 please use the 2.2.0 release of this extension based on Zeebe C# client 2.9.0 release.<br>
 For older .NET versions please use the 1.x.x release of this extension based on Zeebe C# client 1.3.0 release.
 
 ## How to use
