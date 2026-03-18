@@ -25,4 +25,4 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release
     - name: Test
-      run: dotnet test --configuration Release --no-build
+      run: dotnet test --configuration Release --no-build -m:1 /p:BuildInParallel=false
