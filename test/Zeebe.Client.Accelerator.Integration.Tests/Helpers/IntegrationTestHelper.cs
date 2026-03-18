@@ -68,8 +68,7 @@ namespace Zeebe.Client.Accelerator.Integration.Tests.Helpers
 
         private static IContainer SetupZeebe(ILogger logger, string version)
         {
-            var container = new ContainerBuilder()
-                .WithImage($"camunda/zeebe:{version}")
+            var container = new ContainerBuilder($"camunda/zeebe:{version}")
                 .WithName("zeebe-testcontainer")
                 .WithPortBinding(IntegrationTestHelper.ZeebePort)
                 .WithEnvironment("CAMUNDA_DATA_SECONDARYSTORAGE_TYPE", "none")

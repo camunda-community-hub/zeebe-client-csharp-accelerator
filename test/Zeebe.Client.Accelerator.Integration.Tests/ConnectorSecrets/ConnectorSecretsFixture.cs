@@ -29,8 +29,8 @@ public class ConnectorSecretsFixture : IAsyncLifetime
 
     async ValueTask IAsyncLifetime.InitializeAsync()
     {
-        VaultContainer = new ContainerBuilder()
-            .WithImage($"nagyesta/lowkey-vault:7.1.32")
+        ContainerBuilder containerBuilder = new($"nagyesta/lowkey-vault:7.1.32");
+        VaultContainer = containerBuilder
             .WithName("lowkey-vault-testcontainer")
             .WithPortBinding(8443, false)
             .WithPortBinding(8080, true)

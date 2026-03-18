@@ -15,6 +15,10 @@ using System.Text.Json;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests
 {
+    [CollectionDefinition("Sequential", DisableParallelization = true)]
+    public class NoParallelizationCollection { }
+
+    [Collection("Sequential")]
     public class Test : IAsyncLifetime
     {
         private ITestOutputHelper _testOutputHelper;

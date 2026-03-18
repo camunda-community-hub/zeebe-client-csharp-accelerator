@@ -11,6 +11,7 @@ using Zeebe.Client.Accelerator.ConnectorSecrets.Providers.EnvironmentVariables;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests.ConnectorSecrets;
 
+[Collection("Sequential")]
 public class SecretHandlerTests : IClassFixture<ConnectorSecretsFixture>
 {
     
@@ -217,4 +218,5 @@ public class SecretHandlerTests : IClassFixture<ConnectorSecretsFixture>
         Assert.Contains(providers, p => p is EnvironmentVariablesSecretProvider);
         Assert.Contains(providers, p => p is AzureKeyVaultSecretProvider);
     }
+
 }
