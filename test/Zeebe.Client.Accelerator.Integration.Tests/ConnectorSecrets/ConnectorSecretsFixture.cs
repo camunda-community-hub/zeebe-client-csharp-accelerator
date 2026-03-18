@@ -27,10 +27,10 @@ public class ConnectorSecretsFixture : IAsyncLifetime
     public string IdentityUri { get; private set; }
     public IServiceProvider ServiceProvider { get; private set; }
 
-    public async Task InitializeAsync()
+    async ValueTask IAsyncLifetime.InitializeAsync()
     {
         VaultContainer = new ContainerBuilder()
-            .WithImage($"nagyesta/lowkey-vault:3.2.0")
+            .WithImage($"nagyesta/lowkey-vault:7.1.32")
             .WithName("lowkey-vault-testcontainer")
             .WithPortBinding(8443, false)
             .WithPortBinding(8080, true)
@@ -49,7 +49,7 @@ public class ConnectorSecretsFixture : IAsyncLifetime
         Environment.SetEnvironmentVariable("IDENTITY_HEADER", "header");
     }
 
-    public async Task DisposeAsync()
+    async ValueTask IAsyncDisposable.DisposeAsync()
     {
         if (VaultContainer != null)
         {
@@ -123,4 +123,5 @@ public class ConnectorSecretsFixture : IAsyncLifetime
         };
         options.Transport = new HttpClientTransport(clientHandler);
     }
+
 }

@@ -10,7 +10,6 @@ using Zeebe.Client.Accelerator.Integration.Tests.Handlers;
 using Zeebe.Client.Accelerator.Integration.Tests.Helpers;
 using Zeebe.Client.Accelerator.Abstractions;
 using System.Linq;
-using Xunit.Abstractions;
 using System.Text.Json.Serialization;
 using System.Text.Json;
 
@@ -278,14 +277,14 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
 
         }
 
-        public Task InitializeAsync()
+        ValueTask IAsyncLifetime.InitializeAsync()
         {
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
-        Task IAsyncLifetime.DisposeAsync()
+        ValueTask IAsyncDisposable.DisposeAsync()
         {
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
 
         private string GetResourceFile(string bpmn)

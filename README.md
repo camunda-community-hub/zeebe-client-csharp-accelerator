@@ -19,12 +19,13 @@ Extension for the C# Zeebe Client. Credits for the base work still belong to htt
 
 ## Requirements
 
-Since version 2.2.0:
+Since version 2.2.1:
 
-* [.NET 7](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) / [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) / [.NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0)
-* [Zeebe C# client 2.9.0 release](https://www.nuget.org/packages/zb-client/)
+* [.NET 8](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) / [.NET 9](https://dotnet.microsoft.com/en-us/download/dotnet/9.0) / [.NET 10](https://dotnet.microsoft.com/en-us/download/dotnet/10.0)
+* [Zeebe C# client 2.10.0 release](https://www.nuget.org/packages/zb-client/)
 * [Zeebe 8.x release](https://github.com/zeebe-io/zeebe/releases/)
 
+For .NET 7 please use the 2.2.0 release of this extension based on Zeeb C# client 2.9.0 release.<br>
 For older .NET versions please use the 1.x.x release of this extension based on Zeebe C# client 1.3.0 release.
 
 ## How to use

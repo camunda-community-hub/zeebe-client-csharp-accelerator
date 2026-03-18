@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
-using Xunit.Abstractions;
 using Zeebe.Client.Accelerator.Abstractions;
 using Zeebe.Client.Accelerator.Unit.Tests.Stubs;
 
