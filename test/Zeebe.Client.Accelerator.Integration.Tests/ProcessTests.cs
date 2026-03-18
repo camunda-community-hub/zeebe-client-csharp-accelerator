@@ -15,17 +15,14 @@ using System.Text.Json;
 
 namespace Zeebe.Client.Accelerator.Integration.Tests
 {
-    [CollectionDefinition("Sequential", DisableParallelization = true)]
-    public class NoParallelizationCollection { }
-
     [Collection("Sequential")]
-    public class Test : IAsyncLifetime
+    public class ProcessTests : IAsyncLifetime
     {
         private ITestOutputHelper _testOutputHelper;
 
         private List<IJob> jobs;
 
-        public Test(ITestOutputHelper testOutputHelper)
+        public ProcessTests(ITestOutputHelper testOutputHelper)
         {
             this._testOutputHelper = testOutputHelper;
         }
@@ -132,71 +129,6 @@ namespace Zeebe.Client.Accelerator.Integration.Tests
             Assert.Equal(expected.MyJsonPropertyName, state.JsonPropertyNamedAttr);
 
             var doneMessage = zeebeClient.ReceiveMessage<DoneMessage>("responseFor_" + expectedGuid, TimeSpan.FromSeconds(5));
-            Assert.Equal(expected.Guid, doneMessage.Guid);
-            Assert.Equal(expected.DateTime, doneMessage.DateTime);
-        }
-
-        [Fact]
-        public async Task InAndOutputVariablesAreCorrectlySerializedWithSecretsWhenProcesHasStarted()
-        {
-            var expectedGuid = Guid.NewGuid();
-            var secretKey = $"SECRET-{Guid.NewGuid():N}";
-            var testValue = $"test-value-{Guid.NewGuid():N}";
-            var envKey = $"TEST_{secretKey}";
-            Environment.SetEnvironmentVariable(envKey, testValue);
-            var inputWithSecret = $"This is a secret : {{{{secrets.{secretKey}}}}}";
-            var expectedValueWithReplacedSecret = $"This is a secret : {testValue}";
-            OutputJobHandler.State.MyJsonPropertyNameWithSecret = inputWithSecret;
-
-            jobs = new List<IJob>();
-            await using var integrationTestHelper =
-                new IntegrationTestHelper((job, cancellationToken) => this.jobs.Add(job), includeSecretProvider: true);
-            await integrationTestHelper.InitializeAsync();
-            var zeebeClient = integrationTestHelper.ZeebeClient;
-
-            var deployResponse = await zeebeClient.NewDeployCommand()
-                .AddResourceFile(GetResourceFile("variables-test.bpmn"))
-                .Send();
-
-
-
-            var processInstance = await zeebeClient.NewCreateProcessInstanceCommand()
-                .BpmnProcessId("VariablesTest")
-                .LatestVersion()
-                .State(new
-                {
-                    Guid = expectedGuid
-                })
-                .Send();
-
-            Assert.True(deployResponse.Key > 0);
-            Assert.NotNull(processInstance);
-
-            WaitForHandlersToComplete(2, 10000);
-
-            Assert.True(this.jobs.Count == 2);
-
-            var expected = OutputJobHandler.State;
-
-            var actual = jobs[1] as ZeebeJob<InputState>;
-
-            Assert.NotNull(actual);
-            Assert.NotNull(actual.getVariables());
-            var state = actual.getVariables();
-
-            Assert.Equal(expected.Bool, state.Bool);
-            Assert.Equal(expected.Int, state.Int);
-            Assert.Equal(expected.Guid, expectedGuid);
-            Assert.Equal(expected.DateTime, state.DateTime);
-            Assert.Equal(expected.Int, state.Int);
-            Assert.Equal(expected.String, state.String);
-            Assert.Equal(expected.Double, state.Double);
-            Assert.Null(state.ToBeIgnored);
-            Assert.Equal(expected.MyJsonPropertyName, state.JsonPropertyNamedAttr);
-            Assert.Equal(expectedValueWithReplacedSecret, state.JsonPropertyNamedAttrWithSecret);
-
-            var doneMessage =
-                zeebeClient.ReceiveMessage<DoneMessage>("responseFor_" + expectedGuid, TimeSpan.FromSeconds(5));
             Assert.Equal(expected.Guid, doneMessage.Guid);
             Assert.Equal(expected.DateTime, doneMessage.DateTime);
         }
