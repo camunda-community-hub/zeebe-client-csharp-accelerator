@@ -1,4 +1,4 @@
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using System.Reflection;
 using Zeebe.Client.Accelerator.Extensions;
 
@@ -47,6 +47,7 @@ app.MapControllers();
 app.CreateZeebeDeployment()
     .UsingDirectory("Resources")
     .AddResource("process.bpmn")
+    .AddResource("ApproveUser.form")
     .Deploy();
 
 app.Run();

@@ -12,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MartinCostello.Logging.XUnit;
-using Xunit.Abstractions;
 using Microsoft.Extensions.Logging;
 
 namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
@@ -43,6 +42,7 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
                .AddHostedService(p => p.GetRequiredService<BpmAssert>());
             })
             .ConfigureLogging(p => p.AddXUnit(this))
+            .UseSetting("ASPNETCORE_HTTPS_PORT", "443")
             .UseEnvironment("Development")
             ;
         }

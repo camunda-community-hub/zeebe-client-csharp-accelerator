@@ -1,0 +1,34 @@
+{
+  "components": [
+    {
+      "label": "New User",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_03mx5oh",
+        "columns": null
+      },
+      "id": "Field_1oa0rww",
+      "key": "applicantName",
+      "readonly": true
+    },
+    {
+      "label": "Approve User?",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_0866v49",
+        "columns": null
+      },
+      "id": "Field_1tbxuvt",
+      "key": "approved"
+    }
+  ],
+  "type": "default",
+  "id": "Form_ApproveUser",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.45.0"
+  },
+  "schemaVersion": 19
+}

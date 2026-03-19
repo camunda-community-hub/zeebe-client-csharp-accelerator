@@ -1,5 +1,5 @@
 ﻿![Compatible with: Camunda Platform 8](https://img.shields.io/badge/Compatible%20with-Camunda%20Platform%208-0072Ce)
-![.NET 9.0](https://img.shields.io/badge/.NET-9.0-orange.svg)
+![.NET 10.0](https://img.shields.io/badge/.NET-10.0-orange.svg)
 
 # Showcase for Camunda Platform 8 using the Bootstrap Accelerator for the C# Zeebe client
 
@@ -20,7 +20,7 @@ The application includes a REST API for starting the process.
 
 ### Prerequisites
 
-* .NET 9.0
+* .NET 10.0
 * Docker
 * A running Zeebe engine (see below for using docker-compose)
 
@@ -39,9 +39,7 @@ The application serves the following endpoints:
 To stand-up a Camunda Platform 8 Self-Managed environment locally the [docker-compose.yaml](docker-compose.yaml) file in this repository can be used.
 
 The development environment contains these components:
-- Zeebe
-- Operate
-- Tasklist
+- Camunda Orchestration (consisting of Zeebe, Operate, Tasklist, Identity)
 - Elasticsearch
 
 Issue the following command to start your environment:
@@ -53,8 +51,8 @@ docker-compose up -d
 Wait a few minutes for the environment to start up and settle down.
 
 Once everything has started you can navigate to the different web apps and log in with the user `demo` and password `demo`:
-- Operate: [http://localhost:8081](http://localhost:8081)
-- Tasklist: [http://localhost:8082](http://localhost:8082)
+- Operate: [http://localhost:8088/operate](http://localhost:8088/operate)
+- Tasklist: [http://localhost:8088/tasklist](http://localhost:8088/tasklist)
 - Elasticsearch: [http://localhost:9200](http://localhost:9200)
 
 The workflow engine Zeebe is available using gRPC at `localhost:26500`.
@@ -91,6 +89,7 @@ var app = builder.Build();
 app.CreateZeebeDeployment()
     .UsingDirectory("Resources")
     .AddResource("process.bpmn")
+    .AddResource("ApproveUser.form")
     .Deploy();
 
 app.Run();
@@ -179,15 +178,14 @@ public async Task TestHappyPathAsync()
     var processInstanceKey = (await response.Content.ReadFromJsonAsync<ApplicationResponse>()).ProcessInstanceKey;
     _bpmAssert.WaitUntilProcessInstanceHasStarted(processInstanceKey);
 
-    // wait for user task and complete
+    // wait for user task
     _bpmAssert.WaitUntilProcessInstanceHasReachedElement(processInstanceKey, "Task_AppoveUser");
 
-    var humanTask = await _zeebeClient.NewActivateJobsCommand().JobType("io.camunda.zeebe:userTask")
-        .MaxJobsToActivate(1).WorkerName("Xunit").Timeout(TimeSpan.FromMinutes(5)).Send();
-    var job = humanTask.Jobs.First();
-    Assert.Equal(processInstanceKey, job.ProcessInstanceKey);
-    Assert.Equal("Task_AppoveUser", job.ElementId);
-    await _zeebeClient.NewCompleteJobCommand(job.Key).Variables("{\"approved\": true}").Send();
+    // complete the user task
+    FindAndCompleteUserTask(processInstanceKey, "Task_AppoveUser", new
+    {
+        approved = true,
+    });
 
     // await user account creation and end of process
     _bpmAssert.WaitUntilProcessInstanceHasCompletedElement(processInstanceKey, "Activity_CreateUserAccount");

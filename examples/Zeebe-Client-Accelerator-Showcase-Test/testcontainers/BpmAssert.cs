@@ -15,6 +15,7 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
     public class BpmAssert : IHostedService
     {
         public volatile List<ProcessInstanceRecord> processInstanceRecords = new();
+        public volatile List<UserTaskRecord> userTaskRecords = new();
         private readonly ILogger<BpmAssert>? _logger = null;
 
         private static int WAIT_SECONDS = 7;
@@ -25,6 +26,7 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
             _logger = loggerFactory?.CreateLogger<BpmAssert>();
 
             zeebeRedis.AddProcessInstanceListener((record) => ReceiveProcessInstanceRecord(record));
+            zeebeRedis.AddUserTaskListener((record) => ReceiveUserTaksRecord(record));
         }
 
         public Task StartAsync(CancellationToken cancellationToken) => Task.CompletedTask;
@@ -38,6 +40,12 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
         private void ReceiveProcessInstanceRecord(ProcessInstanceRecord record)
         {
             processInstanceRecords.Add(record);
+            _logger?.LogTrace("{}", record);
+        }
+
+        private void ReceiveUserTaksRecord(UserTaskRecord record)
+        {
+            userTaskRecords.Add(record);
             _logger?.LogTrace("{}", record);
         }
 
@@ -125,6 +133,32 @@ namespace Zeebe_Client_Accelerator_Showcase_Test.testcontainers
         public void WaitUntilProcessInstanceHasEnded(long processInstanceKey)
         {
             Wait().AtMost(WAIT_SECONDS, Seconds).PollInterval(POLL_MILLIS, Millis).Until(() => CheckThatProcessInstanceHasEnded(processInstanceKey));
+        }
+
+        // --------------------
+
+        private UserTaskRecord? FindUserTask(long processInstanceKey, string userTaskId)
+        {
+            // Find the last record in order to have the last intend
+            return userTaskRecords.FindLast(ut =>
+                ut.ProcessInstanceKey.Equals(processInstanceKey) &&
+                ut.ElementId.Equals(userTaskId) &&
+                ! ut.Metadata.Intent.Equals("CREATING")
+            );
+        }
+
+        public UserTaskRecord AssertThatUserTaskExistsAndReturnValue(long processInstanceKey, string userTaskId)
+        {
+            var userTask = FindUserTask(processInstanceKey, userTaskId);
+            Assert.NotNull(userTask);
+            Assert.DoesNotContain(userTask.Metadata.Intent, new[] { "COMPLETE", "COMPLETING", "COMPLETED", "CANCELING", "CANCELED" });
+            return userTask;
+        }
+
+        public UserTaskRecord WaitUntilUserTaskExistsAndReturnValue(long processInstanceKey, string userTaskId)
+        {
+            Wait().AtMost(WAIT_SECONDS, Seconds).PollInterval(POLL_MILLIS, Millis).Until(() => FindUserTask(processInstanceKey, userTaskId) != null);
+            return AssertThatUserTaskExistsAndReturnValue(processInstanceKey, userTaskId);
         }
     }
 }

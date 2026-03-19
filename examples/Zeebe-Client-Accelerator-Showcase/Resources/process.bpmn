@@ -1,49 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1vdm7pj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.5.1" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.1.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1vdm7pj" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.45.0" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
   <bpmn:process id="Process_ApplicationFullfillment" isExecutable="true">
-    <bpmn:extensionElements>
-      <zeebe:userTaskForm id="userTaskForm_0oal3ou">{
-  "components": [
-    {
-      "label": "New User",
-      "type": "textfield",
-      "id": "Field_1lgf0jz",
-      "key": "applicantName",
-      "disabled": true
-    },
-    {
-      "label": "Approve User?",
-      "type": "checkbox",
-      "id": "Field_0kmb7yg",
-      "key": "approved"
-    },
-    {
-      "action": "submit",
-      "label": "Complete",
-      "type": "button",
-      "id": "Field_0am3ij9",
-      "key": "field_17wbu9f"
-    }
-  ],
-  "type": "default",
-  "id": "Form_19q4j7x",
-  "executionPlatform": "Camunda Cloud",
-  "executionPlatformVersion": "8.1.0",
-  "exporter": {
-    "name": "Camunda Modeler",
-    "version": "5.5.1"
-  },
-  "schemaVersion": 5
-}</zeebe:userTaskForm>
-    </bpmn:extensionElements>
     <bpmn:startEvent id="StartEvent_ApplicationReceived" name="Application received">
       <bpmn:outgoing>Flow_1lo5qbn</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_1lo5qbn" sourceRef="StartEvent_ApplicationReceived" targetRef="Task_AppoveUser" />
     <bpmn:userTask id="Task_AppoveUser" name="Approve User">
       <bpmn:extensionElements>
-        <zeebe:formDefinition formKey="camunda-forms:bpmn:userTaskForm_0oal3ou" />
+        <zeebe:formDefinition formId="Form_ApproveUser" />
         <zeebe:assignmentDefinition assignee="demo" />
+        <zeebe:userTask />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1lo5qbn</bpmn:incoming>
       <bpmn:outgoing>Flow_0wzu2c9</bpmn:outgoing>
@@ -122,6 +88,10 @@
         <di:waypoint x="495" y="120" />
         <di:waypoint x="570" y="120" />
       </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ze9naf_di" bpmnElement="Flow_0ze9naf">
+        <di:waypoint x="670" y="120" />
+        <di:waypoint x="722" y="120" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1sz61z8_di" bpmnElement="Flow_1sz61z8">
         <di:waypoint x="470" y="145" />
         <di:waypoint x="470" y="260" />
@@ -129,10 +99,6 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="479" y="200" width="13" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0ze9naf_di" bpmnElement="Flow_0ze9naf">
-        <di:waypoint x="670" y="120" />
-        <di:waypoint x="722" y="120" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -29,24 +29,25 @@ namespace Zeebe_Client_Accelerator_Showcase_Test
                 .WithNetwork(_network)
                 .WithNetworkAliases("redis")
                 .WithPortBinding(6379)
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(6379))
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(6379))
                 .WithCleanUp(true)
                 .Build();
 
             // Setup Zeebe with Redis Exporter
             _zeebeContainer = new ContainerBuilder()
-                .WithImage("ghcr.io/camunda-community-hub/zeebe-with-redis-exporter")
+                .WithImage("ghcr.io/camunda-community-hub/zeebe-with-redis-exporter:8.8.16")
                 .WithName("zeebe-testcontainer")
                 .WithNetwork(_network)
                 .WithPortBinding(26500)
+                .WithPortBinding(8080)
                 .WithEnvironment("CAMUNDA_DATA_SECONDARYSTORAGE_TYPE", "none")
                 .WithEnvironment("CAMUNDA_SECURITY_AUTHORIZATIONS_ENABLED", "false")
                 .WithEnvironment("CAMUNDA_SECURITY_AUTHENTICATION_UNPROTECTEDAPI", "true")
                 .WithEnvironment("ZEEBE_REDIS_REMOTE_ADDRESS", "redis://redis")
-                .WithEnvironment("ZEEBE_REDIS_ENABLED_VALUE_TYPES", "PROCESS_INSTANCE")
+                .WithEnvironment("ZEEBE_REDIS_ENABLED_VALUE_TYPES", "PROCESS_INSTANCE,USER_TASK")
                 .WithEnvironment("ZEEBE_REDIS_ENABLED_RECORD_TYPES", "EVENT")
 
-                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(26500))
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilExternalTcpPortIsAvailable(26500))
                 .WithCleanUp(true)
                 .DependsOn(_redisContainer)
                 .Build();
